@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Betting Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ── Tokens ── */
+[data-theme="dark"]{
+  --bg:#0c0c0f;--bg2:#111116;--bg3:#17171d;--bg4:#1e1e26;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --text:#eeedf0;--text2:#8888a0;--text3:#50505f;
+  --green:#00d68f;--green-dim:rgba(0,214,143,.1);
+  --red:#f0506e;--red-dim:rgba(240,80,110,.1);
+  --blue:#5b9cf6;--amber:#f0a030;
+  --chart-grid:rgba(255,255,255,.05);
+  --chart-text:#505060;
+}
+[data-theme="light"]{
+  --bg:#f5f5f8;--bg2:#ffffff;--bg3:#ffffff;--bg4:#f0f0f4;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.15);
+  --text:#0f0f18;--text2:#555568;--text3:#a0a0b0;
+  --green:#00a86b;--green-dim:rgba(0,168,107,.08);
+  --red:#d63050;--red-dim:rgba(214,48,80,.08);
+  --blue:#2563eb;--amber:#d97706;
+  --chart-grid:rgba(0,0,0,.06);
+  --chart-text:#b0b0c0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px}
+
+/* ── Layout ── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
+.main{margin-left:220px;flex:1;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar-logo{padding:1.25rem 1.25rem .9rem;border-bottom:1px solid var(--border)}
+.logo-name{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+.logo-title{font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace}
+.sidebar-nav{padding:.5rem 0;flex:1;overflow-y:auto}
+.nav-group{padding:.4rem 1.25rem .15rem;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:'IBM Plex Mono',monospace}
+.nav-item{display:flex;align-items:center;gap:9px;padding:.5rem 1.25rem;font-size:13px;font-weight:400;color:var(--text2);cursor:pointer;transition:all .12s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(128,128,255,.05)}
+.nav-item.active{color:var(--green);font-weight:500;border-left-color:var(--green);background:var(--green-dim)}
+.nav-icon{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-bottom{padding:.9rem 1.25rem;border-top:1px solid var(--border)}
+.update-btn{width:100%;padding:.55rem;font-size:12px;font-family:'IBM Plex Sans',sans-serif;font-weight:500;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:6px}
+.update-btn:hover{border-color:var(--green);color:var(--green)}
+.last-update{font-size:10px;color:var(--text3);text-align:center;margin-top:.4rem;font-family:'IBM Plex Mono',monospace}
+
+/* ── Theme toggle ── */
+.theme-toggle{position:fixed;top:14px;right:18px;z-index:200;display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;transition:all .15s}
+.theme-toggle:hover{color:var(--text)}
+.toggle-track{width:28px;height:16px;background:var(--bg4);border-radius:8px;position:relative;transition:background .2s}
+.toggle-thumb{width:12px;height:12px;background:var(--text3);border-radius:50%;position:absolute;top:2px;left:2px;transition:all .2s}
+[data-theme="light"] .toggle-thumb{left:14px;background:var(--blue)}
+[data-theme="light"] .toggle-track{background:var(--blue-dim,rgba(37,99,235,.12))}
+
+/* ── Pages ── */
+.page{display:none;padding:1.5rem 1.75rem;animation:fadeIn .18s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* ── Page header ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px}
+.page-title{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.page-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace}
+
+/* ── Filters ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.filter-group{display:flex;flex-direction:column;gap:3px}
+.filter-label{font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace}
+.filter-group select{font-size:12px;padding:5px 9px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;min-width:130px}
+.filter-group select:focus{outline:none;border-color:var(--border2)}
+.date-range{display:flex;gap:4px;align-items:center}
+.date-range input[type=date]{font-size:11px;padding:5px 7px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:5px;font-family:'IBM Plex Mono',monospace;width:115px}
+.date-range input[type=date]:focus{outline:none;border-color:var(--border2)}
+.date-sep{font-size:11px;color:var(--text3)}
+.quick-btns{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.qbtn{font-size:11px;padding:4px 9px;background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:4px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .1s}
+.qbtn:hover,.qbtn.active{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+
+/* ── Multiselect dropdown ── */
+.ms-wrap{position:relative}
+.ms-btn{font-size:12px;padding:5px 9px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;min-width:130px;display:flex;align-items:center;justify-content:space-between;gap:6px;white-space:nowrap}
+.ms-btn:hover{border-color:var(--border2)}
+.ms-btn.has-selection{border-color:var(--green);color:var(--green)}
+.ms-dropdown{position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;min-width:180px;max-height:260px;overflow-y:auto;z-index:300;display:none;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.ms-dropdown.open{display:block}
+.ms-option{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:12px;color:var(--text2);transition:background .1s}
+.ms-option:hover{background:rgba(128,128,255,.06);color:var(--text)}
+.ms-option.selected{color:var(--green)}
+.ms-check{width:13px;height:13px;border:1px solid var(--border2);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ms-option.selected .ms-check{background:var(--green);border-color:var(--green)}
+.ms-check-mark{width:7px;height:7px;display:none}
+.ms-option.selected .ms-check-mark{display:block;fill:var(--bg)}
+.ms-clear{padding:6px 12px;font-size:11px;color:var(--text3);cursor:pointer;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace}
+.ms-clear:hover{color:var(--red)}
+
+/* ── KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:1.25rem}
+.kpi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem}
+.kpi-label{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;margin-bottom:5px}
+.kpi-val{font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-val.pos{color:var(--green)}.kpi-val.neg{color:var(--red)}.kpi-val.neu{color:var(--text)}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:4px;font-family:'IBM Plex Mono',monospace}
+
+/* ── Cards ── */
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1.1rem 1.25rem;margin-bottom:1rem}
+.card:last-child{margin-bottom:0}
+.card-title{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;margin-bottom:.9rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+
+/* ── Charts ── */
+.chart-wrap{position:relative;width:100%}
+
+/* ── Tables ── */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;font-size:12px;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.tbl th{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2);white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.total-row td{font-weight:500;border-top:1px solid var(--border2);color:var(--text)}
+.tbl tbody tr:hover td{background:rgba(128,128,255,.04)}
+
+/* ── Streak ── */
+.streak{display:flex;flex-wrap:wrap;gap:3px}
+.dot{width:12px;height:12px;border-radius:2px;cursor:default;transition:transform .1s}
+.dot:hover{transform:scale(1.35)}
+.dot.w{background:var(--green)}.dot.l{background:var(--red)}.dot.hw{background:var(--amber)}.dot.hl{background:var(--amber)}.dot.v{background:var(--bg4)}
+.streak-stats{margin-top:9px;display:flex;gap:14px;flex-wrap:wrap}
+.streak-stats span{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace}
+
+/* ── Heatmap compact ── */
+.heatmap-table{width:100%;border-collapse:separate;border-spacing:3px}
+.heatmap-table th{font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;font-weight:400;text-align:center;padding:2px 0}
+.heat-cell{height:28px;border-radius:3px;text-align:center;vertical-align:middle;font-size:10px;font-weight:500;font-family:'IBM Plex Mono',monospace;cursor:default;transition:opacity .15s;font-variant-numeric:tabular-nums}
+.heat-cell:hover{opacity:.8}
+.heat-empty{height:28px;background:var(--bg4);border-radius:3px;opacity:.3}
+
+/* ── Loader ── */
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px;color:var(--text3);font-size:12px;font-family:'IBM Plex Mono',monospace}
+.spinner{width:24px;height:24px;border:1.5px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Error ── */
+.error-box{background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:1.25rem;color:var(--red);font-size:12px;line-height:1.8;font-family:'IBM Plex Mono',monospace;max-width:560px;margin:2rem auto}
+
+/* ── Misc ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+</style>
+</head>
+<body>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_a_v27TpfVQh7sbiO058PGtERG1HzcxYCNh8RCovCZYq6dDnDnMY0tXNM8jf4EF_4/exec";
+const BASE_BANK = 100000;
+</script>
+
+<div id="root"><div class="loader"><div class="spinner"></div><span>carregando dados...</span></div></div>
+
+<script>
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+let DADOS=[], charts={};
+
+// ── Theme ──
+function toggleTheme(){
+  const html=document.documentElement;
+  html.setAttribute('data-theme',html.getAttribute('data-theme')==='dark'?'light':'dark');
+  localStorage.setItem('theme',html.getAttribute('data-theme'));
+  // Redraw charts for new colors
+  const active=document.querySelector('.page.active')?.id?.replace('page-','');
+  if(active) renderPage(active);
+}
+function initTheme(){
+  const saved=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',saved);
+}
+initTheme();
+
+// ── Helpers ──
+function fmt(v,d=2){return Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function fmtPL(v){return (v>=0?'+ R$ ':'- R$ ')+fmt(Math.abs(v));}
+function fmtR(v){return 'R$ '+fmt(v,0);}
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return;charts[id]=new Chart(document.getElementById(id),cfg);}
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
+function chartColor(opacity=1){return isDark()?`rgba(255,255,255,${opacity})`:`rgba(0,0,0,${opacity})`;}
+function gridColor(){return isDark()?'rgba(255,255,255,.05)':'rgba(0,0,0,.06)';}
+function tickColor(){return isDark()?'#505060':'#b0b0c0';}
+
+// ── Stats ──
+function normalCDF(z){const t=1/(1+.2316419*Math.abs(z)),d=.3989423*Math.exp(-z*z/2);const p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p;}
+function calcROI(rows){const s=rows.reduce((a,r)=>a+r.stake,0),l=rows.reduce((a,r)=>a+r.lucro,0);return s>0?(l/s)*100:0;}
+function calcWR(rows){const v=rows.filter(r=>['W','HW'].includes(r.resultado));const t=rows.filter(r=>r.resultado!=='V');return t.length>0?(v.length/t.length)*100:0;}
+function calcMDDreais(rows){let cum=0,peak=0,mdd=0;for(const r of rows){cum+=r.lucro;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}return mdd;}
+function calcMDDpct(rows){let bank=BASE_BANK,peak=BASE_BANK,mdd=0;for(const r of rows){bank+=r.lucro;if(bank>peak)peak=bank;const dd=(peak-bank)/peak*100;if(dd>mdd)mdd=dd;}return mdd;}
+function calcXMDD(rows,sims=300){const settled=rows.filter(r=>r.resultado!=='V');if(settled.length<5)return 0;const n=settled.length,wr=calcWR(rows)/100;const avgOdd=settled.reduce((a,r)=>a+r.odd,0)/settled.length;const avgStake=rows.reduce((a,r)=>a+r.stake,0)/rows.length;let total=0;for(let s=0;s<sims;s++){let cum=0,peak=0,mdd=0;for(let i=0;i<n;i++){const win=Math.random()<wr;cum+=win?avgStake*(avgOdd-1):-avgStake;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}total+=mdd;}return total/sims;}
+function calcPValue(rows){const settled=rows.filter(r=>r.resultado!=='V');const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;const n=settled.length;if(n<5)return 1;const avgOdd=settled.reduce((a,r)=>a+r.odd,0)/n;const z=(wins/n-1/avgOdd)/Math.sqrt((1/avgOdd)*(1-1/avgOdd)/n);return Math.max(0.001,Math.min(0.999,1-normalCDF(z)));}
+function calcAvgOdd(rows){const real=rows.filter(r=>r.resultado!=='V'&&r.odd>0&&r.stake>0);const sumStake=real.reduce((a,r)=>a+r.stake,0);return sumStake>0?real.reduce((a,r)=>a+r.odd*r.stake,0)/sumStake:0;}
+
+// ── Multiselect state ──
+const msState={};
+function msInit(id,all){msState[id]=new Set();}
+function msGetSelected(id){return msState[id]||new Set();}
+function msToggle(id,val,allVals){
+  if(!msState[id])msState[id]=new Set();
+  if(val==='__all__'){msState[id]=new Set();return;}
+  if(msState[id].has(val))msState[id].delete(val);
+  else msState[id].add(val);
+}
+function msLabel(id,placeholder){
+  const s=msState[id];
+  if(!s||s.size===0)return placeholder;
+  if(s.size===1)return [...s][0];
+  return s.size+' selecionados';
+}
+function msHasSelection(id){return msState[id]&&msState[id].size>0;}
+
+// ── Filtros por aba ──
+const PAGE_FILTER_STATE={};
+function getFilterState(pageId){
+  if(!PAGE_FILTER_STATE[pageId])PAGE_FILTER_STATE[pageId]={dateFrom:'',dateTo:'',quickDays:0};
+  return PAGE_FILTER_STATE[pageId];
+}
+
+function filtrarPagina(pageId){
+  const st=getFilterState(pageId);
+  let d=[...DADOS];
+  // Date range
+  if(st.dateFrom) d=d.filter(r=>r.data>=st.dateFrom);
+  if(st.dateTo)   d=d.filter(r=>r.data<=st.dateTo);
+  if(st.quickDays>0){const lim=new Date(Date.now()-st.quickDays*864e5).toISOString().slice(0,10);d=d.filter(r=>r.data>=lim);}
+  // Multiselect
+  const sports=msGetSelected('sport_'+pageId);
+  const casas=msGetSelected('casa_'+pageId);
+  if(sports.size>0) d=d.filter(r=>sports.has(r.esporte));
+  if(casas.size>0)  d=d.filter(r=>casas.has(r.casa));
+  return d;
+}
+
+// ── Multiselect DOM helpers ──
+function buildMS(id,items,placeholder,pageId){
+  if(!msState[id])msState[id]=new Set();
+  const hasSel=msHasSelection(id);
+  return `<div class="ms-wrap" id="mswrap_${id}">
+    <div class="ms-btn ${hasSel?'has-selection':''}" onclick="toggleMS('${id}')" id="msbtn_${id}">
+      <span>${msLabel(id,placeholder)}</span>
+      <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+    </div>
+    <div class="ms-dropdown" id="msdrop_${id}">
+      <div class="ms-option ${!hasSel?'selected':''}" onclick="selectMS('${id}','__all__','${pageId}')">
+        <span class="ms-check"><svg class="ms-check-mark" viewBox="0 0 8 8"><path d="M1 4l2.5 2.5L7 1.5" stroke="white" stroke-width="1.5" fill="none"/></svg></span>
+        <span>Todos</span>
+      </div>
+      ${items.map(it=>`<div class="ms-option ${msState[id]?.has(it)?'selected':''}" onclick="selectMS('${id}','${it.replace(/'/g,"\\'")}','${pageId}')">
+        <span class="ms-check"><svg class="ms-check-mark" viewBox="0 0 8 8"><path d="M1 4l2.5 2.5L7 1.5" stroke="white" stroke-width="1.5" fill="none"/></svg></span>
+        <span>${it}</span>
+      </div>`).join('')}
+      ${hasSel?`<div class="ms-clear" onclick="clearMS('${id}','${pageId}')">Limpar seleção</div>`:''}
+    </div>
+  </div>`;
+}
+
+function toggleMS(id){
+  const drop=document.getElementById('msdrop_'+id);
+  if(!drop)return;
+  const isOpen=drop.classList.contains('open');
+  document.querySelectorAll('.ms-dropdown.open').forEach(d=>d.classList.remove('open'));
+  if(!isOpen)drop.classList.add('open');
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.ms-wrap'))document.querySelectorAll('.ms-dropdown.open').forEach(d=>d.classList.remove('open'));});
+
+function selectMS(id,val,pageId){
+  msToggle(id,val);
+  refreshMS(id,pageId);
+  renderPage(pageId);
+}
+function clearMS(id,pageId){msState[id]=new Set();refreshMS(id,pageId);renderPage(pageId);}
+function refreshMS(id,pageId){
+  const wrap=document.getElementById('mswrap_'+id);
+  if(!wrap)return;
+  const allItems=[...wrap.querySelectorAll('.ms-option')].slice(1).map(o=>o.querySelector('span:last-child').textContent);
+  const hasSel=msHasSelection(id);
+  const btn=document.getElementById('msbtn_'+id);
+  if(btn){btn.querySelector('span').textContent=msLabel(id,id.startsWith('sport')?'Todos os esportes':'Todas as casas');btn.className='ms-btn'+(hasSel?' has-selection':'');}
+  const drop=document.getElementById('msdrop_'+id);
+  if(drop){
+    drop.querySelectorAll('.ms-option').forEach((o,i)=>{
+      if(i===0){o.className='ms-option'+(hasSel?'':' selected');return;}
+      const v=o.querySelector('span:last-child').textContent;
+      o.className='ms-option'+(msState[id]?.has(v)?' selected':'');
+    });
+    const cl=drop.querySelector('.ms-clear');
+    if(hasSel&&!cl){const d=document.createElement('div');d.className='ms-clear';d.textContent='Limpar seleção';d.onclick=()=>clearMS(id,pageId);drop.appendChild(d);}
+    else if(!hasSel&&cl)cl.remove();
+  }
+}
+
+// ── Date filter helpers ──
+function buildDateFilters(pageId){
+  const st=getFilterState(pageId);
+  return `<div class="filter-group">
+    <div class="filter-label">Período</div>
+    <div class="date-range">
+      <input type="date" id="df_from_${pageId}" value="${st.dateFrom}" onchange="setDateFilter('${pageId}','from',this.value)">
+      <span class="date-sep">→</span>
+      <input type="date" id="df_to_${pageId}" value="${st.dateTo}" onchange="setDateFilter('${pageId}','to',this.value)">
+    </div>
+    <div class="quick-btns">
+      <button class="qbtn ${st.quickDays===7?'active':''}" onclick="setQuick('${pageId}',7)">7d</button>
+      <button class="qbtn ${st.quickDays===15?'active':''}" onclick="setQuick('${pageId}',15)">15d</button>
+      <button class="qbtn ${st.quickDays===30?'active':''}" onclick="setQuick('${pageId}',30)">30d</button>
+      <button class="qbtn ${st.quickDays===90?'active':''}" onclick="setQuick('${pageId}',90)">90d</button>
+      <button class="qbtn ${st.quickDays===0&&!st.dateFrom&&!st.dateTo?'active':''}" onclick="clearDateFilter('${pageId}')">Tudo</button>
+    </div>
+  </div>`;
+}
+
+function setDateFilter(pageId,type,val){
+  const st=getFilterState(pageId);
+  st.quickDays=0;
+  if(type==='from')st.dateFrom=val; else st.dateTo=val;
+  refreshDateBtns(pageId);
+  renderPage(pageId);
+}
+function setQuick(pageId,days){
+  const st=getFilterState(pageId);
+  st.quickDays=days; st.dateFrom=''; st.dateTo='';
+  const f=document.getElementById('df_from_'+pageId),t=document.getElementById('df_to_'+pageId);
+  if(f)f.value=''; if(t)t.value='';
+  refreshDateBtns(pageId);
+  renderPage(pageId);
+}
+function clearDateFilter(pageId){
+  const st=getFilterState(pageId);
+  st.quickDays=0; st.dateFrom=''; st.dateTo='';
+  const f=document.getElementById('df_from_'+pageId),t=document.getElementById('df_to_'+pageId);
+  if(f)f.value=''; if(t)t.value='';
+  refreshDateBtns(pageId);
+  renderPage(pageId);
+}
+function refreshDateBtns(pageId){
+  const st=getFilterState(pageId);
+  document.querySelectorAll(`#page-${pageId} .qbtn`).forEach(b=>{
+    const d=parseInt(b.textContent);
+    if(b.textContent==='Tudo') b.className='qbtn'+(st.quickDays===0&&!st.dateFrom&&!st.dateTo?' active':'');
+    else b.className='qbtn'+(st.quickDays===d?' active':'');
+  });
+}
+
+function buildPageFilters(pageId,sports,casas){
+  return `<div class="filters">
+    ${buildDateFilters(pageId)}
+    <div class="filter-group">
+      <div class="filter-label">Esporte</div>
+      ${buildMS('sport_'+pageId,sports,'Todos os esportes',pageId)}
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Casa</div>
+      ${buildMS('casa_'+pageId,casas,'Todas as casas',pageId)}
+    </div>
+  </div>`;
+}
+
+// ── Nav ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.getElementById('nav-'+id)?.classList.add('active');
+  renderPage(id);
+}
+function renderPage(id){
+  const rows=filtrarPagina(id);
+  if(id==='overview'){renderKPI(rows);renderBankroll(rows);renderROIMonthly(rows);renderHeatmap(rows);}
+  else if(id==='sports'){renderSport(rows);renderCasa(rows);renderAposta(rows);}
+  else if(id==='value'){renderOdds(rows);renderValue(rows);}
+  else if(id==='tipsters'){renderTipster(id);}
+  else if(id==='parceiros'){renderParceiros(rows);}
+  else if(id==='streak'){renderStreak(rows,'streakDiv','streakStats');}
+  else if(id==='advanced'){renderAdvanced(rows);}
+}
+
+// ── KPI ──
+function renderKPI(rows){
+  const lucro=rows.reduce((a,r)=>a+r.lucro,0),stake=rows.reduce((a,r)=>a+r.stake,0);
+  const roi=calcROI(rows),wr=calcWR(rows),n=rows.length;
+  const wins=rows.filter(r=>r.resultado==='W').length,losses=rows.filter(r=>r.resultado==='L').length;
+  const avgOdd=calcAvgOdd(rows);
+  document.getElementById('kpiGrid').innerHTML=[
+    {label:'P/L total',val:fmtPL(lucro),cls:lucro>=0?'pos':'neg',sub:'Turnover: '+fmtR(stake)},
+    {label:'ROI',val:(roi>=0?'+':'')+roi.toFixed(2)+'%',cls:roi>=0?'pos':'neg',sub:n+' apostas'},
+    {label:'Win rate',val:wr.toFixed(1)+'%',cls:wr>=50?'pos':'neg',sub:wins+' W / '+losses+' L'},
+    {label:'Odd ponderada',val:avgOdd.toFixed(2),cls:'neu',sub:'Σ(odd×stake)/Σ(stake)'},
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-val ${k.cls}">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+}
+
+// ── P/L Chart ──
+function renderBankroll(rows){
+  const byDay={};
+  rows.forEach(r=>{const k=r.data.slice(0,10);if(!byDay[k])byDay[k]=0;byDay[k]+=r.lucro;});
+  const days=Object.keys(byDay).sort(),dailyPL=days.map(k=>byDay[k]);
+  let cum=0;const cumPL=dailyPL.map(v=>{cum+=v;return parseFloat(cum.toFixed(2));});
+  const step=Math.max(1,Math.floor(days.length/14));
+  const lbl=days.filter((_,i)=>i%step===0||i===days.length-1).map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
+  const cumF=cumPL.filter((_,i)=>i%step===0||i===cumPL.length-1);
+  const dailyF=dailyPL.filter((_,i)=>i%step===0||i===dailyPL.length-1);
+  mkChart('chartBankroll',{type:'bar',data:{labels:lbl,datasets:[
+    {type:'line',data:cumF,borderColor:'#00d68f',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1'},
+    {type:'bar',data:dailyF,backgroundColor:dailyF.map(v=>v>=0?'rgba(0,214,143,.55)':'rgba(240,80,110,.55)'),borderRadius:3,yAxisID:'y'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    x:{ticks:{color:tickColor(),font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},
+    y:{ticks:{color:tickColor(),font:{size:10},callback:v=>'R$'+Math.round(v)},grid:{color:gridColor()},border:{display:false},position:'left'},
+    y1:{ticks:{color:tickColor(),font:{size:10},callback:v=>'R$'+Math.round(v)},grid:{display:false},border:{display:false},position:'right'}
+  }}});
+}
+
+// ── ROI Mensal (barras) ──
+function renderROIMonthly(rows){
+  const byMonth={};
+  rows.forEach(r=>{const d=new Date(r.data+'T12:00:00');const k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byMonth[k])byMonth[k]={pl:0,s:0,mes:d.getMonth(),ano:d.getFullYear()};byMonth[k].pl+=r.lucro;byMonth[k].s+=r.stake;});
+  const mks=Object.keys(byMonth).sort();
+  const lbl=mks.map(k=>{const v=byMonth[k];return MESES[v.mes]+' '+String(v.ano).slice(2);});
+  const vals=mks.map(k=>byMonth[k].s>0?parseFloat((byMonth[k].pl/byMonth[k].s*100).toFixed(2)):0);
+  mkChart('chartROI',{type:'bar',data:{labels:lbl,datasets:[{data:vals,backgroundColor:vals.map(v=>v>=0?'rgba(0,214,143,.65)':'rgba(240,80,110,.65)'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor(),font:{size:10},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:tickColor(),font:{size:10},callback:v=>v.toFixed(1)+'%'},grid:{color:gridColor()},border:{display:false}}}}});
+}
+
+// ── Heatmap compacto ──
+function renderHeatmap(rows){
+  const byMonth={};
+  rows.forEach(r=>{const d=new Date(r.data+'T12:00:00');const k=d.getFullYear()+'-'+d.getMonth();if(!byMonth[k])byMonth[k]={l:0,s:0,mes:d.getMonth(),ano:d.getFullYear()};byMonth[k].l+=r.lucro;byMonth[k].s+=r.stake;});
+  const anos=[...new Set(Object.values(byMonth).map(v=>v.ano))].sort();
+  const vals=Object.values(byMonth).map(v=>v.l);
+  const maxAbs=Math.max(...vals.map(Math.abs),1);
+  let html=`<table class="heatmap-table"><thead><tr><th style="width:36px"></th>${MESES.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>`;
+  anos.forEach(ano=>{
+    html+=`<tr><th style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:right;padding-right:6px">${ano}</th>`;
+    for(let m=0;m<12;m++){
+      const k=ano+'-'+m;
+      if(byMonth[k]){
+        const v=byMonth[k].l,alpha=0.15+Math.min(1,Math.abs(v)/maxAbs)*0.7;
+        const bg=v>=0?`rgba(0,214,143,${alpha})`:`rgba(240,80,110,${alpha})`;
+        const col=v>=0?'#00d68f':'#f0506e';
+        const roi=byMonth[k].s>0?(v/byMonth[k].s*100).toFixed(0):'0';
+        const tip=`${MESES[m]}/${ano}: ${v>=0?'+':'-'} R$ ${fmt(Math.abs(v),0)} (ROI ${roi}%)`;
+        html+=`<td class="heat-cell" style="background:${bg};color:${col}" title="${tip}">${roi}%</td>`;
+      } else {
+        html+=`<td class="heat-empty"></td>`;
+      }
+    }
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('heatmapWrap').innerHTML=html;
+}
+
+function renderSport(rows){
+  const map={};rows.forEach(r=>{if(!map[r.esporte])map[r.esporte]={l:0,s:0};map[r.esporte].l+=r.lucro;map[r.esporte].s+=r.stake;});
+  const ents=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined').sort((a,b)=>b[1].l-a[1].l);
+  const h=Math.max(180,ents.length*32+60);
+  document.querySelector('#chartSport').parentElement.style.height=h+'px';
+  mkChart('chartSport',{type:'bar',data:{labels:ents.map(e=>e[0]),datasets:[{data:ents.map(e=>parseFloat(e[1].l.toFixed(2))),backgroundColor:ents.map(e=>e[1].l>=0?'rgba(0,214,143,.65)':'rgba(240,80,110,.65)'),borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor(),font:{size:10},callback:v=>'R$'+v.toFixed(0)},grid:{color:gridColor()},border:{display:false}},y:{ticks:{color:tickColor(),font:{size:11}},grid:{display:false},border:{display:false}}}}});
+}
+
+function renderCasa(rows){
+  const map={};rows.forEach(r=>{if(!map[r.casa])map[r.casa]={l:0,s:0};map[r.casa].l+=r.lucro;map[r.casa].s+=r.stake;});
+  const ents=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined').sort((a,b)=>(b[1].s>0?b[1].l/b[1].s:0)-(a[1].s>0?a[1].l/a[1].s:0));
+  const vals=ents.map(e=>e[1].s>0?parseFloat((e[1].l/e[1].s*100).toFixed(2)):0);
+  const h=Math.max(180,ents.length*32+60);
+  document.querySelector('#chartCasa').parentElement.style.height=h+'px';
+  mkChart('chartCasa',{type:'bar',data:{labels:ents.map(e=>e[0]),datasets:[{data:vals,backgroundColor:vals.map(v=>v>=0?'rgba(91,156,246,.7)':'rgba(240,80,110,.65)'),borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor(),font:{size:10},callback:v=>v.toFixed(1)+'%'},grid:{color:gridColor()},border:{display:false}},y:{ticks:{color:tickColor(),font:{size:11}},grid:{display:false},border:{display:false}}}}});
+}
+
+function renderAposta(rows){
+  const map={};rows.filter(r=>r.resultado!=='V').forEach(r=>{if(!map[r.aposta])map[r.aposta]={w:0,n:0};map[r.aposta].n++;if(['W','HW'].includes(r.resultado))map[r.aposta].w++;});
+  const ents=Object.entries(map).filter(e=>e[1].n>=3&&e[0]&&e[0]!=='undefined').sort((a,b)=>(b[1].w/b[1].n)-(a[1].w/a[1].n));
+  const h=Math.max(180,ents.length*32+60);
+  document.querySelector('#chartAposta').parentElement.style.height=h+'px';
+  mkChart('chartAposta',{type:'bar',data:{labels:ents.map(e=>e[0]+' ('+e[1].n+')'),datasets:[{data:ents.map(e=>parseFloat((e[1].w/e[1].n*100).toFixed(1))),backgroundColor:'rgba(240,160,48,.6)',borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:100,ticks:{color:tickColor(),font:{size:10},callback:v=>v+'%'},grid:{color:gridColor()},border:{display:false}},y:{ticks:{color:tickColor(),font:{size:11}},grid:{display:false},border:{display:false}}}}});
+}
+
+function renderOdds(rows){
+  const bins=[0,1.3,1.5,1.8,2.0,2.5,3.0,4.0,6.0,999];
+  const lbls=['<1.3','1.3-1.5','1.5-1.8','1.8-2.0','2.0-2.5','2.5-3.0','3.0-4.0','4.0-6.0','6.0+'];
+  const counts=new Array(lbls.length).fill(0);
+  rows.forEach(r=>{for(let i=0;i<bins.length-1;i++){if(r.odd>=bins[i]&&r.odd<bins[i+1]){counts[i]++;break;}}});
+  mkChart('chartOdds',{type:'bar',data:{labels:lbls,datasets:[{data:counts,backgroundColor:'rgba(91,156,246,.6)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor(),font:{size:10}},grid:{display:false},border:{display:false}},y:{ticks:{color:tickColor(),font:{size:10}},grid:{color:gridColor()},border:{display:false},beginAtZero:true}}}});
+}
+
+function renderValue(rows){
+  const bins=[1,1.5,2.0,2.5,3.0,4.0,999];
+  const lbls=['1.0-1.5','1.5-2.0','2.0-2.5','2.5-3.0','3.0-4.0','4.0+'];
+  const bdata=lbls.map(()=>({l:0,s:0}));
+  rows.forEach(r=>{for(let i=0;i<bins.length-1;i++){if(r.odd>=bins[i]&&r.odd<bins[i+1]){bdata[i].l+=r.lucro;bdata[i].s+=r.stake;break;}}});
+  const vals=bdata.map(b=>b.s>0?parseFloat((b.l/b.s*100).toFixed(2)):0);
+  mkChart('chartValue',{type:'bar',data:{labels:lbls,datasets:[{data:vals,backgroundColor:vals.map(v=>v>=0?'rgba(0,214,143,.6)':'rgba(240,80,110,.6)'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor(),font:{size:10}},grid:{display:false},border:{display:false}},y:{ticks:{color:tickColor(),font:{size:10},callback:v=>v.toFixed(1)+'%'},grid:{color:gridColor()},border:{display:false}}}}});
+}
+
+function renderParceiros(rows){
+  const map={};
+  rows.forEach(r=>{const key=r.fornecedor+'||'+r.conta+'||'+r.casa;if(!map[key])map[key]={conta:r.conta,forn:r.fornecedor,casa:r.casa,n:0,stake:0,lucro:0,datas:[]};map[key].n++;map[key].stake+=r.stake;map[key].lucro+=r.lucro;map[key].datas.push(r.data);});
+  document.querySelector('#tblParceiros tbody').innerHTML=Object.values(map).sort((a,b)=>b.lucro-a.lucro).map(e=>{
+    const roi=e.stake>0?(e.lucro/e.stake)*100:0;
+    const lc=e.lucro>=0?'color:var(--green)':'color:var(--red)';
+    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    const sorted=e.datas.slice().sort();
+    const d1=sorted[0].slice(0,10).split('-'),d2=sorted[sorted.length-1].slice(0,10).split('-');
+    const dias=Math.round((new Date(sorted[sorted.length-1])-new Date(sorted[0]))/864e5);
+    return `<tr><td style="font-weight:500;color:var(--text)">${e.forn||'—'}</td><td>${e.conta}</td><td>${e.casa}</td><td>${e.n}</td><td>R$ ${fmt(e.stake,0)}</td><td style="${lc}">${fmtPL(e.lucro)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(1)}%</td><td>${d1[2]}/${d1[1]}/${d1[0].slice(2)}</td><td>${d2[2]}/${d2[1]}/${d2[0].slice(2)}</td><td>${dias}d</td></tr>`;
+  }).join('');
+}
+
+function renderStreak(rows,divId,statsId){
+  const last=rows.slice(-60);
+  document.getElementById(divId).innerHTML=last.map(r=>{const d=new Date(r.data+'T12:00:00').toLocaleDateString('pt-BR');return `<span class="dot ${r.resultado.toLowerCase()}" title="${r.resultado} — ${r.esporte} — ${d}"></span>`;}).join('');
+  const wins=last.filter(r=>['W','HW'].includes(r.resultado)).length;
+  const losses=last.filter(r=>['L','HL'].includes(r.resultado)).length;
+  const curRes=last.length?last[last.length-1].resultado:'';
+  let cur=0;for(let i=last.length-1;i>=0;i--){if(['W','HW'].includes(last[i].resultado)===(['W','HW'].includes(curRes)))cur++;else break;}
+  const isWin=['W','HW'].includes(curRes);
+  document.getElementById(statsId).innerHTML=`<span>Wins: <strong style="color:var(--green)">${wins}</strong></span><span>Losses: <strong style="color:var(--red)">${losses}</strong></span><span style="color:${isWin?'var(--green)':'var(--red)'}">${cur} ${isWin?'wins':'losses'} seguidos</span>`;
+}
+
+function renderTipster(pageId){
+  const tv=document.getElementById('fTipsterView')?.value||'all';
+  const rows=filtrarPagina(pageId||'tipsters');
+  const trows=tv==='all'?rows:rows.filter(r=>r.tipster===tv);
+  const lucro=trows.reduce((a,r)=>a+r.lucro,0),stake=trows.reduce((a,r)=>a+r.stake,0);
+  const roi=calcROI(trows),wr=calcWR(trows),n=trows.length;
+  const wins=trows.filter(r=>r.resultado==='W').length,losses=trows.filter(r=>r.resultado==='L').length;
+  document.getElementById('tipsterKPI').innerHTML=[
+    {label:'P/L',val:fmtPL(lucro),cls:lucro>=0?'pos':'neg',sub:'Turnover: '+fmtR(stake)},
+    {label:'ROI',val:(roi>=0?'+':'')+roi.toFixed(2)+'%',cls:roi>=0?'pos':'neg',sub:n+' apostas'},
+    {label:'Win rate',val:wr.toFixed(1)+'%',cls:wr>=50?'pos':'neg',sub:wins+' W / '+losses+' L'},
+    {label:'Odd ponderada',val:calcAvgOdd(trows).toFixed(2),cls:'neu',sub:'média ponderada'},
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-val ${k.cls}">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+  const byMonth={};
+  trows.forEach(r=>{const d=new Date(r.data+'T12:00:00'),k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byMonth[k])byMonth[k]={bets:0,pl:0,stake:0,ano:d.getFullYear(),mes:d.getMonth()};byMonth[k].bets++;byMonth[k].pl+=r.lucro;byMonth[k].stake+=r.stake;});
+  let totPL=0,totStake=0,totBets=0;
+  document.querySelector('#tipsterMonthTable tbody').innerHTML=Object.keys(byMonth).sort().map(k=>{
+    const v=byMonth[k];const roi=v.stake>0?(v.pl/v.stake*100).toFixed(2)+'%':'0%';
+    const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
+    totPL+=v.pl;totStake+=v.stake;totBets+=v.bets;
+    return `<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPL(v.pl)}</td><td>${fmtR(v.stake)}</td><td style="${pc}">${roi}</td></tr>`;
+  }).join('')+`<tr class="total-row"><td>Total</td><td>${totBets}</td><td style="${totPL>=0?'color:var(--green)':'color:var(--red)'}">${fmtPL(totPL)}</td><td>${fmtR(totStake)}</td><td style="${totPL>=0?'color:var(--green)':'color:var(--red)'}">${totStake>0?(totPL/totStake*100).toFixed(2)+'%':'0%'}</td></tr>`;
+  renderStreak(trows,'tipsterStreak','tipsterStreakStats');
+}
+
+function renderAdvanced(rows){
+  const mddR=calcMDDreais(rows),mddPct=calcMDDpct(rows);
+  const xmdd=calcXMDD(rows,300),emdd=xmdd*0.85;
+  const pval=calcPValue(rows),pl=rows.reduce((a,r)=>a+r.lucro,0);
+  const profEmdd=emdd>0?(pl/emdd).toFixed(2):'—';
+  [
+    {label:'MDD real (R$)',val:'R$ '+fmt(mddR,0),cls:mddR<5000?'pos':mddR<15000?'neu':'neg',sub:'pior queda acumulada real'},
+    {label:'MDD real (%)',val:mddPct.toFixed(1)+'%',cls:mddPct<15?'pos':mddPct<30?'neu':'neg',sub:'% do bankroll máximo'},
+    {label:'EMDD (R$)',val:'R$ '+fmt(emdd,0),cls:emdd<5000?'pos':emdd<15000?'neu':'neg',sub:'drawdown esperado'},
+    {label:'XMDD Monte Carlo',val:'R$ '+fmt(xmdd,0),cls:xmdd<5000?'pos':xmdd<15000?'neu':'neg',sub:'drawdown médio simulado'},
+    {label:'P-Value',val:pval<0.001?'<0.001':pval.toFixed(3),cls:pval<0.05?'pos':pval<0.15?'neu':'neg',sub:pval<0.05?'estatist. significativo':'não significativo'},
+    {label:'Profit / EMDD',val:profEmdd,cls:parseFloat(profEmdd)>=5?'pos':parseFloat(profEmdd)>=2?'neu':'neg',sub:'> 5 = excelente'},
+  ].forEach((k,i)=>{const el=document.querySelectorAll('#kpiAdvanced .kpi')[i];if(el){el.querySelector('.kpi-label').textContent=k.label;el.querySelector('.kpi-val').textContent=k.val;el.querySelector('.kpi-val').className='kpi-val '+k.cls;el.querySelector('.kpi-sub').textContent=k.sub;}});
+}
+
+// ── Build HTML ──
+function buildHTML(){
+  const tipsters=[...new Set(DADOS.map(r=>r.tipster).filter(Boolean))].sort();
+  const sports=[...new Set(DADOS.map(r=>r.esporte).filter(Boolean))].sort();
+  const casas=[...new Set(DADOS.map(r=>r.casa).filter(Boolean))].sort();
+  const PAGES=['overview','sports','value','tipsters','parceiros','streak','advanced'];
+  PAGES.forEach(p=>{msInit('sport_'+p,sports);msInit('casa_'+p,casas);});
+
+  document.getElementById('root').innerHTML=`
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+    <span id="themeLabel">${document.documentElement.getAttribute('data-theme')==='dark'?'Claro':'Escuro'}</span>
+  </button>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-name">Fernando Carvalho</div>
+        <div class="logo-title">Betting Dashboard</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-group">Análise</div>
+        <div class="nav-item active" id="nav-overview" onclick="showPage('overview')">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+          Visão Geral
+        </div>
+        <div class="nav-item" id="nav-sports" onclick="showPage('sports')">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-4 3 3 5-6"/></svg>
+          Esportes & Casas
+        </div>
+        <div class="nav-item" id="nav-value" onclick="showPage('value')">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 8h6M8 5v6"/></svg>
+          Value Betting
+        </div>
+        <div class="nav-item" id="nav-tipsters" onclick="showPage('tipsters')">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.2-4 5-4s5 1.5 5 4"/><circle cx="12" cy="5" r="2"/><path d="M12 9c1.5.3 3 1.2 3 4"/></svg>
+          Tipsters
+        </div>
+        <div class="nav-group">Gestão</div>
+        <div class="nav-item" id="nav-parceiros" onclick="showPage('parceiros')">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
+          Parceiros
+        </div>
+        <div class="nav-item" id="nav-streak" onclick="showPage('streak')">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h2l2-5 2 10 2-7 2 4 1-2h1"/></svg>
+          Sequência
+        </div>
+        <div class="nav-item" id="nav-advanced" onclick="showPage('advanced')">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v2M8 12v2M2 8h2m8 0h2"/><circle cx="8" cy="8" r="3"/></svg>
+          Métricas Avançadas
+        </div>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="update-btn" onclick="loadData()">↻ Atualizar dados</button>
+        <div class="last-update" id="lastUpdate">${new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <!-- OVERVIEW -->
+      <div class="page active" id="page-overview">
+        <div class="page-header">
+          <div><div class="page-title">Visão Geral</div><div class="page-sub">performance consolidada</div></div>
+          ${buildPageFilters('overview',sports,casas)}
+        </div>
+        <div class="kpi-grid" id="kpiGrid"></div>
+        <div class="row2">
+          <div class="card"><div class="card-title">P/L acumulado + P/L diário</div><div class="chart-wrap" style="height:200px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div></div>
+          <div class="card"><div class="card-title">ROI mensal (%)</div><div class="chart-wrap" style="height:200px"><canvas id="chartROI" role="img" aria-label="ROI mensal"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-title">Heatmap — ROI por mês</div><div id="heatmapWrap"></div></div>
+      </div>
+
+      <!-- SPORTS -->
+      <div class="page" id="page-sports">
+        <div class="page-header">
+          <div><div class="page-title">Esportes & Casas</div><div class="page-sub">performance por modalidade e bookmaker</div></div>
+          ${buildPageFilters('sports',sports,casas)}
+        </div>
+        <div class="row2">
+          <div class="card"><div class="card-title">P/L por esporte</div><div class="chart-wrap" style="height:200px"><canvas id="chartSport" role="img" aria-label="Esportes"></canvas></div></div>
+          <div class="card"><div class="card-title">ROI% por casa</div><div class="chart-wrap" style="height:200px"><canvas id="chartCasa" role="img" aria-label="Casas"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-title">Win rate por categoria</div><div class="chart-wrap" style="height:200px"><canvas id="chartAposta" role="img" aria-label="Categorias"></canvas></div></div>
+      </div>
+
+      <!-- VALUE -->
+      <div class="page" id="page-value">
+        <div class="page-header">
+          <div><div class="page-title">Value Betting</div><div class="page-sub">análise de odds e rentabilidade por faixa</div></div>
+          ${buildPageFilters('value',sports,casas)}
+        </div>
+        <div class="card"><div class="card-title">Distribuição de odds</div><div class="chart-wrap" style="height:180px"><canvas id="chartOdds" role="img" aria-label="Odds"></canvas></div></div>
+        <div class="card"><div class="card-title">ROI por faixa de odd</div><div class="chart-wrap" style="height:180px"><canvas id="chartValue" role="img" aria-label="Value"></canvas></div></div>
+      </div>
+
+      <!-- TIPSTERS -->
+      <div class="page" id="page-tipsters">
+        <div class="page-header">
+          <div><div class="page-title">Tipsters</div><div class="page-sub">performance individual</div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            <select id="fTipsterView" onchange="renderTipster('tipsters')" style="font-size:12px;padding:5px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:5px;font-family:'IBM Plex Sans',sans-serif;cursor:pointer">
+              <option value="all">Carteira toda</option>
+              ${tipsters.map(t=>`<option value="${t}">${t}</option>`).join('')}
+            </select>
+            ${buildPageFilters('tipsters',sports,casas)}
+          </div>
+        </div>
+        <div class="kpi-grid" id="tipsterKPI"></div>
+        <div class="card"><div class="card-title">P/L mensal</div><div class="tbl-wrap"><table class="tbl" id="tipsterMonthTable"><thead><tr><th>Mês</th><th>Apostas</th><th>P/L</th><th>Total inv.</th><th>ROI</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="card"><div class="card-title">Sequência recente (últimas 60)</div><div class="streak" id="tipsterStreak"></div><div class="streak-stats" id="tipsterStreakStats"></div></div>
+      </div>
+
+      <!-- PARCEIROS -->
+      <div class="page" id="page-parceiros">
+        <div class="page-header">
+          <div><div class="page-title">Parceiros</div><div class="page-sub">turnover, lucro e período</div></div>
+          ${buildPageFilters('parceiros',sports,casas)}
+        </div>
+        <div class="card"><div class="tbl-wrap"><table class="tbl" id="tblParceiros"><thead><tr><th>Fornecedor</th><th>Conta</th><th>Casa</th><th>Apostas</th><th>Turnover</th><th>Lucro</th><th>ROI</th><th>1ª aposta</th><th>Última</th><th>Período</th></tr></thead><tbody></tbody></table></div></div>
+      </div>
+
+      <!-- STREAK -->
+      <div class="page" id="page-streak">
+        <div class="page-header">
+          <div><div class="page-title">Sequência</div><div class="page-sub">últimas 60 apostas</div></div>
+          ${buildPageFilters('streak',sports,casas)}
+        </div>
+        <div class="card">
+          <div class="streak" id="streakDiv"></div>
+          <div class="streak-stats" id="streakStats"></div>
+          <div style="margin-top:1rem;display:flex;gap:14px;flex-wrap:wrap">
+            ${[['w','Win'],['l','Loss'],['hw','Half Win/Loss'],['v','Void']].map(([c,l])=>`<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace"><span class="dot ${c}"></span>${l}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- ADVANCED -->
+      <div class="page" id="page-advanced">
+        <div class="page-header">
+          <div><div class="page-title">Métricas Avançadas</div><div class="page-sub">drawdown, significância e eficiência</div></div>
+          ${buildPageFilters('advanced',sports,casas)}
+        </div>
+        <div class="kpi-grid" id="kpiAdvanced">
+          ${Array(6).fill('<div class="kpi"><div class="kpi-label"> </div><div class="kpi-val neu">—</div><div class="kpi-sub"> </div></div>').join('')}
+        </div>
+        <div class="card" style="font-size:11px;color:var(--text3);line-height:1.9;font-family:'IBM Plex Mono',monospace">
+          <strong style="color:var(--text2)">MDD real</strong> — maior queda real do P/L acumulado em R$ e % do bankroll máximo.<br>
+          <strong style="color:var(--text2)">EMDD</strong> — drawdown médio esperado (fórmula movimento browniano com drift).<br>
+          <strong style="color:var(--text2)">XMDD</strong> — drawdown médio via Monte Carlo (300 simulações).<br>
+          <strong style="color:var(--text2)">P-Value</strong> — probabilidade dos resultados serem acaso. &lt; 5% = significativo.<br>
+          <strong style="color:var(--text2)">Profit/EMDD</strong> — métrica WinnerOdds. Acima de 5 = método excelente.
+        </div>
+      </div>
+
+    </main>
+  </div>`;
+
+  // Theme toggle label sync
+  document.getElementById('themeLabel').textContent=document.documentElement.getAttribute('data-theme')==='dark'?'Claro':'Escuro';
+  showPage('overview');
+}
+
+async function loadData(){
+  document.getElementById('root').innerHTML=`<div class="loader"><div class="spinner"></div><span>carregando dados...</span></div>`;
+  try{
+    const res=await fetch(APPS_SCRIPT_URL);
+    const json=await res.json();
+    if(!json.ok) throw new Error(json.error||'Erro desconhecido');
+    DADOS=json.data;
+    buildHTML();
+    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }catch(err){
+    document.getElementById('root').innerHTML=`<div style="padding:2rem"><div class="error-box"><strong>Erro ao carregar dados</strong><br><br>${err.message}</div></div>`;
+  }
+}
+loadData();
+</script>
+</body>
+</html>
