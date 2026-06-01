@@ -192,7 +192,7 @@ function buildHTML(){
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo" style="padding:.75rem 1rem .65rem">
-        <img src="brand/01_logo_principal_dark.png" class="logo-dark" alt="FDC Capital" style="height:30px;width:auto;object-fit:contain"><img src="brand/02_logo_principal_light.png" class="logo-light" alt="FDC Capital" style="height:30px;width:auto;object-fit:contain">
+        <img src="brand/03_logo_compacto_dark.png" class="logo-dark" alt="FDC Capital" style="height:32px;width:auto;object-fit:contain"><img src="brand/04_logo_compacto_light.png" class="logo-light" alt="FDC Capital" style="height:32px;width:auto;object-fit:contain">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>

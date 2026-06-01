@@ -35,16 +35,14 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     const data=dayMap[key];
     if(!data) return {bg:'var(--bg4)',border:'var(--border)',clr:'var(--text3)',pl:null,n:0};
     const pl=data.pl;
-    if(pl>0){
-      const intensity=Math.min(1,Math.abs(pl)/1500);
-      const alpha=0.2+intensity*0.65;
-      return{bg:`rgba(0,214,143,${alpha})`,border:'rgba(0,214,143,.4)',clr:pl>500?'#fff':'var(--green)',pl,n:data.n};
-    } else if(pl<0){
-      const intensity=Math.min(1,Math.abs(pl)/1500);
-      const alpha=0.2+intensity*0.65;
-      return{bg:`rgba(240,80,110,${alpha})`,border:'rgba(240,80,110,.4)',clr:pl<-500?'#fff':'var(--red)',pl,n:data.n};
-    }
-    return{bg:'var(--bg5)',border:'var(--border2)',clr:'var(--text3)',pl:0,n:data.n};
+    let bg,border,clr='#fff';
+    if(pl>5000)      {bg='#00C896';border='rgba(0,200,150,.5)';}
+    else if(pl>1000) {bg='#00a876';border='rgba(0,168,118,.5)';}
+    else if(pl>=0)   {bg='#4db896';border='rgba(77,184,150,.5)';}
+    else if(pl>=-1000){bg='#ff8a94';border='rgba(255,138,148,.5)';}
+    else if(pl>=-5000){bg='#FF4757';border='rgba(255,71,87,.5)';}
+    else              {bg='#cc1a2a';border='rgba(204,26,42,.5)';}
+    return{bg,border,clr,pl,n:data.n};
   };
 
   const compact = opts.compact;
