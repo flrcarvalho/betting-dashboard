@@ -1,4 +1,4 @@
-﻿const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbz_a_v27TpfVQh7sbiO058PGtERG1HzcxYCNh8RCovCZYq6dDnDnMY0tXNM8jf4EF_4/exec";
+﻿const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbz2k1bEWIHrkElhwKg_SM86PFgqrBC-AXLPGrMrb9wvC4uWqRUK1pqqRrtNCRJlTGia/exec";
 const BASE_BANK=100000;
 // Mapa de ícones das casas (favicon via Google S2)
 const CASA_ICONS={
