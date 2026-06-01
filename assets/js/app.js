@@ -192,7 +192,7 @@ function buildHTML(){
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo" style="padding:.75rem 1rem .65rem">
-        <img src="brand/03_logo_compacto_dark.png" class="logo-dark" alt="FDC Capital" style="height:32px;width:auto;object-fit:contain"><img src="brand/04_logo_compacto_light.png" class="logo-light" alt="FDC Capital" style="height:32px;width:auto;object-fit:contain">
+        <img src="brand/03_logo_compacto_dark.png" class="logo-dark" alt="FDC Capital" style="height:36px;width:auto;object-fit:contain;background:transparent;border:none;padding:0"><img src="brand/04_logo_compacto_light.png" class="logo-light" alt="FDC Capital" style="height:36px;width:auto;object-fit:contain;background:transparent;border:none;padding:0">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
@@ -503,19 +503,8 @@ window.deleteCG=function(idx){
 };
 
 async function loadData(){
-  // Loader sempre usa fundo navy e logo dark independente do tema
-  document.getElementById('root').innerHTML=`<div class="loader" style="background:#081320"><img src="brand/01_logo_principal_dark.png" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div>`;
-  let _pct=0,_animDone=false;
-  const _bar=()=>document.getElementById('loaderBar');
-  const _lbl=()=>document.getElementById('loaderPct');
-  const _set=(p)=>{const b=_bar(),l=_lbl();if(b)b.style.width=p+'%';if(l)l.textContent=Math.round(p)+'%';};
-  const _animate=()=>{
-    if(_animDone)return;
-    if(_pct<88){_pct++;_set(_pct);setTimeout(_animate,30);}
-    else if(_pct<97){_pct++;_set(_pct);setTimeout(_animate,200);}
-    else{setTimeout(()=>{if(!_animDone){_pct=100;_set(100);}},600);}
-  };
-  _animate();
+  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><img src="brand/01_logo_principal_dark.png" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div></div></div>`;
+  // Fase 1: animação CSS 0→70% em 2s — sem setTimeout de simulação
   let _fetchErr=null;
   try{
     const res=await fetch(APPS_SCRIPT_URL);
@@ -526,9 +515,13 @@ async function loadData(){
     _fetchErr=err.message||'Falha na conexão';
     DADOS=[];
   }
-  _animDone=true;
-  _pct=100;_set(100);
-  await new Promise(r=>setTimeout(r,280));
+  // Fase 2: fetch retornou → completa barra em 0.3s, depois fade out
+  const bar=document.getElementById('loaderBar');
+  const loader=document.getElementById('loaderEl');
+  if(bar){bar.classList.remove('p1');bar.style.width='100%';}
+  await new Promise(r=>setTimeout(r,320));
+  if(loader){loader.style.opacity='0';}
+  await new Promise(r=>setTimeout(r,360));
   buildHTML();
   if(_fetchErr){
     const banner=document.createElement('div');
