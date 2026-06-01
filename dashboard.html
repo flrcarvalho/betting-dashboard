@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" sizes="32x32" href="brand/14_favicon_32px.png">
-<script>(function(){var img=new Image();img.onload=function(){var c=document.createElement('canvas');c.width=c.height=32;var ctx=c.getContext('2d');ctx.drawImage(img,0,0,32,32);var d=ctx.getImageData(0,0,32,32);var px=d.data;for(var i=0;i<px.length;i+=4){var br=(px[i]+px[i+1]+px[i+2])/3;if(br>220){px[i+3]=0;}else{px[i]=30;px[i+1]=144;px[i+2]=255;}}ctx.putImageData(d,0,0);var lnk=document.querySelector('link[rel="icon"]');if(!lnk){lnk=document.createElement('link');lnk.rel='icon';document.head.appendChild(lnk);}lnk.type='image/png';lnk.href=c.toDataURL();};img.src='brand/18_favicon_512px.png';})();</script>
+<link rel="icon" type="image/png" href="brand/Icone_Mono_Preto.png">
 <title>Betting Dashboard v25</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -45,7 +44,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrop
 [data-theme="light"] .tog-thumb{left:14px;background:var(--blue)}
 .main-content{padding:1.5rem 1.75rem;margin-top:44px;max-width:1600px}
 /* Sidebar */
-.sidebar-logo{padding:16px 16px 14px;border-bottom:1px solid rgba(183,190,200,.08);display:flex;align-items:center}.sidebar-logo img{height:40px;width:auto;background:transparent;flex-shrink:0;display:block}
+.sidebar-logo{height:80px;padding:0 16px;border-bottom:1px solid rgba(183,190,200,.08);display:flex;align-items:center;justify-content:center}.sidebar-logo img{height:52px;width:auto;max-width:100%;background:transparent;display:block}
 .logo-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.02em}
 .logo-title{font-size:11px;color:var(--text3);margin-top:3px;font-family:'JetBrains Mono',monospace}
 .sidebar-nav{padding:.5rem 0;flex:1}
@@ -2731,8 +2730,8 @@ function buildHTML(){
   </div>
   <div class="app">
     <aside class="sidebar">
-      <div class="sidebar-logo" style="padding:16px 16px 14px">
-        <img src="brand/01_logo_principal_dark.png" class="logo-dark" alt="FDC Capital" draggable="false"><img src="brand/02_logo_principal_light.png" class="logo-light" alt="FDC Capital" draggable="false">
+      <div class="sidebar-logo">
+        <img src="brand/Versão_Dark_Mode_para_Fundo_Escuro.png" class="logo-dark" alt="FDC Capital" draggable="false"><img src="brand/Versão_Clara_Mode_para_Fundo_Claro.png" class="logo-light" alt="FDC Capital" draggable="false">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
