@@ -310,14 +310,14 @@ html, body {
   justify-content: center;
   min-height: 100vh;
   gap: 0;
-  color: var(--text3);
+  color: rgba(0,229,255,0.8);
   font-size: var(--text-sm);
   font-family: var(--font-mono);
   text-align: center;
   width: 100%;
   position: fixed;
   top: 0; left: 0;
-  background: var(--bg);
+  background: #081320;
   z-index: 9999;
 }
 .loader-bottom {

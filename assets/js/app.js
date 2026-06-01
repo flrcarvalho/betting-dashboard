@@ -503,15 +503,12 @@ window.deleteCG=function(idx){
 };
 
 async function loadData(){
-  const _isDark=document.documentElement.getAttribute('data-theme')!=='light';
-  const _logoSrc=_isDark?'brand/01_logo_principal_dark.png':'brand/02_logo_principal_light.png';
-  document.getElementById('root').innerHTML=`<div class="loader"><img src="${_logoSrc}" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div>`;
+  // Loader sempre usa fundo navy e logo dark independente do tema
+  document.getElementById('root').innerHTML=`<div class="loader" style="background:#081320"><img src="brand/01_logo_principal_dark.png" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div>`;
   let _pct=0,_animDone=false;
   const _bar=()=>document.getElementById('loaderBar');
   const _lbl=()=>document.getElementById('loaderPct');
   const _set=(p)=>{const b=_bar(),l=_lbl();if(b)b.style.width=p+'%';if(l)l.textContent=Math.round(p)+'%';};
-  // Phase 1: 0→88% in ~2.6s (30ms/step), Phase 2: 88→97% in ~1.8s (200ms/step)
-  // Phase 3: auto-snap to 100% after 600ms even without server response
   const _animate=()=>{
     if(_animDone)return;
     if(_pct<88){_pct++;_set(_pct);setTimeout(_animate,30);}
@@ -519,21 +516,27 @@ async function loadData(){
     else{setTimeout(()=>{if(!_animDone){_pct=100;_set(100);}},600);}
   };
   _animate();
+  let _fetchErr=null;
   try{
-    const _ctrl=new AbortController();
-    const _tout=setTimeout(()=>_ctrl.abort(),30000);
-    const res=await fetch(APPS_SCRIPT_URL,{signal:_ctrl.signal});
-    clearTimeout(_tout);
+    const res=await fetch(APPS_SCRIPT_URL);
     const json=await res.json();
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
-    _animDone=true;
-    _pct=100;_set(100);
-    await new Promise(r=>setTimeout(r,280));
-    DADOS=json.data;buildHTML();
-    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    DADOS=json.data;
   }catch(err){
-    _animDone=true;
-    document.getElementById('root').innerHTML=`<div style="padding:2rem"><div class="error-box"><strong>Erro ao carregar dados</strong><br><br>${err.message}</div></div>`;
+    _fetchErr=err.message||'Falha na conexão';
+    DADOS=[];
+  }
+  _animDone=true;
+  _pct=100;_set(100);
+  await new Promise(r=>setTimeout(r,280));
+  buildHTML();
+  if(_fetchErr){
+    const banner=document.createElement('div');
+    banner.style.cssText='position:fixed;top:44px;left:224px;right:0;z-index:9998;background:rgba(255,71,87,0.12);border-bottom:1px solid rgba(255,71,87,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#FF4757';
+    banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${_fetchErr}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(255,71,87,0.4);color:#FF4757;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#FF4757;cursor:pointer;font-size:14px">×</button>`;
+    document.body.appendChild(banner);
+  }else{
+    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   }
 }
 loadData();
