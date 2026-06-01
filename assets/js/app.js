@@ -525,7 +525,7 @@ async function loadData(){
   buildHTML();
   if(_fetchErr){
     const banner=document.createElement('div');
-    banner.style.cssText='position:fixed;top:44px;left:224px;right:0;z-index:9998;background:rgba(255,71,87,0.12);border-bottom:1px solid rgba(255,71,87,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#FF4757';
+    banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(255,71,87,0.12);border-bottom:1px solid rgba(255,71,87,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#FF4757';
     banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${_fetchErr}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(255,71,87,0.4);color:#FF4757;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#FF4757;cursor:pointer;font-size:14px">×</button>`;
     document.body.appendChild(banner);
   }else{

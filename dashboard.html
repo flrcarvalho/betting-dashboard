@@ -35,9 +35,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;font-size:14px}
 .app{display:flex;min-height:100vh}
-.sidebar{width:224px;background:var(--bg2);border-right:1px solid rgba(183,190,200,0.08);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
-.main{margin-left:224px;flex:1;min-height:100vh}
-.topbar{position:fixed;top:0;right:0;left:224px;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;padding:0 1.5rem;z-index:99;gap:10px}
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid rgba(183,190,200,0.08);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.main{margin-left:220px;flex:1;min-height:100vh}
+.topbar{position:fixed;top:0;right:0;left:220px;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;padding:0 1.5rem;z-index:99;gap:10px}
 .theme-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;background:var(--bg3)}
 .tog-track{width:26px;height:14px;background:var(--bg4);border-radius:7px;position:relative}
 .tog-thumb{width:10px;height:10px;background:var(--text3);border-radius:50%;position:absolute;top:2px;left:2px;transition:all .2s}
@@ -3145,7 +3145,7 @@ async function loadData(){
   buildHTML();
   if(_fetchErr){
     const banner=document.createElement('div');
-    banner.style.cssText='position:fixed;top:44px;left:224px;right:0;z-index:9998;background:rgba(255,71,87,0.12);border-bottom:1px solid rgba(255,71,87,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:'JetBrains Mono',monospace;color:#FF4757';
+    banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(255,71,87,0.12);border-bottom:1px solid rgba(255,71,87,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:'JetBrains Mono',monospace;color:#FF4757';
     banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${_fetchErr}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(255,71,87,0.4);color:#FF4757;border-radius:4px;cursor:pointer;font-size:11px">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#FF4757;cursor:pointer;font-size:14px">×</button>`;
     document.body.appendChild(banner);
   }else{

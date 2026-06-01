@@ -24,7 +24,7 @@ html, body {
 
 /* ── Sidebar ─────────────────────────────────────────────────────────────── */
 .sidebar {
-  width: 224px;
+  width: 220px;
   background: var(--bg2);
   border-right: 1px solid rgba(183,190,200,0.08);
   display: flex;
@@ -37,7 +37,7 @@ html, body {
 }
 
 .sidebar-logo {
-  height: 120px;
+  height: 140px;
   padding: 20px 16px;
   border-bottom: 1px solid rgba(183,190,200,0.08);
   display: flex;
@@ -46,7 +46,7 @@ html, body {
 }
 
 .sidebar-logo img {
-  height: 72px;
+  height: 88px;
   width: auto;
   object-fit: contain;
   background: transparent;
@@ -151,7 +151,7 @@ html, body {
 /* ── Topbar ──────────────────────────────────────────────────────────────── */
 .topbar {
   position: fixed;
-  top: 0; right: 0; left: 224px;
+  top: 0; right: 0; left: 220px;
   height: 44px;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
@@ -195,7 +195,7 @@ html, body {
 [data-theme="light"] .tog-thumb { left: 14px; background: var(--blue); }
 
 /* ── Main content ────────────────────────────────────────────────────────── */
-.main { margin-left: 224px; flex: 1; min-height: 100vh; }
+.main { margin-left: 220px; flex: 1; min-height: 100vh; }
 .main-content {
   padding: var(--space-6) 1.75rem;
   margin-top: 44px;
