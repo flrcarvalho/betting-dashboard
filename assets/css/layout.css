@@ -41,7 +41,6 @@ html, body {
   border-bottom: 1px solid rgba(183,190,200,0.08);
   display: flex;
   align-items: center;
-  background: transparent;
 }
 
 .sidebar-logo img {
@@ -49,11 +48,12 @@ html, body {
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
-  background: transparent;
-  border: none;
-  padding: 0;
   display: block;
 }
+
+/* PNG files have baked-in backgrounds — blend modes remove them cleanly */
+.sidebar-logo .logo-dark  { mix-blend-mode: lighten; }
+.sidebar-logo .logo-light { mix-blend-mode: darken; }
 
 [data-theme="light"] .sidebar-logo .logo-dark  { display: none; }
 [data-theme="dark"]  .sidebar-logo .logo-light { display: none; }
