@@ -12,11 +12,15 @@
   font-family: var(--font-mono);
   transition: all 0.1s;
 }
-.qbtn:hover,
-.qbtn.active {
+.qbtn:hover {
   border-color: var(--blue);
   color: var(--blue);
   background: rgba(30,144,255,0.08);
+}
+.qbtn.active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
 }
 
 /* ── Multiselect ─────────────────────────────────────────────────────────── */
@@ -44,10 +48,10 @@
   border: 1px solid var(--border3);
   border-radius: 7px;
   min-width: 200px;
-  max-height: 320px;
+  max-height: 300px;
   display: none;
   flex-direction: column;
-  z-index: 9999;
+  z-index: 1000;
   box-shadow: var(--shadow-md);
 }
 .ms-dd.open { display: flex; }
@@ -259,7 +263,8 @@
   background: var(--bg4);
 }
 .tbl tbody tr:hover td { background: rgba(30,144,255,0.04); }
-.tbl td.td-num, .tbl th.td-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tbl td.td-num, .tbl th.td-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
 .tbl td.td-name, .tbl th.td-name { font-family: var(--font-sans); }
 
 /* ── Column resizer ──────────────────────────────────────────────────────── */
