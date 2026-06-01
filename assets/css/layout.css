@@ -37,8 +37,8 @@ html, body {
 }
 
 .sidebar-logo {
-  height: 100px;
-  padding: 16px 20px;
+  height: 120px;
+  padding: 20px 16px;
   border-bottom: 1px solid rgba(183,190,200,0.08);
   display: flex;
   align-items: center;
@@ -46,9 +46,9 @@ html, body {
 }
 
 .sidebar-logo img {
-  height: 68px;
+  height: 72px;
   width: auto;
-  max-width: 160px;
+  object-fit: contain;
   background: transparent;
   display: block;
 }
