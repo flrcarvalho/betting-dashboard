@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FDC Capital — Betting Dashboard</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/14_favicon_32px.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="brand/13_favicon_16px.png">
+  <link rel="apple-touch-icon" href="brand/19_appicon_256px.png">
+
+  <!-- Manrope + JetBrains Mono (Google Fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+
+  <!-- Theme init: aplica tema salvo antes do render para evitar flash -->
+  <script>
+    (function() {
+      var t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
+
+<!-- App — ordem de carregamento respeitada com defer -->
+<script src="assets/js/data.js"    defer></script>
+<script src="assets/js/filters.js" defer></script>
+<script src="assets/js/charts.js"  defer></script>
+<script src="assets/js/app.js"     defer></script>
+
+</body>
+</html>
