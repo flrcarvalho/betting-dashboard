@@ -25,7 +25,7 @@ html, body {
 /* ── Sidebar ─────────────────────────────────────────────────────────────── */
 .sidebar {
   width: 224px;
-  background: rgba(13,31,52,0.9);
+  background: var(--bg2);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -52,6 +52,8 @@ html, body {
   flex-shrink: 0;
 }
 
+.sidebar-logo .logo-dark,
+.sidebar-logo .logo-light  { display: block; }
 [data-theme="light"] .sidebar-logo .logo-dark  { display: none; }
 [data-theme="dark"]  .sidebar-logo .logo-light { display: none; }
 
@@ -101,10 +103,10 @@ html, body {
   background: rgba(30,144,255,0.06);
 }
 .nav-item.active {
-  color: var(--cyan);
+  color: var(--blue);
   font-weight: var(--weight-semibold);
-  border-left-color: var(--cyan);
-  background: rgba(0,229,255,0.08);
+  border-left-color: var(--blue);
+  background: rgba(30,144,255,0.10);
 }
 .nav-icon { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.55; }
 .nav-item.active .nav-icon { opacity: 1; }

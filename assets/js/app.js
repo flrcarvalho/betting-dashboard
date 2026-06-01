@@ -192,7 +192,7 @@ function buildHTML(){
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo" style="padding:.75rem 1rem .65rem">
-        <img src="brand/03_logo_compacto_dark.png" class="logo-dark" alt="FDC Capital" style="height:30px;width:auto;object-fit:contain;display:block"><img src="brand/04_logo_compacto_light.png" class="logo-light" alt="FDC Capital" style="height:30px;width:auto;object-fit:contain;display:block">
+        <img src="brand/01_logo_principal_dark.png" class="logo-dark" alt="FDC Capital" style="height:30px;width:auto;object-fit:contain"><img src="brand/02_logo_principal_light.png" class="logo-light" alt="FDC Capital" style="height:30px;width:auto;object-fit:contain">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
@@ -503,31 +503,36 @@ window.deleteCG=function(idx){
 };
 
 async function loadData(){
-  const _logoSrc='brand/01_logo_principal_dark.png';
-  document.getElementById('root').innerHTML=`<div class="loader"><img src="${_logoSrc}" alt="Betting Dashboard" style="width:338px;max-width:80vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div>`;
-  // Animate progress bar — 0→90 at 1%/500ms, 90→99 at 1%/2500ms, snap on load
-  let _pct=0;
+  const _isDark=document.documentElement.getAttribute('data-theme')!=='light';
+  const _logoSrc=_isDark?'brand/01_logo_principal_dark.png':'brand/02_logo_principal_light.png';
+  document.getElementById('root').innerHTML=`<div class="loader"><img src="${_logoSrc}" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div>`;
+  let _pct=0,_animDone=false;
   const _bar=()=>document.getElementById('loaderBar');
   const _lbl=()=>document.getElementById('loaderPct');
   const _set=(p)=>{const b=_bar(),l=_lbl();if(b)b.style.width=p+'%';if(l)l.textContent=Math.round(p)+'%';};
-  let _t2=null;
-  const _t1=setInterval(()=>{
-    if(_pct>=90){clearInterval(_t1);
-      _t2=setInterval(()=>{if(_pct>=99){clearInterval(_t2);return;}_pct+=1;_set(_pct);},2500);
-      return;
-    }
-    _pct+=1;_set(_pct);
-  },500);
+  // Phase 1: 0→88% in ~2.6s (30ms/step), Phase 2: 88→97% in ~1.8s (200ms/step)
+  // Phase 3: auto-snap to 100% after 600ms even without server response
+  const _animate=()=>{
+    if(_animDone)return;
+    if(_pct<88){_pct++;_set(_pct);setTimeout(_animate,30);}
+    else if(_pct<97){_pct++;_set(_pct);setTimeout(_animate,200);}
+    else{setTimeout(()=>{if(!_animDone){_pct=100;_set(100);}},600);}
+  };
+  _animate();
   try{
-    const res=await fetch(APPS_SCRIPT_URL);const json=await res.json();
+    const _ctrl=new AbortController();
+    const _tout=setTimeout(()=>_ctrl.abort(),30000);
+    const res=await fetch(APPS_SCRIPT_URL,{signal:_ctrl.signal});
+    clearTimeout(_tout);
+    const json=await res.json();
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
-    // Snap to 100% immediately on success
-    clearInterval(_t1);if(_t2)clearInterval(_t2);
+    _animDone=true;
     _pct=100;_set(100);
-    await new Promise(r=>setTimeout(r,220));
+    await new Promise(r=>setTimeout(r,280));
     DADOS=json.data;buildHTML();
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   }catch(err){
+    _animDone=true;
     document.getElementById('root').innerHTML=`<div style="padding:2rem"><div class="error-box"><strong>Erro ao carregar dados</strong><br><br>${err.message}</div></div>`;
   }
 }
