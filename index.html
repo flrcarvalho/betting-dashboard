@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FDC Capital — Betting Dashboard</title>
 
-  <!-- Favicon -->
+  <!-- Favicon: canvas-based, converte branco→transparente e ícone→#1E90FF -->
   <link rel="icon" type="image/png" sizes="32x32" href="brand/14_favicon_32px.png">
+  <script>
+  (function(){var img=new Image();img.onload=function(){var c=document.createElement('canvas');c.width=c.height=32;var ctx=c.getContext('2d');ctx.drawImage(img,0,0,32,32);var d=ctx.getImageData(0,0,32,32);var px=d.data;for(var i=0;i<px.length;i+=4){var br=(px[i]+px[i+1]+px[i+2])/3;if(br>220){px[i+3]=0;}else{px[i]=30;px[i+1]=144;px[i+2]=255;}}ctx.putImageData(d,0,0);var lnk=document.querySelector('link[rel="icon"]');if(!lnk){lnk=document.createElement('link');lnk.rel='icon';document.head.appendChild(lnk);}lnk.type='image/png';lnk.href=c.toDataURL();};img.src='brand/18_favicon_512px.png';})();
+  </script>
 
   <!-- Manrope + JetBrains Mono (Google Fonts) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

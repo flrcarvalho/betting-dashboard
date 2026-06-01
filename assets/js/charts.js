@@ -62,7 +62,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     const key=`${yr}-${mo}-${String(d).padStart(2,'0')}`;
     const isToday=(today.getFullYear()===parseInt(yr)&&today.getMonth()===parseInt(mo)-1&&today.getDate()===d);
     const todayBorder=isToday?'2px solid var(--blue)':'1px solid '+s.border;
-    const plTxt=s.pl!=null?`<div style="font-weight:700;font-size:${cellFS};color:${s.clr};font-variant-numeric:tabular-nums;line-height:1.1">${s.pl>=0?'+':''}${s.pl>=1000||s.pl<=-1000?fmtK(s.pl):Math.round(s.pl)}</div>`:'';
+    const plTxt=s.pl!=null?`<div style="font-weight:700;font-size:${cellFS};color:${s.clr};font-variant-numeric:tabular-nums;line-height:1.1">${s.pl>=0?'+':''}${fmtK(s.pl)}</div>`:'';
     const nTxt=s.n>0?`<div style="font-size:${subFS};color:${s.clr};opacity:.7;line-height:1">${s.n}b</div>`:'';
     cells+=`<div style="background:${s.bg};border:${todayBorder};border-radius:6px;padding:4px 5px;cursor:${s.n?'pointer':'default'};display:flex;flex-direction:column;justify-content:space-between;min-height:${cellH};position:relative;transition:opacity .1s" ${s.n?`onclick="if(window._calHeatCb)window._calHeatCb('${key}')" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"`:''}>
       <div style="font-size:${subFS};color:${s.pl!=null?s.clr:'var(--text3)'};font-family:'JetBrains Mono',monospace;font-weight:${isToday?700:500}">${d}</div>

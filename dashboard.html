@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" sizes="32x32" href="brand/14_favicon_32px.png">
+<script>(function(){var img=new Image();img.onload=function(){var c=document.createElement('canvas');c.width=c.height=32;var ctx=c.getContext('2d');ctx.drawImage(img,0,0,32,32);var d=ctx.getImageData(0,0,32,32);var px=d.data;for(var i=0;i<px.length;i+=4){var br=(px[i]+px[i+1]+px[i+2])/3;if(br>220){px[i+3]=0;}else{px[i]=30;px[i+1]=144;px[i+2]=255;}}ctx.putImageData(d,0,0);var lnk=document.querySelector('link[rel="icon"]');if(!lnk){lnk=document.createElement('link');lnk.rel='icon';document.head.appendChild(lnk);}lnk.type='image/png';lnk.href=c.toDataURL();};img.src='brand/18_favicon_512px.png';})();</script>
 <title>Betting Dashboard v25</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -44,12 +45,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrop
 [data-theme="light"] .tog-thumb{left:14px;background:var(--blue)}
 .main-content{padding:1.5rem 1.75rem;margin-top:44px;max-width:1600px}
 /* Sidebar */
-.sidebar-logo{padding:16px 16px 14px;border-bottom:1px solid rgba(183,190,200,.08);display:flex;align-items:center;gap:10px}.sidebar-logo img{height:48px;width:auto;background:transparent;flex-shrink:0;display:block}.sidebar-brand-name{font-family:'Manrope',sans-serif;font-weight:600;font-size:14px;color:#FFFFFF;white-space:nowrap}[data-theme="light"] .sidebar-brand-name{color:#081320}
+.sidebar-logo{padding:16px 16px 14px;border-bottom:1px solid rgba(183,190,200,.08);display:flex;align-items:center}.sidebar-logo img{height:40px;width:auto;background:transparent;flex-shrink:0;display:block}
 .logo-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.02em}
 .logo-title{font-size:11px;color:var(--text3);margin-top:3px;font-family:'JetBrains Mono',monospace}
 .sidebar-nav{padding:.5rem 0;flex:1}
-.nav-group{padding:.65rem 1.25rem .25rem;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text2);font-family:'JetBrains Mono',monospace;font-weight:700;border-top:1px solid var(--border);margin-top:2px;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:.5rem 1.25rem;font-size:13px;font-weight:400;color:var(--text2);cursor:pointer;transition:all .12s;border-left:2px solid transparent}
+.nav-group{padding:.65rem 1.25rem .25rem;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text2);font-family:'Manrope',sans-serif;font-weight:700;border-top:1px solid var(--border);margin-top:2px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:.5rem 1.25rem;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .12s;border-left:2px solid transparent}
 .nav-item:hover{color:var(--text);background:rgba(128,128,255,.05)}
 .nav-item.active{color:#1E90FF;font-weight:600;border-left-color:#1E90FF;background:rgba(30,144,255,.12)}
 .nav-icon{width:15px;height:15px;flex-shrink:0;opacity:.55}
@@ -772,7 +773,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     const key=`${yr}-${mo}-${String(d).padStart(2,'0')}`;
     const isToday=(today.getFullYear()===parseInt(yr)&&today.getMonth()===parseInt(mo)-1&&today.getDate()===d);
     const todayBorder=isToday?'2px solid var(--blue)':'1px solid '+s.border;
-    const plTxt=s.pl!=null?`<div style="font-weight:700;font-size:${cellFS};color:${s.clr};font-variant-numeric:tabular-nums;line-height:1.1">${s.pl>=0?'+':''}${s.pl>=1000||s.pl<=-1000?fmtK(s.pl):Math.round(s.pl)}</div>`:'';
+    const plTxt=s.pl!=null?`<div style="font-weight:700;font-size:${cellFS};color:${s.clr};font-variant-numeric:tabular-nums;line-height:1.1">${s.pl>=0?'+':''}${fmtK(s.pl)}</div>`:'';
     const nTxt=s.n>0?`<div style="font-size:${subFS};color:${s.clr};opacity:.7;line-height:1">${s.n}b</div>`:'';
     cells+=`<div style="background:${s.bg};border:${todayBorder};border-radius:6px;padding:4px 5px;cursor:${s.n?'pointer':'default'};display:flex;flex-direction:column;justify-content:space-between;min-height:${cellH};position:relative;transition:opacity .1s" ${s.n?`onclick="if(window._calHeatCb)window._calHeatCb('${key}')" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"`:''}>
       <div style="font-size:${subFS};color:${s.pl!=null?s.clr:'var(--text3)'};font-family:'JetBrains Mono',monospace;font-weight:${isToday?700:500}">${d}</div>
@@ -2731,7 +2732,7 @@ function buildHTML(){
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo" style="padding:16px 16px 14px">
-        <img src="brand/07_icone_dark.png" class="logo-dark" alt="FDC Capital" draggable="false"><img src="brand/08_icone_light.png" class="logo-light" alt="FDC Capital" draggable="false"><span class="sidebar-brand-name">FDC Capital</span>
+        <img src="brand/01_logo_principal_dark.png" class="logo-dark" alt="FDC Capital" draggable="false"><img src="brand/02_logo_principal_light.png" class="logo-light" alt="FDC Capital" draggable="false">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
