@@ -239,7 +239,7 @@
   letter-spacing: 0.06em;
   color: var(--text2);
   padding: 7px 10px;
-  text-align: left;
+  text-align: right;
   border-bottom: 1px solid var(--border2);
   white-space: nowrap;
   background: var(--bg4);
