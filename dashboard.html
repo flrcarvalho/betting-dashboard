@@ -2510,6 +2510,61 @@ function renderApostas(){
   });
   // Virtual scroll render
   renderApostasVirt();
+  updateExportBtn();
+}
+
+function updateExportBtn(){
+  const btn=document.getElementById('btn-export-csv');if(!btn)return;
+  const n=apostasFiltered.length;
+  btn.disabled=n===0;
+  btn.title=n===0?'Nenhuma aposta no período selecionado':'';
+  btn.textContent=n===0?'⬇ Exportar CSV':`⬇ Exportar CSV (${n.toLocaleString('pt-BR')} apostas)`;
+}
+
+function buildCsvFilename(){
+  const st=gfs('apostas');
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const ym=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
+  const tipF=(apostasColFilters[2]||'').trim().replace(/\s+/g,'_');
+  const casaF=(apostasColFilters[3]||'').trim().replace(/\s+/g,'_');
+  const entity=tipF||casaF||'';
+  let datePart='tudo';
+  if(st.qt==='hoje')datePart=`hoje_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  else if(st.qt==='wtd')datePart=`WTD_${ym}`;
+  else if(st.qt==='mtd')datePart=`MTD_${ym}`;
+  else if(st.qt==='ytd')datePart=`YTD_${now.getFullYear()}`;
+  else if(st.qd)datePart=`${st.qd}d`;
+  else if(st.df||st.dt)datePart=`${st.df||'inicio'}_${st.dt||'fim'}`;
+  return['apostas',entity,datePart].filter(Boolean).join('_')+'.csv';
+}
+
+async function exportApostas(){
+  const btn=document.getElementById('btn-export-csv');
+  if(!btn||!apostasFiltered.length)return;
+  const n=apostasFiltered.length;
+  btn.disabled=true;
+  btn.textContent=`Gerando CSV... (${n.toLocaleString('pt-BR')} apostas)`;
+  await new Promise(r=>setTimeout(r,16)); // flush UI
+  const BOM='﻿';
+  const headers='Data,Tipster,Casa,Esporte,Mercado,Descricao,Odd,Stake,Resultado,PL,ROI_Aposta';
+  function esc(v){
+    if(v==null)return'';const s=String(v);
+    return(s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;
+  }
+  const csvRows=apostasFiltered.map(r=>{
+    const roiAp=r.stake>0?((r.lucro/r.stake)*100).toFixed(2):'0.00';
+    return[r.data||'',r.tipster||'',r.casa||'',r.esporte||'',r.aposta||'',r.descricao||'',
+      (r.odd||0).toFixed(2),(r.stake||0).toFixed(2),r.resultado||'',(r.lucro||0).toFixed(2),roiAp
+    ].map(esc).join(',');
+  });
+  const blob=new Blob([BOM+headers+'\n'+csvRows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=buildCsvFilename();
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showAnaliseToast('✓ CSV exportado com sucesso');
+  updateExportBtn();
 }
 
 function betResLabel(r){return{W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'}[r]||r;}
@@ -3196,10 +3251,11 @@ function buildHTML(){
           </div>
           <button onclick="clearApostasFilters()" style="font-size:10px;padding:5px 10px;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0">✕ Limpar</button>
         </div>
-        <!-- Sort bar -->
+        <!-- Sort bar + export -->
         <div style="display:flex;gap:5px;align-items:center;margin-bottom:.75rem;flex-wrap:wrap">
           <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-right:4px">Ordenar:</span>
           ${[['Data',0],['Odd',8],['Stake',7],['P/L',10],['Resultado',9],['Tipster',2],['Casa',3]].map(([lbl,i])=>`<button class="apostas-sort-btn" data-col="${i}" onclick="apostasSort(${i})">${lbl} <span class="sort-arrow"></span></button>`).join('')}
+          <button id="btn-export-csv" class="btn-export" onclick="exportApostas()" disabled title="Nenhuma aposta no período selecionado">⬇ Exportar CSV</button>
         </div>
         <!-- Cards container -->
         <div class="apostas-cont" id="apostasCont" style="height:calc(100vh - 380px)" onscroll="renderApostasVirt()">

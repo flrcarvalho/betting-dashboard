@@ -1,6 +1,23 @@
 /* ── FDC Capital — Components ────────────────────────────────────────────── */
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-export {
+  background: #1E90FF;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 13px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background .12s;
+  margin-left: auto;
+}
+.btn-export:hover { background: #1a7ee0; }
+.btn-export:disabled { background: #334455; color: #6677aa; cursor: not-allowed; }
 .qbtn {
   font-size: var(--text-xs);
   padding: 3px var(--space-2);
