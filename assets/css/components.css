@@ -263,9 +263,36 @@
   background: var(--bg4);
 }
 .tbl tbody tr:hover td { background: rgba(30,144,255,0.04); }
-.tbl td.td-num, .tbl th.td-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
-.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+.tbl td.td-num,
+.tbl th.td-num,
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  font-family: var(--font-mono);
+}
 .tbl td.td-name, .tbl th.td-name { font-family: var(--font-sans); }
+
+/* ── Money layout (R$ alinhado como planilha) ────────────────────────────── */
+.money {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 4px;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+.money-sign {
+  color: var(--text3);
+  min-width: 2ch;
+  text-align: right;
+  flex-shrink: 0;
+}
+.money-val {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  min-width: 10ch;
+}
 
 /* ── Column resizer ──────────────────────────────────────────────────────── */
 .col-rsz {

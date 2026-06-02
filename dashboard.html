@@ -756,7 +756,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   };
 
   const compact = opts.compact;
-  const cellH = compact ? '52px' : '68px';
+  const cellH = '48px';
   const cellFS = compact ? '12px' : '14px';
   const subFS = compact ? '9px' : '10px';
 
@@ -859,21 +859,41 @@ function renderBankroll(rows){
   const days=Object.keys(byDay).sort();
   const dpL=days.map(k=>byDay[k]);
   let cum=0;const cumPL=dpL.map(v=>{cum+=v;return parseFloat(cum.toFixed(2));});
-  // Labels every ~30 days to avoid clutter, shown vertically
   const labelStep=Math.max(1,Math.floor(days.length/14));
   const lbl=days.map((d,i)=>{
     if(i%labelStep!==0&&i!==days.length-1)return'';
     const p=d.split('-');return p[2]+'/'+p[1];
   });
+  // Escala de intensidade por percentis do dataset filtrado
+  function barColor(v){
+    if(v===0)return'rgba(183,190,200,.2)';
+    const pos=dpL.filter(x=>x>0).sort((a,b)=>a-b);
+    const neg=dpL.filter(x=>x<0).map(x=>Math.abs(x)).sort((a,b)=>a-b);
+    if(v>0){
+      const p=pos.length;const rank=pos.filter(x=>x<=v).length/Math.max(p,1);
+      if(rank<=0.2)return'#1a4a2e';
+      if(rank<=0.4)return'#166534';
+      if(rank<=0.6)return'#15803d';
+      if(rank<=0.8)return'#16a34a';
+      return'#22c55e';
+    }else{
+      const av=Math.abs(v);const n=neg.length;const rank=neg.filter(x=>x<=av).length/Math.max(n,1);
+      if(rank<=0.2)return'#4a1a1a';
+      if(rank<=0.4)return'#7f1d1d';
+      if(rank<=0.6)return'#991b1b';
+      if(rank<=0.8)return'#b91c1c';
+      return'#ef4444';
+    }
+  }
   mkChart('chartBankroll',{type:'bar',data:{labels:lbl,datasets:[
-    {type:'line',data:cumPL,borderColor:'#00d68f',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
-    {type:'bar',data:dpL,backgroundColor:dpL.map(v=>v>=0?'rgba(0,214,143,.6)':'rgba(240,80,110,.6)'),borderRadius:1,yAxisID:'y',label:'Diário',barPercentage:0.9,categoryPercentage:1.0}
+    {type:'line',data:cumPL,borderColor:'#00E5FF',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
+    {type:'bar',data:dpL,backgroundColor:dpL.map(barColor),borderRadius:2,yAxisID:'y',label:'Diário',barPercentage:0.9,categoryPercentage:1.0}
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
     scales:{
       x:{ticks:{color:tc(),font:{size:9},maxRotation:90,minRotation:90,autoSkip:false,callback:(v,i)=>lbl[i]||null},grid:{display:false},border:{display:false}},
       y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false},position:'left'},
-      y1:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{display:false},border:{display:false},position:'right'}
+      y1:{ticks:{color:'#00E5FF',font:{size:10},callback:v=>fmtK(v)},grid:{display:false},border:{display:false},position:'right'}
     }}});
 }
 
@@ -920,20 +940,35 @@ function renderOddsDist(rows){
   });
   const counts=bdata.map(b=>b.n);
   const wrs=bdata.map(b=>b.n>0?parseFloat((b.w/b.n*100).toFixed(1)):null);
-  const rois=bdata.map(b=>b.s>0?parseFloat((b.pl/b.s*100).toFixed(2)):null);
+  const rois=bdata.map(b=>b.s>0?parseFloat((b.pl/b.s*100).toFixed(1)):null);
+  // Linha de referência ROI=0 no eixo Y1
+  const zeroLine={id:'zeroLineOdds',beforeDraw(chart){
+    const y1=chart.scales['y1'];if(!y1)return;
+    const zero=y1.getPixelForValue(0);
+    const{ctx,chartArea:{left,right}}=chart;
+    ctx.save();ctx.beginPath();ctx.moveTo(left,zero);ctx.lineTo(right,zero);
+    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.setLineDash([4,4]);ctx.lineWidth=1;ctx.stroke();
+    ctx.restore();
+  }};
   mkChart('chartOddsDist',{type:'bar',data:{labels:lbls,datasets:[
     {type:'bar',data:counts,backgroundColor:'rgba(91,156,246,.55)',borderRadius:3,label:'Apostas',yAxisID:'y'},
-    {type:'line',data:wrs,borderColor:'#00d68f',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#00d68f',borderWidth:2,label:'Win Rate %',yAxisID:'y1',spanGaps:false},
-    {type:'line',data:rois,borderColor:'#f0a030',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#f0a030',borderWidth:2,label:'ROI %',yAxisID:'y2',borderDash:[4,3],spanGaps:false}
+    {type:'line',data:wrs,borderColor:'#00C896',backgroundColor:'transparent',tension:.3,pointRadius:4,pointBackgroundColor:'#00C896',borderWidth:2,label:'Win Rate %',yAxisID:'y1',spanGaps:false},
+    {type:'line',data:rois,borderColor:'#1E90FF',backgroundColor:'transparent',tension:.3,pointRadius:4,pointBackgroundColor:'#1E90FF',borderWidth:2,label:'ROI %',yAxisID:'y1',borderDash:[4,3],spanGaps:false}
   ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,position:'top',labels:{color:tc(),font:{size:11},boxWidth:12,padding:16}},
-      tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return'Apostas: '+ctx.raw;if(ctx.datasetIndex===1)return'Win Rate: '+(ctx.raw?.toFixed(1)||'—')+'%';return'ROI: '+(ctx.raw?.toFixed(2)||'—')+'%';}}}},
+      tooltip:{callbacks:{
+        label:ctx=>{
+          const fmt1=v=>v==null?'—':v.toFixed(1).replace('.',',');
+          if(ctx.datasetIndex===0)return'Apostas: '+ctx.raw;
+          if(ctx.datasetIndex===1)return'Win Rate: '+fmt1(ctx.raw)+'%';
+          return'ROI: '+(ctx.raw>=0?'+':'')+fmt1(ctx.raw)+'%';
+        }
+      }}},
     scales:{
       x:{ticks:{color:tc(),font:{size:10}},grid:{display:false},border:{display:false}},
-      y:{ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false},position:'left'},
-      y1:{ticks:{color:'#00d68f',font:{size:10},callback:v=>v+'%'},grid:{display:false},border:{display:false},position:'right'},
-      y2:{ticks:{color:'#f0a030',font:{size:10},callback:v=>v+'%'},grid:{display:false},border:{display:false},position:'right',offset:true}
-    }}});
+      y:{position:'left',title:{display:true,text:'Apostas',color:tc(),font:{size:10}},ticks:{color:tc(),font:{size:10},precision:0},grid:{color:gc()},border:{display:false}},
+      y1:{position:'right',title:{display:true,text:'Win Rate / ROI (%)',color:tc(),font:{size:10}},ticks:{color:tc(),font:{size:10},callback:v=>v+'%'},grid:{display:false},border:{display:false}}
+    }},plugins:[zeroLine]});
 }
 
 function renderHeatmap(rows){
@@ -965,6 +1000,7 @@ function renderHeatmap(rows){
   document.getElementById('heatmapWrap').innerHTML=html;
 }
 
+let _ovTipRankCol='pl',_ovTipRankAsc=false;
 function renderOvTipsters(rows){
   const map={};
   rows.forEach(r=>{
@@ -973,65 +1009,68 @@ function renderOvTipsters(rows){
     map[r.tipster].pl+=r.lucro;map[r.tipster].s+=r.stake;map[r.tipster].n++;
     if(r.resultado!=='V'){map[r.tipster].t++;if(['W','HW'].includes(r.resultado))map[r.tipster].w++;}
   });
-  const ents=Object.entries(map).sort((a,b)=>b[1].pl-a[1].pl);
-  const labels=ents.map(e=>e[0]);
+  const ents=Object.entries(map);
   const pls=ents.map(e=>parseFloat(e[1].pl.toFixed(2)));
-  const rois=ents.map(e=>e[1].s>0?parseFloat((e[1].pl/e[1].s*100).toFixed(2)):0);
+  const rois=ents.map((e,i)=>e[1].s>0?parseFloat((e[1].pl/e[1].s*100).toFixed(1)):0);
   const wrs=ents.map(e=>e[1].t>0?parseFloat((e[1].w/e[1].t*100).toFixed(1)):0);
 
-  // Bar chart: P/L bars only com ROI label inline — altura dinâmica
-  const h=Math.max(400,ents.length*28+80);
-  const barWrap=document.querySelector('#chartOvTipsterBar')?.parentElement;
-  if(barWrap)barWrap.style.height=h+'px';
-  // Plugin: ROI label inside bar
-  const roiLabelPlugin={id:'roiLabels',afterDatasetsDraw(chart){
-    const{ctx}=chart;
-    chart.getDatasetMeta(0).data.forEach((bar,i)=>{
-      const roi=rois[i];const pl=pls[i];
-      if(Math.abs(pl)<1)return;
-      ctx.save();
-      ctx.font='bold 10px JetBrains Mono, monospace';
-      ctx.fillStyle='rgba(255,255,255,.9)';
-      ctx.textAlign=pl>=0?'left':'right';
-      ctx.textBaseline='middle';
-      const x=pl>=0?bar.x+5:bar.x-5;
-      ctx.fillText(`${(roi>=0?'+':'')+roi.toFixed(1)}%`,x,bar.y);
-      ctx.restore();
+  // Ranking table
+  const body=document.getElementById('ovTipsterRankBody');
+  const thead=document.querySelector('#ovTipsterRankTable thead');
+  if(body){
+    const sortBy=(col)=>{
+      if(_ovTipRankCol===col)_ovTipRankAsc=!_ovTipRankAsc;
+      else{_ovTipRankCol=col;_ovTipRankAsc=col==='tipster';}
+      renderOvTipsters(rows);
+    };
+    // Update header arrows
+    if(thead){
+      thead.querySelectorAll('th[data-col]').forEach(th=>{
+        const active=th.dataset.col===_ovTipRankCol;
+        th.querySelector('.sort-icon').style.opacity=active?'1':'0.3';
+        th.querySelector('.sort-icon').style.color=active?'var(--blue)':'';
+      });
+    }
+    // Sort entries
+    const colMap={pl:(e,i)=>pls[i],roi:(e,i)=>rois[i],wr:(e,i)=>wrs[i],n:(e,i)=>e[1].n,s:(e,i)=>e[1].s,tipster:(e)=>e[0]};
+    const sorted=ents.map((e,i)=>({e,i})).sort((a,b)=>{
+      const fn=colMap[_ovTipRankCol]||colMap.pl;
+      const av=fn(a.e,a.i),bv=fn(b.e,b.i);
+      const cmp=typeof av==='string'?av.localeCompare(bv):av-bv;
+      return _ovTipRankAsc?cmp:-cmp;
     });
-  }};
-  mkChart('chartOvTipsterBar',{type:'bar',data:{labels,datasets:[
-    {type:'bar',data:pls,backgroundColor:pls.map(v=>v>=0?'rgba(0,214,143,.75)':'rgba(240,80,110,.75)'),borderRadius:3,label:'P/L (R$)',yAxisID:'y'},
-  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>`P/L: ${fmtPL(ctx.raw)}  ROI: ${(rois[ctx.dataIndex]>=0?'+':'')+rois[ctx.dataIndex].toFixed(2)}%`}}},
-    scales:{
-      x:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false}},
-      y:{ticks:{color:tc(),font:{size:11}},grid:{display:false},border:{display:false}},
-    }},plugins:[roiLabelPlugin]});;
+    // ROI color scale
+    function roiClass(v){if(v>=10)return'#22c55e';if(v>=3)return'#16a34a';if(v>=0)return'#4db896';if(v>=-5)return'#f0a030';return'#ef4444';}
+    const ODD_BG='background:rgba(13,30,46,0.6)';
+    const EVEN_BG='background:rgba(10,24,40,0.6)';
+    body.innerHTML=sorted.map(({e,i},rank)=>{
+      const [name,d]=e;
+      const pl=pls[i],roi=rois[i],wr=wrs[i];
+      const plColor=pl>=0?'var(--success)':'var(--danger)';
+      const bg=rank%2===0?ODD_BG:EVEN_BG;
+      return`<tr style="${bg}">
+        <td style="color:var(--text3);font-family:var(--font-mono);font-size:11px">${rank+1}</td>
+        <td style="font-weight:600;color:var(--text)">${name}</td>
+        <td class="td-num">${d.n}</td>
+        <td class="td-num">R$ ${fmt(d.s,0)}</td>
+        <td class="td-num" style="color:${plColor};font-weight:700">${pl>=0?'+':''}R$ ${fmt(Math.abs(pl),2)}</td>
+        <td class="td-num" style="color:${roiClass(roi)};font-weight:600">${roi>=0?'+':''}${roi.toFixed(1)}%</td>
+        <td class="td-num">${wr.toFixed(1)}%</td>
+      </tr>`;
+    }).join('');
+  }
+  // Atualizar headers com onclick
+  if(thead){
+    const cols=[{col:'n',lbl:'Apostas'},{col:'s',lbl:'Turnover'},{col:'pl',lbl:'P/L'},{col:'roi',lbl:'ROI'},{col:'wr',lbl:'Win Rate'}];
+    const ths=thead.querySelectorAll('th[data-col]');
+    if(!ths.length){
+      // Injetar data-col e onclick nos th numéricos (só na primeira vez)
+      const allTh=thead.querySelectorAll('th');
+      const mapping=[null,'tipster',...cols.map(c=>c.col)];
+      allTh.forEach((th,i)=>{if(mapping[i]){th.dataset.col=mapping[i];th.onclick=()=>sortBy(mapping[i]);if(!th.querySelector('.sort-icon')){const si=document.createElement('span');si.className='sort-icon';th.appendChild(si);}}});
+    }
+  }
 
-  // Donut chart: participation in positive P/L
-  const winners=ents.filter(e=>e[1].pl>0);
-  const totalPos=winners.reduce((a,e)=>a+e[1].pl,0);
-  const PIE_COLORS=['#00d68f','#5b9cf6','#f0a030','#a78bfa','#2dd4bf','#f87171','#34d399','#fbbf24','#60a5fa','#c084fc','#fb923c','#ffd700','#ff8c69','#dda0dd','#87ceeb'];
-  mkChart('chartOvTipsterPie',{type:'doughnut',
-    data:{labels:winners.map(e=>e[0]),datasets:[{
-      data:winners.map(e=>parseFloat(e[1].pl.toFixed(2))),
-      backgroundColor:PIE_COLORS.slice(0,winners.length),
-      borderWidth:2,borderColor:isDark()?'#17171d':'#fff'
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'right',labels:{color:isDark()?'#eeedf0':'#0f0f18',font:{size:11},boxWidth:12,padding:8,
-          generateLabels(chart){
-            const ds=chart.data.datasets[0];
-            const txtColor=isDark()?'#eeedf0':'#0f0f18';
-            return chart.data.labels.map((lbl,i)=>{
-              const v=ds.data[i];const pct=totalPos>0?(v/totalPos*100).toFixed(1):'0';
-              return{text:`${lbl}  ${pct}%`,fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],fontColor:txtColor,hidden:false,index:i};
-            });
-          }}},
-        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmtPL(ctx.raw)} (${totalPos>0?(ctx.raw/totalPos*100).toFixed(1):'0'}%)`}}
-      }}});
 }
 
 // ── Shared KPI grid builder (2 rows × 4) ────────────────────────────────────
@@ -2603,10 +2642,8 @@ function renderOvCusto(){
   }).join('');
 
   el.innerHTML=`
-    <div class="kpi-grid" style="margin-bottom:1rem">
+    <div class="kpi-grid" style="margin-bottom:1rem;grid-template-columns:repeat(3,1fr)">
       <div class="kpi"><div class="kpi-label">Custo Total</div><div class="kpi-val neg">R$ ${fmt(grandCost,0)}</div><div class="kpi-sub">${totalContas} contas · ${allForns.filter(f=>fornTots[f]>0).length} fornecedores</div></div>
-      <div class="kpi"><div class="kpi-label">P/L Bruto</div><div class="kpi-val ${lucroTotal>=0?'pos':'neg'}">${fmtPL(lucroTotal)}</div><div class="kpi-sub">sem deduzir custos</div></div>
-      <div class="kpi"><div class="kpi-label">P/L Líquido</div><div class="kpi-val ${lucroLiq>=0?'pos':'neg'}">${fmtPL(lucroLiq)}</div><div class="kpi-sub">após custo de contas</div></div>
       <div class="kpi"><div class="kpi-label">Custo Médio/Conta</div><div class="kpi-val neu">R$ ${fmt(avgCostPago,0)}</div><div class="kpi-sub">${contasComPreco} contas com preço</div></div>
       <div class="kpi"><div class="kpi-label">Custo Médio/Casa</div><div class="kpi-val neu">R$ ${fmt(avgPorCasa,0)}</div><div class="kpi-sub">${casasComCusto.length} casas com custo</div></div>
     </div>
@@ -2770,22 +2807,16 @@ function buildHTML(){
         <div class="page-header"><div><div class="page-title">Visão Geral</div><div class="page-sub">performance consolidada</div></div></div>
         ${buildFilters('overview',sports,casas,tipsters)}
         <div class="kpi-grid" id="kpiGrid"></div>
-        ${mkCard('bankroll','P/L Acumulado + P/L Diário','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>')}
+        ${mkCard('bankroll','Resultado Geral','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>')}
         ${mkCard('ov_streaks','Sequências & Topo Histórico','<div id="ovStreaksContent"></div>')}
         ${mkCard('roi_monthly','ROI Mensal (%)','<div class="chart-wrap" style="min-height:220px"><canvas id="chartROI" role="img" aria-label="ROI mensal"></canvas></div>')}
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
         ${mkCard('ov_custo','Custo de Contas — Resumo','<div id="ovCustoContent"></div>')}
-        <div style="display:grid;grid-template-columns:1fr 420px;gap:10px;margin-bottom:1.25rem;align-items:stretch">
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem" id="ovHeatmapCard">
-            <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Calendário — Resultados Diários</div>
-            <div id="ovHeatmapContent"></div>
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem">
-            <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Participação no Resultado Total</div>
-            <div class="chart-wrap" style="height:300px"><canvas id="chartOvTipsterPie" role="img" aria-label="Tipsters pie"></canvas></div>
-          </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem" id="ovHeatmapCard">
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Calendário — Resultados Diários</div>
+          <div id="ovHeatmapContent"></div>
         </div>
-        ${mkCard('ov_tipster_bar','Tipsters — P/L, Win Rate e ROI','<div class="chart-wrap" style="min-height:260px"><canvas id="chartOvTipsterBar" role="img" aria-label="Tipsters bar"></canvas></div>')}
+        ${mkCard('ov_tipster_rank','Tipsters — Ranking','<div class="tbl-wrap"><table class="tbl" id="ovTipsterRankTable"><thead><tr><th style="width:32px">#</th><th>Tipster</th><th class="td-num">Apostas</th><th class="td-num">Turnover</th><th class="td-num">P/L</th><th class="td-num">ROI</th><th class="td-num">Win Rate</th></tr></thead><tbody id="ovTipsterRankBody"></tbody></table></div>')}
       </div>
 
       <!-- CONSOLIDADO -->

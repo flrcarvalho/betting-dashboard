@@ -199,9 +199,9 @@ function buildFilters(p,sports,casas,tipsters){
       </div>
       <div class="quick-btns">
         <button class="qbtn ${st.qt==='hoje'?'active':''}" data-qt="hoje" onclick="setQuickType('${p}','hoje')">Hoje</button>
-        <button class="qbtn ${st.qt==='wtd'?'active':''}" data-qt="wtd" onclick="setQuickType('${p}','wtd')">S↑</button>
-        <button class="qbtn ${st.qt==='mtd'?'active':''}" data-qt="mtd" onclick="setQuickType('${p}','mtd')">M↑</button>
-        <button class="qbtn ${st.qt==='ytd'?'active':''}" data-qt="ytd" onclick="setQuickType('${p}','ytd')">A↑</button>
+        <button class="qbtn ${st.qt==='wtd'?'active':''}" data-qt="wtd" onclick="setQuickType('${p}','wtd')">WTD</button>
+        <button class="qbtn ${st.qt==='mtd'?'active':''}" data-qt="mtd" onclick="setQuickType('${p}','mtd')">MTD</button>
+        <button class="qbtn ${st.qt==='ytd'?'active':''}" data-qt="ytd" onclick="setQuickType('${p}','ytd')">YTD</button>
         <button class="qbtn ${st.qd===7?'active':''}" data-days="7" onclick="setQuick('${p}',7)">7d</button>
         <button class="qbtn ${st.qd===30?'active':''}" data-days="30" onclick="setQuick('${p}',30)">30d</button>
         <button class="qbtn ${st.qd===90?'active':''}" data-days="90" onclick="setQuick('${p}',90)">90d</button>
