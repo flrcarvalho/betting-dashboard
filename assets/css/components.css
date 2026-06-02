@@ -776,3 +776,8 @@
 .filters { position: relative; z-index: 100; }
 .ms-wrap { position: relative; z-index: 100; }
 .ms-dd { z-index: 9999 !important; }
+
+[data-theme="dark"] .logo-light { display: none; }
+[data-theme="dark"] .logo-dark  { display: block; }
+[data-theme="light"] .logo-dark  { display: none; }
+[data-theme="light"] .logo-light { display: block; }
