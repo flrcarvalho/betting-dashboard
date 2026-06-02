@@ -7,6 +7,7 @@
 <title>Betting Dashboard v25</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 [data-theme="dark"]{
   --bg:#0c0c0f;--bg2:#0d1f34;--bg3:#17171d;--bg4:#1e1e26;--bg5:#252530;
@@ -376,6 +377,29 @@ function mkMoney(sign,numStr){return`<span class="money"><span class="money-sign
 function fmtPLm(v){return mkMoney(v>=0?'+ R$':'- R$',fmt(Math.abs(v)));}
 function fmtRm(v){return mkMoney('R$',fmt(v,0));}
 function fmtCostm(v){return v>0?mkMoney('- R$',fmt(v,0)):mkMoney('R$','0');}
+// Hash simples para cor determinística do avatar
+function hashStr(s){return[...s].reduce((h,c)=>((h<<5)-h)+c.charCodeAt(0),0);}
+// Percentis e escala de cores de barras — usados em renderBankroll e popup
+function computePercentiles(arr){
+  if(!arr.length)return[0,0,0,0];
+  const s=[...arr].sort((a,b)=>a-b);
+  const at=f=>s[Math.max(0,Math.ceil(f*s.length)-1)];
+  return[at(0.2),at(0.4),at(0.6),at(0.8)];
+}
+function getBarColor(value,positivePercentiles,negativePercentiles){
+  if(value===0)return'rgba(183,190,200,.2)';
+  if(value>0){
+    const p=positivePercentiles;
+    if(value<p[0])return'#1a4a2e';if(value<p[1])return'#166534';
+    if(value<p[2])return'#15803d';if(value<p[3])return'#16a34a';
+    return'#22c55e';
+  }else{
+    const abs=Math.abs(value),p=negativePercentiles;
+    if(abs<p[0])return'#4a1a1a';if(abs<p[1])return'#7f1d1d';
+    if(abs<p[2])return'#991b1b';if(abs<p[3])return'#b91c1c';
+    return'#ef4444';
+  }
+}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return;charts[id]=new Chart(document.getElementById(id),cfg);}
 function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
@@ -677,8 +701,235 @@ function setAnaliseDim(dim){
   document.querySelectorAll('.analise-dim').forEach(b=>b.classList.toggle('active',b.dataset.dim===dim));
   renderPage('analise');
 }
+
+// ── Sort da grid de cards ────────────────────────────────────────────────────
+let _analiseSortBy='pl';
+function setAnaliseSort(col){
+  _analiseSortBy=col;
+  renderPage('analise');
+}
+
+// ── Avatar determinístico ────────────────────────────────────────────────────
+const AVATAR_PALETTE=['#1E90FF','#00C896','#F5A623','#a78bfa','#2dd4bf','#f87171','#00E5FF','#fbbf24','#60a5fa','#fb923c'];
+function avatarColor(name){return AVATAR_PALETTE[Math.abs(hashStr(name))%AVATAR_PALETTE.length];}
+function avatarInitials(name){return name.replace(/[^a-zA-ZÀ-ÿ\s]/g,'').trim().split(/\s+/).map(w=>w[0]?.toUpperCase()||'').slice(0,2).join('')||'?';}
+function mkAvatar(name,sz=36){
+  return`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${avatarColor(name)};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(sz*.36)}px;color:#fff;flex-shrink:0">${avatarInitials(name)}</div>`;
+}
+
+// ── Cards da aba Análise ─────────────────────────────────────────────────────
+function mkAnaliseCard(item,dim){
+  const plColor=item.pl>=0?'var(--success)':'var(--danger)';
+  return`<div class="analise-card" onclick="openAnalisePopup(${JSON.stringify(item.name)},'${dim}')">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      ${mkAvatar(item.name,36)}
+      <div style="font-weight:700;font-size:13px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.name}</div>
+    </div>
+    <div style="font-size:20px;font-weight:800;color:${plColor};font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-bottom:10px;display:flex;align-items:baseline;gap:4px">${fmtPLm(item.pl)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px">
+      <div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600">ROI</div><div style="font-size:12px;font-weight:600;color:${roiColor(item.roi)}">${item.roi>=0?'+':''}${item.roi.toFixed(1)}%</div></div>
+      <div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600">Turnover</div><div style="font-size:12px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums">${fmtRm(item.s)}</div></div>
+      <div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600">Apostas</div><div style="font-size:12px;font-weight:600;color:var(--text2)">${item.n}</div></div>
+      <div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600">Win Rate</div><div style="font-size:12px;font-weight:600;color:var(--text2)">${item.wr.toFixed(1)}%</div></div>
+    </div>
+  </div>`;
+}
+
 function renderAnalise(rows){
-  // lógica de dados virá nas próximas tarefas
+  const el=document.getElementById('analise-content');
+  if(!el)return;
+  if(!rows||!rows.length){el.innerHTML='<p style="color:var(--text3);padding:1rem">Sem dados para o período selecionado.</p>';return;}
+
+  const dimKey=_analiseDim;
+  const map={};
+  rows.forEach(r=>{
+    const k=(r[dimKey]||'').trim()||'—';
+    if(!map[k])map[k]={pl:0,s:0,n:0,w:0,t:0};
+    map[k].pl+=r.lucro;map[k].s+=r.stake;map[k].n++;
+    if(r.resultado!=='V'){map[k].t++;if(['W','HW'].includes(r.resultado))map[k].w++;}
+  });
+
+  const sortFns={pl:(a,b)=>b.pl-a.pl,roi:(a,b)=>b.roi-a.roi,turnover:(a,b)=>b.s-a.s,apostas:(a,b)=>b.n-a.n};
+  const ents=Object.entries(map).map(([name,d])=>({
+    name,pl:parseFloat(d.pl.toFixed(2)),
+    roi:d.s>0?parseFloat((d.pl/d.s*100).toFixed(1)):0,
+    s:d.s,n:d.n,
+    wr:d.t>0?parseFloat((d.w/d.t*100).toFixed(1)):0
+  }));
+
+  const main=ents.filter(e=>e.n>=5).sort(sortFns[_analiseSortBy]||sortFns.pl);
+  const small=ents.filter(e=>e.n<5).sort(sortFns[_analiseSortBy]||sortFns.pl);
+
+  const sortBar=`<div class="analise-sort-bar">
+    <span>Ordenar por</span>
+    ${['pl','roi','turnover','apostas'].map(c=>`<button class="qbtn${_analiseSortBy===c?' active':''}" onclick="setAnaliseSort('${c}')">${{pl:'P/L',roi:'ROI',turnover:'Turnover',apostas:'Apostas'}[c]}</button>`).join('')}
+  </div>`;
+
+  const mainCards=main.length
+    ?`<div class="analise-cards-grid">${main.map(e=>mkAnaliseCard(e,dimKey)).join('')}</div>`
+    :'<p style="color:var(--text3);font-size:12px;margin-bottom:1rem">Nenhum item com 5 ou mais apostas.</p>';
+
+  const smallSection=small.length?`
+    <button class="analise-small-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.startsWith('▶')?'▼ Ocultar menores (${small.length})':'▶ Ver menores (${small.length})'">▶ Ver menores (${small.length})</button>
+    <div style="display:none"><div class="analise-cards-grid">${small.map(e=>mkAnaliseCard(e,dimKey)).join('')}</div></div>`:'';
+
+  el.innerHTML=sortBar+mainCards+smallSection;
+}
+
+// ── Popup de análise individual ──────────────────────────────────────────────
+function openAnalisePopup(name,dim){
+  const dimKey=dim;
+  const rows=filtrarPagina('analise').filter(r=>(r[dimKey]||'').trim()===name);
+  const overlay=document.getElementById('analisePopupOverlay');
+  const content=document.getElementById('analisePopupContent');
+  if(!overlay||!content)return;
+
+  // KPIs
+  const pl=rows.reduce((a,r)=>a+r.lucro,0);
+  const stake=rows.reduce((a,r)=>a+r.stake,0);
+  const roi=stake>0?pl/stake*100:0;
+  const n=rows.length;
+  const settled=rows.filter(r=>r.resultado!=='V');
+  const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;
+  const wr=settled.length?wins/settled.length*100:0;
+
+  // Período label
+  const st=gfs('analise');
+  const periodLabel=st.qt?{hoje:'Hoje',wtd:'Esta semana',mtd:'Este mês',ytd:'Este ano'}[st.qt]||st.qt
+    :st.df||st.dt?(st.df||'...')+' → '+(st.dt||'...'):'Todo o período';
+
+  // Breakdown dims
+  const DIM_LABEL={tipster:'Tipster',casa:'Casa',esporte:'Esporte'};
+  const otherDims=(['tipster','casa','esporte']).filter(d=>d!==dim);
+
+  const mkBreakdown=(byKey)=>{
+    const bmap={};
+    rows.forEach(r=>{
+      const k=(r[byKey]||'').trim()||'—';
+      if(!bmap[k])bmap[k]={pl:0,s:0,n:0,w:0,t:0};
+      bmap[k].pl+=r.lucro;bmap[k].s+=r.stake;bmap[k].n++;
+      if(r.resultado!=='V'){bmap[k].t++;if(['W','HW'].includes(r.resultado))bmap[k].w++;}
+    });
+    const bents=Object.entries(bmap).sort((a,b)=>b[1].pl-a[1].pl);
+    return`<div class="analise-popup-section-title">Por ${DIM_LABEL[byKey]||byKey}</div>
+    <div class="tbl-wrap" style="margin-bottom:1rem"><table class="tbl"><thead><tr>
+      <th>${DIM_LABEL[byKey]||byKey}</th><th class="td-num">Bets</th><th class="td-num">P/L</th><th class="td-num">ROI</th><th class="td-num">Win Rate</th>
+    </tr></thead><tbody>${bents.map(([k,d])=>{
+      const r2=d.s>0?d.pl/d.s*100:0,w2=d.t>0?d.w/d.t*100:0;
+      const plC=d.pl>=0?'var(--success)':'var(--danger)';
+      return`<tr><td style="font-weight:600">${k}</td><td class="td-num">${d.n}</td>
+        <td class="td-num" style="color:${plC};font-weight:600">${fmtPLm(d.pl)}</td>
+        <td class="td-num" style="color:${roiColor(r2)}">${r2>=0?'+':''}${r2.toFixed(1)}%</td>
+        <td class="td-num">${w2.toFixed(1)}%</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  };
+
+  content.innerHTML=`
+    <div class="analise-popup-hdr">
+      ${mkAvatar(name,40)}
+      <div style="flex:1">
+        <div style="font-size:17px;font-weight:700;color:var(--text)">${name}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${periodLabel} · ${n} apostas</div>
+      </div>
+      <button id="analisePopupCopyBtn" onclick="copyAnalisePopup()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--font-sans)">📷 Copiar</button>
+      <button onclick="closeAnalisePopup()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:6px;cursor:pointer;font-size:14px;margin-left:4px">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px" class="analise-popup-section">
+      <div class="kpi"><div class="kpi-label">P/L</div><div class="kpi-val ${pl>=0?'pos':'neg'}">${fmtPLm(pl)}</div></div>
+      <div class="kpi"><div class="kpi-label">ROI</div><div class="kpi-val ${roi>=0?'pos':'neg'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div></div>
+      <div class="kpi"><div class="kpi-label">Turnover</div><div class="kpi-val neu">${fmtRm(stake)}</div></div>
+      <div class="kpi"><div class="kpi-label">Apostas</div><div class="kpi-val neu">${n}</div></div>
+      <div class="kpi"><div class="kpi-label">Win Rate</div><div class="kpi-val ${wr>=50?'pos':'neu'}">${wr.toFixed(1)}%</div></div>
+    </div>
+    <div class="analise-popup-section">
+      <div class="analise-popup-section-title">Resultado Geral</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="analisePopupChart"></canvas></div>
+    </div>
+    <div class="analise-popup-section">
+      <div class="analise-popup-section-title">Análise Mensal</div>
+      <div class="tbl-wrap"><table class="tbl" id="analisePopupMonthTable"></table></div>
+    </div>
+    <div class="analise-popup-section">${otherDims.map(mkBreakdown).join('')}</div>
+  `;
+
+  overlay.style.display='block';
+  document.body.style.overflow='hidden';
+
+  // Chart — reutiliza getBarColor global
+  (()=>{
+    const byDay={};rows.forEach(r=>{const k=r.data.slice(0,10);if(!byDay[k])byDay[k]=0;byDay[k]+=r.lucro;});
+    const days=Object.keys(byDay).sort();
+    const dpL=days.map(k=>byDay[k]);
+    let cum=0;const cumPL=dpL.map(v=>{cum+=v;return parseFloat(cum.toFixed(2));});
+    const step=Math.max(1,Math.floor(days.length/10));
+    const lbl=days.map((d,i)=>{if(i%step!==0&&i!==days.length-1)return'';const p=d.split('-');return p[2]+'/'+p[1];});
+    const pp=computePercentiles(dpL.filter(v=>v>0));
+    const pn=computePercentiles(dpL.filter(v=>v<0).map(v=>Math.abs(v)));
+    mkChart('analisePopupChart',{type:'bar',data:{labels:lbl,datasets:[
+      {type:'line',data:cumPL,borderColor:'#00E5FF',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
+      {type:'bar',data:dpL,backgroundColor:dpL.map(v=>getBarColor(v,pp,pn)),borderRadius:2,yAxisID:'y',label:'Diário',barPercentage:.9,categoryPercentage:1}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
+      scales:{
+        x:{ticks:{color:tc(),font:{size:9},maxRotation:90,minRotation:90,autoSkip:false,callback:(v,i)=>lbl[i]||null},grid:{display:false},border:{display:false}},
+        y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false},position:'left'},
+        y1:{ticks:{color:'#00E5FF',font:{size:10},callback:v=>fmtK(v)},grid:{display:false},border:{display:false},position:'right'}
+      }}});
+  })();
+
+  // Tabela mensal
+  (()=>{
+    const byM={};
+    rows.forEach(r=>{
+      const d=new Date(r.data+'T12:00:00');
+      const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      if(!byM[k])byM[k]={pl:0,s:0,n:0,w:0,t:0,year:d.getFullYear(),month:d.getMonth()};
+      byM[k].pl+=r.lucro;byM[k].s+=r.stake;byM[k].n++;
+      if(r.resultado!=='V'){byM[k].t++;if(['W','HW'].includes(r.resultado))byM[k].w++;}
+    });
+    const tbl=document.getElementById('analisePopupMonthTable');
+    if(!tbl)return;
+    const keys=Object.keys(byM).sort().reverse();
+    tbl.innerHTML=`<thead><tr><th>Mês</th><th class="td-num">Bets</th><th class="td-num">P/L</th><th class="td-num">ROI</th><th class="td-num">Win Rate</th></tr></thead>
+    <tbody>${keys.map(k=>{
+      const d=byM[k];const r2=d.s>0?d.pl/d.s*100:0;const w2=d.t>0?d.w/d.t*100:0;
+      return`<tr><td>${MESES[d.month]} ${d.year}</td><td class="td-num">${d.n}</td>
+        <td class="td-num" style="color:${d.pl>=0?'var(--success)':'var(--danger)'};font-weight:600">${fmtPLm(d.pl)}</td>
+        <td class="td-num" style="color:${roiColor(r2)}">${r2>=0?'+':''}${r2.toFixed(1)}%</td>
+        <td class="td-num">${w2.toFixed(1)}%</td></tr>`;
+    }).join('')}</tbody>`;
+  })();
+}
+
+function closeAnalisePopup(event){
+  if(event&&event.target!==document.getElementById('analisePopupOverlay'))return;
+  document.getElementById('analisePopupOverlay').style.display='none';
+  document.body.style.overflow='';
+  destroyChart('analisePopupChart');
+}
+
+async function copyAnalisePopup(){
+  const modal=document.getElementById('analisePopupModal');
+  try{
+    const canvas=await html2canvas(modal,{backgroundColor:'#081320',scale:2,logging:false,useCORS:true});
+    canvas.toBlob(async blob=>{
+      try{
+        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        showAnaliseToast('✓ Imagem copiada!');
+      }catch{
+        window.open(canvas.toDataURL('image/png'));
+        showAnaliseToast('✓ Imagem aberta em nova aba');
+      }
+    });
+  }catch(e){showAnaliseToast('⚠ Erro ao capturar imagem');}
+}
+
+function showAnaliseToast(msg){
+  const t=document.createElement('div');
+  t.className='analise-toast';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),350);},2000);
 }
 function renderPage(id){
   const rows=filtrarPagina(id);
@@ -856,34 +1107,8 @@ function renderBankroll(rows){
     if(i%labelStep!==0&&i!==days.length-1)return'';
     const p=d.split('-');return p[2]+'/'+p[1];
   });
-  // Pré-computa percentis (p20, p40, p60, p80)
-  function computePercentiles(arr){
-    if(!arr.length)return[0,0,0,0];
-    const s=[...arr].sort((a,b)=>a-b);
-    const at=f=>s[Math.max(0,Math.ceil(f*s.length)-1)];
-    return[at(0.2),at(0.4),at(0.6),at(0.8)];
-  }
   const positivePercentiles=computePercentiles(dpL.filter(v=>v>0));
   const negativePercentiles=computePercentiles(dpL.filter(v=>v<0).map(v=>Math.abs(v)));
-  function getBarColor(value,positivePercentiles,negativePercentiles){
-    if(value===0)return'rgba(183,190,200,.2)';
-    if(value>0){
-      const p=positivePercentiles;
-      if(value<p[0])return'#1a4a2e';
-      if(value<p[1])return'#166534';
-      if(value<p[2])return'#15803d';
-      if(value<p[3])return'#16a34a';
-      return'#22c55e';
-    }else{
-      const abs=Math.abs(value);
-      const p=negativePercentiles;
-      if(abs<p[0])return'#4a1a1a';
-      if(abs<p[1])return'#7f1d1d';
-      if(abs<p[2])return'#991b1b';
-      if(abs<p[3])return'#b91c1c';
-      return'#ef4444';
-    }
-  }
   mkChart('chartBankroll',{type:'bar',data:{labels:lbl,datasets:[
     {type:'line',data:cumPL,borderColor:'#00E5FF',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
     {type:'bar',data:dpL,backgroundColor:dpL.map(v=>getBarColor(v,positivePercentiles,negativePercentiles)),borderRadius:2,yAxisID:'y',label:'Diário',barPercentage:0.9,categoryPercentage:1.0}
@@ -3214,5 +3439,12 @@ async function loadData(){
 }
 loadData();
 </script>
+
+<!-- Popup de análise individual -->
+<div class="analise-popup-overlay" id="analisePopupOverlay" onclick="closeAnalisePopup(event)">
+  <div class="analise-popup-modal" id="analisePopupModal" onclick="event.stopPropagation()">
+    <div id="analisePopupContent"></div>
+  </div>
+</div>
 </body>
 </html>
