@@ -497,8 +497,8 @@
 
 /* ── Calendar heatmap cell ───────────────────────────────────────────────── */
 .cal-cell {
-  min-height: 48px;
-  height: 48px;
+  min-height: 56px;
+  height: 56px;
 }
 
 /* ── Status / result colors ──────────────────────────────────────────────── */
