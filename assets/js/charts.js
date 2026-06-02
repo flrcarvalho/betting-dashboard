@@ -1058,7 +1058,7 @@ function renderSemana(){
     return pl;
   });
   const dayLabels=weekDays.map(day=>{const dp=new Date(day+'T12:00:00');const[,md,dd]=day.split('-');return DOWS[dp.getDay()]+' '+dd+'/'+md;});
-  const chartHTML=mkCard('semana_chart','P/L Diário da Semana',
+  const chartHTML=mkCard('semana_chart','Resultado Geral',
     `<div class="chart-wrap" style="height:240px"><canvas id="chartSemanaPL"></canvas></div>`);
 
   // Tabela tipsters da semana
@@ -1098,9 +1098,33 @@ function renderSemana(){
   cont.innerHTML=semanaHeatHTML+selectorHTML+kpiHTML+tabelaHTML+chartHTML+tipTableHTML2;
   setTimeout(()=>{
     makeSortable('tblSemanaTip',[1,3,4,5,6]);
+    function getBarColor(value, pos, neg) {
+      if (value >= 0) {
+        if (value < pos[0]) return '#1a4a2e';
+        if (value < pos[1]) return '#166534';
+        if (value < pos[2]) return '#15803d';
+        if (value < pos[3]) return '#16a34a';
+        return '#22c55e';
+      } else {
+        const abs = Math.abs(value);
+        if (abs < neg[0]) return '#4a1a1a';
+        if (abs < neg[1]) return '#7f1d1d';
+        if (abs < neg[2]) return '#991b1b';
+        if (abs < neg[3]) return '#b91c1c';
+        return '#ef4444';
+      }
+    }
+    function calcPercentiles(values) {
+      const sorted = [...values].sort((a, b) => a - b);
+      return [0.2, 0.4, 0.6, 0.8].map(p => sorted[Math.floor(p * sorted.length)] || 0);
+    }
+    const posVals = dailyPLs.filter(v => v > 0);
+    const negVals = dailyPLs.filter(v => v < 0).map(v => Math.abs(v));
+    const posPerc = calcPercentiles(posVals);
+    const negPerc = calcPercentiles(negVals);
     mkChart('chartSemanaPL',{type:'bar',data:{labels:dayLabels,datasets:[
-      {type:'line',data:cumData,borderColor:'#00C896',tension:.4,pointRadius:4,pointBackgroundColor:'#00C896',fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
-      {type:'bar',data:dailyPLs,backgroundColor:dailyPLs.map(v=>v>=0?'rgba(0,214,143,.6)':'rgba(240,80,110,.6)'),borderRadius:4,yAxisID:'y',label:'Diário'}
+      {type:'line',data:cumData,borderColor:'#00E5FF',tension:.4,pointRadius:4,pointBackgroundColor:'#00E5FF',fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
+      {type:'bar',data:dailyPLs,backgroundColor:dailyPLs.map(v=>getBarColor(v,posPerc,negPerc)),borderRadius:4,yAxisID:'y',label:'Diário'}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:true,position:'top',labels:{color:isDark()?'#eeedf0':'#0f0f18',font:{size:11},boxWidth:10,padding:12}},
         tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtPL(ctx.raw)}}},
