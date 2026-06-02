@@ -1919,8 +1919,7 @@ function renderOvCusto(){
   el.innerHTML=`
     <div class="kpi-grid" style="margin-bottom:1rem">
       <div class="kpi"><div class="kpi-label">Custo Total</div><div class="kpi-val neg">R$ ${fmt(grandCost,0)}</div><div class="kpi-sub">${totalContas} contas · ${allForns.filter(f=>fornTots[f]>0).length} fornecedores</div></div>
-      <div class="kpi"><div class="kpi-label">P/L Bruto</div><div class="kpi-val ${lucroTotal>=0?'pos':'neg'}">${fmtPL(lucroTotal)}</div><div class="kpi-sub">sem deduzir custos</div></div>
-      <div class="kpi"><div class="kpi-label">P/L Líquido</div><div class="kpi-val ${lucroLiq>=0?'pos':'neg'}">${fmtPL(lucroLiq)}</div><div class="kpi-sub">após custo de contas</div></div>
+
       <div class="kpi"><div class="kpi-label">Custo Médio/Conta</div><div class="kpi-val neu">R$ ${fmt(avgCostPago,0)}</div><div class="kpi-sub">${contasComPreco} contas com preço</div></div>
       <div class="kpi"><div class="kpi-label">Custo Médio/Casa</div><div class="kpi-val neu">R$ ${fmt(avgPorCasa,0)}</div><div class="kpi-sub">${casasComCusto.length} casas com custo</div></div>
     </div>
