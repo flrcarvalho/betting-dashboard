@@ -2,7 +2,7 @@
 
 // Helpers
 function fmt(v,d=2){return Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
-function fmtPL(v){return`<span class="money"><span class="money-sign">${v>=0?'+':'-'} R$</span><span class="money-val">${fmt(Math.abs(v))}</span></span>`;}
+function fmtPL(v){const cls=v>=0?'pos':'neg';return`<span class="money ${cls}"><span class="money-sign">${v>=0?'+':'-'} R$</span><span class="money-val">${fmt(Math.abs(v))}</span></span>`;}
 function fmtR(v){return`<span class="money"><span class="money-sign">R$</span><span class="money-val">${fmt(v,0)}</span></span>`;}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return;charts[id]=new Chart(document.getElementById(id),cfg);}

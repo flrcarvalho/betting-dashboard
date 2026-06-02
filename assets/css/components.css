@@ -511,6 +511,9 @@
 .res-hl { color: var(--hl);    font-weight: var(--weight-bold); }
 .res-v  { color: var(--text3); font-weight: var(--weight-bold); }
 
+.money.pos { color: var(--green); }
+.money.neg { color: var(--red); }
+
 /* ── Status badges ───────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;
