@@ -991,6 +991,18 @@ function renderHeatmap(rows){
 }
 
 let _ovTipRankCol='pl',_ovTipRankAsc=false;
+// Escala de cores para ROI — idêntica ao heatmap (escuro→brilhante)
+function roiColor(v){
+  if(v>=20)return'#22c55e';
+  if(v>=10)return'#16a34a';
+  if(v>=5)return'#15803d';
+  if(v>=0)return'#1a4a2e';
+  if(v>=-5)return'#4a1a1a';
+  if(v>=-10)return'#7f1d1d';
+  if(v>=-20)return'#991b1b';
+  if(v>=-30)return'#b91c1c';
+  return'#ef4444';
+}
 function renderOvTipsters(rows){
   const map={};
   rows.forEach(r=>{
@@ -1000,67 +1012,68 @@ function renderOvTipsters(rows){
     if(r.resultado!=='V'){map[r.tipster].t++;if(['W','HW'].includes(r.resultado))map[r.tipster].w++;}
   });
   const ents=Object.entries(map);
-  const pls=ents.map(e=>parseFloat(e[1].pl.toFixed(2)));
-  const rois=ents.map((e,i)=>e[1].s>0?parseFloat((e[1].pl/e[1].s*100).toFixed(1)):0);
-  const wrs=ents.map(e=>e[1].t>0?parseFloat((e[1].w/e[1].t*100).toFixed(1)):0);
+  const byIdx=(arr,fn)=>arr.map(fn);
+  const pls=byIdx(ents,e=>parseFloat(e[1].pl.toFixed(2)));
+  const rois=byIdx(ents,e=>e[1].s>0?parseFloat((e[1].pl/e[1].s*100).toFixed(1)):0);
+  const wrs=byIdx(ents,e=>e[1].t>0?parseFloat((e[1].w/e[1].t*100).toFixed(1)):0);
 
-  // Ranking table
   const body=document.getElementById('ovTipsterRankBody');
   const thead=document.querySelector('#ovTipsterRankTable thead');
-  if(body){
-    const sortBy=(col)=>{
-      if(_ovTipRankCol===col)_ovTipRankAsc=!_ovTipRankAsc;
-      else{_ovTipRankCol=col;_ovTipRankAsc=col==='tipster';}
-      renderOvTipsters(rows);
-    };
-    // Update header arrows
-    if(thead){
-      thead.querySelectorAll('th[data-col]').forEach(th=>{
-        const active=th.dataset.col===_ovTipRankCol;
-        th.querySelector('.sort-icon').style.opacity=active?'1':'0.3';
-        th.querySelector('.sort-icon').style.color=active?'var(--blue)':'';
-      });
-    }
-    // Sort entries
-    const colMap={pl:(e,i)=>pls[i],roi:(e,i)=>rois[i],wr:(e,i)=>wrs[i],n:(e,i)=>e[1].n,s:(e,i)=>e[1].s,tipster:(e)=>e[0]};
-    const sorted=ents.map((e,i)=>({e,i})).sort((a,b)=>{
-      const fn=colMap[_ovTipRankCol]||colMap.pl;
-      const av=fn(a.e,a.i),bv=fn(b.e,b.i);
-      const cmp=typeof av==='string'?av.localeCompare(bv):av-bv;
-      return _ovTipRankAsc?cmp:-cmp;
+  if(!body)return;
+
+  // Injeta data-col e onclick na primeira renderização
+  if(thead&&!thead.querySelector('th[data-col]')){
+    const mapping=[null,'tipster','n','s','pl','roi','wr'];
+    thead.querySelectorAll('th').forEach((th,i)=>{
+      if(!mapping[i])return;
+      th.dataset.col=mapping[i];
+      th.style.cursor='pointer';
+      th.onclick=()=>{
+        _ovTipRankCol===mapping[i]?(_ovTipRankAsc=!_ovTipRankAsc):(_ovTipRankCol=mapping[i],_ovTipRankAsc=mapping[i]==='tipster');
+        renderOvTipsters(filtrarPagina('overview'));
+      };
+      const si=document.createElement('span');
+      si.className='sort-icon';
+      th.appendChild(si);
     });
-    // ROI color scale
-    function roiClass(v){if(v>=10)return'#22c55e';if(v>=3)return'#16a34a';if(v>=0)return'#4db896';if(v>=-5)return'#f0a030';return'#ef4444';}
-    const ODD_BG='background:rgba(13,30,46,0.6)';
-    const EVEN_BG='background:rgba(10,24,40,0.6)';
-    body.innerHTML=sorted.map(({e,i},rank)=>{
-      const [name,d]=e;
-      const pl=pls[i],roi=rois[i],wr=wrs[i];
-      const plColor=pl>=0?'var(--success)':'var(--danger)';
-      const bg=rank%2===0?ODD_BG:EVEN_BG;
-      return`<tr style="${bg}">
-        <td style="color:var(--text3);font-family:var(--font-mono);font-size:11px">${rank+1}</td>
-        <td style="font-weight:600;color:var(--text)">${name}</td>
-        <td class="td-num">${d.n}</td>
-        <td class="td-num">R$ ${fmt(d.s,0)}</td>
-        <td class="td-num" style="color:${plColor};font-weight:700">${pl>=0?'+':''}R$ ${fmt(Math.abs(pl),2)}</td>
-        <td class="td-num" style="color:${roiClass(roi)};font-weight:600">${roi>=0?'+':''}${roi.toFixed(1)}%</td>
-        <td class="td-num">${wr.toFixed(1)}%</td>
-      </tr>`;
-    }).join('');
-  }
-  // Atualizar headers com onclick
-  if(thead){
-    const cols=[{col:'n',lbl:'Apostas'},{col:'s',lbl:'Turnover'},{col:'pl',lbl:'P/L'},{col:'roi',lbl:'ROI'},{col:'wr',lbl:'Win Rate'}];
-    const ths=thead.querySelectorAll('th[data-col]');
-    if(!ths.length){
-      // Injetar data-col e onclick nos th numéricos (só na primeira vez)
-      const allTh=thead.querySelectorAll('th');
-      const mapping=[null,'tipster',...cols.map(c=>c.col)];
-      allTh.forEach((th,i)=>{if(mapping[i]){th.dataset.col=mapping[i];th.onclick=()=>sortBy(mapping[i]);if(!th.querySelector('.sort-icon')){const si=document.createElement('span');si.className='sort-icon';th.appendChild(si);}}});
-    }
   }
 
+  // Atualiza indicadores de ordenação
+  if(thead){
+    thead.querySelectorAll('th[data-col]').forEach(th=>{
+      const si=th.querySelector('.sort-icon');if(!si)return;
+      const active=th.dataset.col===_ovTipRankCol;
+      si.style.opacity=active?'1':'0.25';
+      si.style.color=active?'var(--blue)':'';
+      if(active)th.classList.toggle('sort-asc',_ovTipRankAsc);
+      if(active)th.classList.toggle('sort-desc',!_ovTipRankAsc);
+    });
+  }
+
+  // Ordena
+  const colVal={pl:(e,i)=>pls[i],roi:(e,i)=>rois[i],wr:(e,i)=>wrs[i],n:(e,i)=>e[1].n,s:(e,i)=>e[1].s,tipster:(e)=>e[0]};
+  const sorted=ents.map((e,i)=>({e,i})).sort((a,b)=>{
+    const fn=colVal[_ovTipRankCol]||colVal.pl;
+    const av=fn(a.e,a.i),bv=fn(b.e,b.i);
+    const cmp=typeof av==='string'?av.localeCompare(bv):av-bv;
+    return _ovTipRankAsc?cmp:-cmp;
+  });
+
+  body.innerHTML=sorted.map(({e,i},rank)=>{
+    const[name,d]=e;
+    const pl=pls[i],roi=rois[i],wr=wrs[i];
+    const plColor=pl>=0?'var(--success)':'var(--danger)';
+    const bg=rank%2===0?'#0d1e2e':'#0a1828';
+    return`<tr style="background:${bg}">
+      <td style="color:var(--text3);font-family:var(--font-mono);font-size:11px;text-align:center">${rank+1}</td>
+      <td style="font-weight:600;color:var(--text)">${name}</td>
+      <td class="td-num">${d.n}</td>
+      <td class="td-num">${fmtRm(d.s)}</td>
+      <td class="td-num" style="color:${plColor};font-weight:700">${fmtPLm(pl)}</td>
+      <td class="td-num" style="color:${roiColor(roi)};font-weight:600">${roi>=0?'+':''}${roi.toFixed(1)}%</td>
+      <td class="td-num">${wr.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── Shared KPI grid builder (2 rows × 4) ────────────────────────────────────

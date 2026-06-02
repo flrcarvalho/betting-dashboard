@@ -357,6 +357,12 @@
   border-top: 1px solid var(--border2);
 }
 
+/* ── Calendar heatmap cell ───────────────────────────────────────────────── */
+.cal-cell {
+  min-height: 48px;
+  height: 48px;
+}
+
 /* ── Status / result colors ──────────────────────────────────────────────── */
 .cell-pos { color: var(--green); }
 .cell-neg { color: var(--red); }
