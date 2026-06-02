@@ -261,15 +261,9 @@ function buildHTML(){
         ${mkCard('roi_monthly','ROI Mensal (%)','<div class="chart-wrap" style="min-height:220px"><canvas id="chartROI" role="img" aria-label="ROI mensal"></canvas></div>')}
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
         ${mkCard('ov_custo','Custo de Contas — Resumo','<div id="ovCustoContent"></div>')}
-        <div style="display:grid;grid-template-columns:1fr 420px;gap:10px;margin-bottom:1.25rem;align-items:stretch">
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem" id="ovHeatmapCard">
-            <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Calendário — Resultados Diários</div>
-            <div id="ovHeatmapContent"></div>
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem">
-            <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Participação no Resultado Total</div>
-            <div class="chart-wrap" style="height:300px"><canvas id="chartOvTipsterPie" role="img" aria-label="Tipsters pie"></canvas></div>
-          </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem" id="ovHeatmapCard">
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Calendário — Resultados Diários</div>
+          <div id="ovHeatmapContent"></div>
         </div>
         ${mkCard('ov_tipster_bar','Tipsters — P/L, Win Rate e ROI','<div class="chart-wrap" style="min-height:260px"><canvas id="chartOvTipsterBar" role="img" aria-label="Tipsters bar"></canvas></div>')}
       </div>
