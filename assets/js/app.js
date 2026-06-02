@@ -217,7 +217,7 @@ function buildHTML(){
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <img src="brand/Logo_Vertical_Dark.png?v=3" alt="FDC Capital" draggable="false" style="width:140px;display:block;margin:0 auto;">
+        <img src="brand/Logo_Vertical_Dark.png?v=3" alt="FDC Capital" draggable="false" style="width:168px;display:block;margin:0 auto;">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
