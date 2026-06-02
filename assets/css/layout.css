@@ -37,8 +37,7 @@ html, body {
 }
 
 .sidebar-logo {
-  height: 140px;
-  padding: 20px 16px;
+  padding: 1rem 1rem 1.5rem;
   border-bottom: 1px solid rgba(183,190,200,0.08);
   display: flex;
   align-items: center;
@@ -46,15 +45,13 @@ html, body {
 }
 
 .sidebar-logo img {
-  height: 88px;
-  width: auto;
-  object-fit: contain;
-  background: transparent;
   display: block;
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto;
 }
-
-[data-theme="light"] .sidebar-logo .logo-dark  { display: none; }
-[data-theme="dark"]  .sidebar-logo .logo-light { display: none; }
 
 .logo-name {
   font-size: var(--text-sm);

@@ -45,7 +45,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrop
 [data-theme="light"] .tog-thumb{left:14px;background:var(--blue)}
 .main-content{padding:1.5rem 1.75rem;margin-top:44px;max-width:1600px}
 /* Sidebar */
-.sidebar-logo{height:100px;padding:16px 20px;border-bottom:1px solid rgba(183,190,200,.08);display:flex;align-items:center;justify-content:center}.sidebar-logo img{height:68px;width:auto;max-width:160px;background:transparent;display:block}
+.sidebar-logo{padding:1rem 1rem 1.5rem;border-bottom:1px solid rgba(183,190,200,.08);display:flex;align-items:center;justify-content:center}.sidebar-logo img{display:block;width:100%;max-width:160px;height:auto;object-fit:contain;margin:0 auto}
 .logo-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.02em}
 .logo-title{font-size:11px;color:var(--text3);margin-top:3px;font-family:'JetBrains Mono',monospace}
 .sidebar-nav{padding:.5rem 0;flex:1}
@@ -246,7 +246,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrop
 .tbl td.td-num,.tbl th.td-num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
 .tbl td.td-name,.tbl th.td-name{font-family:'Manrope',sans-serif}
 
-[data-theme="light"] .sidebar-logo .logo-dark{display:none}[data-theme="dark"] .sidebar-logo .logo-light{display:none}.sidebar-logo .logo-dark,.sidebar-logo .logo-light{display:block}
 
 [data-theme="light"] .sidebar{background:#f0f4f8}[data-theme="light"] .nav-item{color:#2D323A}[data-theme="light"] .nav-item:hover{color:#1E90FF;background:rgba(30,144,255,.06)}[data-theme="light"] .nav-item.active{color:#1E90FF;background:rgba(30,144,255,.10)}[data-theme="light"] .nav-group{color:#2D323A;opacity:.6}[data-theme="light"] .nav-item.active svg{color:#1E90FF}
 </style>
@@ -3142,7 +3141,7 @@ function buildHTML(){
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <img src="brand/Versão_Dark_Mode_para_Fundo_Escuro.png" class="logo-dark" alt="FDC Capital" draggable="false"><img src="brand/Versão_Clara_Mode_para_Fundo_Claro.png" class="logo-light" alt="FDC Capital" draggable="false">
+        <img src="brand/Logo_Vertical_Dark.png" alt="FDC Capital" draggable="false">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
