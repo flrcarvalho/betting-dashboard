@@ -671,9 +671,19 @@ function showPage(id){
   document.getElementById('nav-'+id)?.classList.add('active');
   renderPage(id);
 }
+let _analiseDim='tipster';
+function setAnaliseDim(dim){
+  _analiseDim=dim;
+  document.querySelectorAll('.analise-dim').forEach(b=>b.classList.toggle('active',b.dataset.dim===dim));
+  renderPage('analise');
+}
+function renderAnalise(rows){
+  // lógica de dados virá nas próximas tarefas
+}
 function renderPage(id){
   const rows=filtrarPagina(id);
   if(id==='overview'){renderKPI(rows);renderBankroll(rows);renderROIMonthly(rows);renderOddsDist(rows);renderOvCusto();renderOvStreaks(rows);renderOvTipsters(rows);renderOvHeatmap();}
+  else if(id==='analise'){renderAnalise(rows);}
   else if(id==='daily'||id==='consolidado'){renderConsolidado();}
   else if(id==='sports'){renderSport(rows);}
   else if(id==='casas'){renderCasa(rows);}
@@ -2777,10 +2787,8 @@ function buildHTML(){
         <div class="nav-group">Análise</div>
         ${[
           ['overview','Visão Geral','<rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>'],
-          ['sports','Esportes','<path d="M2 12l4-4 3 3 5-6"/>'],
-          ['casas','Bookies','<rect x="1" y="3" width="14" height="10" rx="1"/><path d="M1 8h14M5 3v10"/>'],
+          ['analise','Análise','<path d="M1 3h14M1 3v10a1 1 0 001 1h12a1 1 0 001-1V3M5 3V2M11 3V2M1 7h14"/><path d="M5 10h2M9 10h2"/>'],
           ['apostas','Apostas','<path d="M2 4h12M2 8h12M2 12h8"/><rect x="1" y="2" width="14" height="12" rx="1"/>'],
-          ['tipsters','Tipsters','<circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.2-4 5-4s5 1.5 5 4"/><circle cx="12" cy="5" r="2"/><path d="M12 9c1.5.3 3 1.2 3 4"/>'],
         ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">${icon}</svg>${label}</div>`).join('')}
         <div class="nav-group">Resultados</div>
         ${[
@@ -2820,6 +2828,24 @@ function buildHTML(){
           <div id="ovHeatmapContent"></div>
         </div>
         ${mkCard('ov_tipster_rank','Tipsters — Ranking','<div class="tbl-wrap"><table class="tbl" id="ovTipsterRankTable"><thead><tr><th style="width:32px">#</th><th>Tipster</th><th class="td-num">Apostas</th><th class="td-num">Turnover</th><th class="td-num">P/L</th><th class="td-num">ROI</th><th class="td-num">Win Rate</th></tr></thead><tbody id="ovTipsterRankBody"></tbody></table></div>')}
+      </div>
+
+      <!-- ANÁLISE -->
+      <div class="page" id="page-analise">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Análise</div>
+            <div class="page-sub">performance por dimensão</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-right:2px">dimensão</span>
+            <button class="qbtn analise-dim active" data-dim="tipster" onclick="setAnaliseDim('tipster')">Tipster</button>
+            <button class="qbtn analise-dim" data-dim="casa" onclick="setAnaliseDim('casa')">Casa</button>
+            <button class="qbtn analise-dim" data-dim="esporte" onclick="setAnaliseDim('esporte')">Esporte</button>
+          </div>
+        </div>
+        ${buildFilters('analise',sports,casas,tipsters)}
+        <div id="analise-content" class="analise-content"></div>
       </div>
 
       <!-- CONSOLIDADO -->
