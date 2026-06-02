@@ -371,6 +371,11 @@ function toggleTheme(){const h=document.documentElement;const t=h.getAttribute('
 function fmt(v,d=2){return Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function fmtPL(v){return(v>=0?'+ R$ ':'- R$ ')+fmt(Math.abs(v));}
 function fmtR(v){return'R$ '+fmt(v,0);}
+// Versões HTML com estrutura .money para alinhamento de planilha
+function mkMoney(sign,numStr){return`<span class="money"><span class="money-sign">${sign}</span><span class="money-val">${numStr}</span></span>`;}
+function fmtPLm(v){return mkMoney(v>=0?'+ R$':'- R$',fmt(Math.abs(v)));}
+function fmtRm(v){return mkMoney('R$',fmt(v,0));}
+function fmtCostm(v){return v>0?mkMoney('- R$',fmt(v,0)):mkMoney('R$','0');}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return;charts[id]=new Chart(document.getElementById(id),cfg);}
 function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
@@ -545,29 +550,6 @@ function refreshMS(id){
   }
 }
 
-function buildFilters(p,sports,casas,tipsters){
-  const st=gfs(p);
-  return`<div class="filters">
-    <div class="filter-group">
-      <div class="filter-label">Período</div>
-      <div class="date-row">
-        <input type="date" id="df_f_${p}" value="${st.df}" onchange="setDateF('${p}','f',this.value)">
-        <span class="date-sep">→</span>
-        <input type="date" id="df_t_${p}" value="${st.dt}" onchange="setDateF('${p}','t',this.value)">
-      </div>
-      <div class="quick-btns">
-        <button class="qbtn ${st.qd===7?'active':''}" data-days="7" onclick="setQuick('${p}',7)">7d</button>
-        <button class="qbtn ${st.qd===15?'active':''}" data-days="15" onclick="setQuick('${p}',15)">15d</button>
-        <button class="qbtn ${st.qd===30?'active':''}" data-days="30" onclick="setQuick('${p}',30)">30d</button>
-        <button class="qbtn ${st.qd===90?'active':''}" data-days="90" onclick="setQuick('${p}',90)">90d</button>
-        <button class="qbtn ${st.qd===0&&!st.df&&!st.dt?'active':''}" data-all="1" onclick="clearDate('${p}')">Tudo</button>
-      </div>
-    </div>
-    <div class="filter-group"><div class="filter-label">Esporte</div>${buildMS('sp_'+p,sports,'Todos os esportes',p)}</div>
-    <div class="filter-group"><div class="filter-label">Casa</div>${buildMS('ca_'+p,casas,'Todas as casas',p,'',true)}</div>
-    ${tipsters?`<div class="filter-group"><div class="filter-label">Tipster</div>${buildMS('ti_'+p,tipsters,'Todos os tipsters',p)}</div>`:''}
-  </div>`;
-}
 
 // Formatação de eixos com ponto como separador de milhar
 function fmtK(v){
@@ -833,14 +815,14 @@ function renderKPI(rows){
   const lucroLiq=lucro-totalCost;
   // ── Andar 1: P/L Bruto → Custo Conta → Custo Tipster → P/L Líquido ────────
   const row1=[
-    {l:'P/L Bruto',v:fmtPL(lucro),c:lucro>=0?'pos':'neg',s:'antes de custos',accent:''},
-    {l:'Custo de Contas',v:costConta>0?'- R$ '+fmt(costConta,0):'R$ 0',c:costConta>0?'neg':'neu',s:'total aquisição',accent:''},
-    {l:'Custo de Tipsters',v:costTipster>0?'- R$ '+fmt(costTipster,0):'R$ 0',c:costTipster>0?'neg':'neu',s:'assinaturas / serviços',accent:''},
-    {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'border-top:2px solid var(--green);'},
+    {l:'P/L Bruto',v:fmtPLm(lucro),c:lucro>=0?'pos':'neg',s:'antes de custos',accent:''},
+    {l:'Custo de Contas',v:fmtCostm(costConta),c:costConta>0?'neg':'neu',s:'total aquisição',accent:''},
+    {l:'Custo de Tipsters',v:fmtCostm(costTipster),c:costTipster>0?'neg':'neu',s:'assinaturas / serviços',accent:''},
+    {l:'P/L Líquido',v:fmtPLm(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'border-top:2px solid var(--green);'},
   ];
   // ── Andar 2: Turnover → ROI → Odd Média → Win Rate ──────────────────────
   const row2=[
-    {l:'Turnover',v:fmtR(stake),c:'neu',s:'volume apostado'},
+    {l:'Turnover',v:fmtRm(stake),c:'neu',s:'volume apostado'},
     {l:'ROI',v:(roi>=0?'+':'')+roi.toFixed(2)+'%',c:roi>=0?'pos':'neg',s:n+' apostas'},
     {l:'Odd Média Pond.',v:calcAvgOdd(rows).toFixed(2),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
     {l:'Win Rate',v:wr.toFixed(1)+'%',c:wr>=50?'pos':'neg',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`},
@@ -2643,9 +2625,9 @@ function renderOvCusto(){
 
   el.innerHTML=`
     <div class="kpi-grid" style="margin-bottom:1rem;grid-template-columns:repeat(3,1fr)">
-      <div class="kpi"><div class="kpi-label">Custo Total</div><div class="kpi-val neg">R$ ${fmt(grandCost,0)}</div><div class="kpi-sub">${totalContas} contas · ${allForns.filter(f=>fornTots[f]>0).length} fornecedores</div></div>
-      <div class="kpi"><div class="kpi-label">Custo Médio/Conta</div><div class="kpi-val neu">R$ ${fmt(avgCostPago,0)}</div><div class="kpi-sub">${contasComPreco} contas com preço</div></div>
-      <div class="kpi"><div class="kpi-label">Custo Médio/Casa</div><div class="kpi-val neu">R$ ${fmt(avgPorCasa,0)}</div><div class="kpi-sub">${casasComCusto.length} casas com custo</div></div>
+      <div class="kpi"><div class="kpi-label">Custo Total</div><div class="kpi-val neg">${fmtRm(grandCost)}</div><div class="kpi-sub">${totalContas} contas · ${allForns.filter(f=>fornTots[f]>0).length} fornecedores</div></div>
+      <div class="kpi"><div class="kpi-label">Custo Médio/Conta</div><div class="kpi-val neu">${fmtRm(avgCostPago)}</div><div class="kpi-sub">${contasComPreco} contas com preço</div></div>
+      <div class="kpi"><div class="kpi-label">Custo Médio/Casa</div><div class="kpi-val neu">${fmtRm(avgPorCasa)}</div><div class="kpi-sub">${casasComCusto.length} casas com custo</div></div>
     </div>
     ${casasComCusto.length>0?`<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">${casaCards}</div>`:''}
     <div style="display:flex;flex-wrap:wrap;gap:.75rem">${fornCards}</div>`;

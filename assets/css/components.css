@@ -140,6 +140,8 @@
   letter-spacing: -0.03em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  text-align: right !important;
 }
 .kpi-val.pos { color: var(--green); }
 .kpi-val.neg { color: var(--red); }
@@ -283,7 +285,7 @@
   font-feature-settings: "tnum";
 }
 .money-sign {
-  color: var(--text3);
+  color: #8899AA;
   min-width: 2ch;
   text-align: right;
   flex-shrink: 0;
