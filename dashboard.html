@@ -846,30 +846,37 @@ function renderBankroll(rows){
     if(i%labelStep!==0&&i!==days.length-1)return'';
     const p=d.split('-');return p[2]+'/'+p[1];
   });
-  // Escala de intensidade por percentis do dataset filtrado
-  function barColor(v){
-    if(v===0)return'rgba(183,190,200,.2)';
-    const pos=dpL.filter(x=>x>0).sort((a,b)=>a-b);
-    const neg=dpL.filter(x=>x<0).map(x=>Math.abs(x)).sort((a,b)=>a-b);
-    if(v>0){
-      const p=pos.length;const rank=pos.filter(x=>x<=v).length/Math.max(p,1);
-      if(rank<=0.2)return'#1a4a2e';
-      if(rank<=0.4)return'#166534';
-      if(rank<=0.6)return'#15803d';
-      if(rank<=0.8)return'#16a34a';
+  // Pré-computa percentis (p20, p40, p60, p80)
+  function computePercentiles(arr){
+    if(!arr.length)return[0,0,0,0];
+    const s=[...arr].sort((a,b)=>a-b);
+    const at=f=>s[Math.max(0,Math.ceil(f*s.length)-1)];
+    return[at(0.2),at(0.4),at(0.6),at(0.8)];
+  }
+  const positivePercentiles=computePercentiles(dpL.filter(v=>v>0));
+  const negativePercentiles=computePercentiles(dpL.filter(v=>v<0).map(v=>Math.abs(v)));
+  function getBarColor(value,positivePercentiles,negativePercentiles){
+    if(value===0)return'rgba(183,190,200,.2)';
+    if(value>0){
+      const p=positivePercentiles;
+      if(value<p[0])return'#1a4a2e';
+      if(value<p[1])return'#166534';
+      if(value<p[2])return'#15803d';
+      if(value<p[3])return'#16a34a';
       return'#22c55e';
     }else{
-      const av=Math.abs(v);const n=neg.length;const rank=neg.filter(x=>x<=av).length/Math.max(n,1);
-      if(rank<=0.2)return'#4a1a1a';
-      if(rank<=0.4)return'#7f1d1d';
-      if(rank<=0.6)return'#991b1b';
-      if(rank<=0.8)return'#b91c1c';
+      const abs=Math.abs(value);
+      const p=negativePercentiles;
+      if(abs<p[0])return'#4a1a1a';
+      if(abs<p[1])return'#7f1d1d';
+      if(abs<p[2])return'#991b1b';
+      if(abs<p[3])return'#b91c1c';
       return'#ef4444';
     }
   }
   mkChart('chartBankroll',{type:'bar',data:{labels:lbl,datasets:[
     {type:'line',data:cumPL,borderColor:'#00E5FF',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
-    {type:'bar',data:dpL,backgroundColor:dpL.map(barColor),borderRadius:2,yAxisID:'y',label:'Diário',barPercentage:0.9,categoryPercentage:1.0}
+    {type:'bar',data:dpL,backgroundColor:dpL.map(v=>getBarColor(v,positivePercentiles,negativePercentiles)),borderRadius:2,yAxisID:'y',label:'Diário',barPercentage:0.9,categoryPercentage:1.0}
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
     scales:{

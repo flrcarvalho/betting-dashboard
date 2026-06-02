@@ -110,16 +110,24 @@ function openMS(e,id,page,cb){
   document.querySelectorAll('.ms-dd.open').forEach(d=>d.classList.remove('open'));
   if(!isOpen){
     const rect=btn.getBoundingClientRect();
-    const dropMaxH=300;
-    const spaceBelow=window.innerHeight-rect.bottom-8;
-    const spaceAbove=rect.top-8;
-    if(spaceBelow>=dropMaxH||spaceBelow>=spaceAbove){
-      drop.style.top=(rect.bottom+4)+'px';
-    }else{
-      drop.style.top=Math.max(4,rect.top-dropMaxH-4)+'px';
-    }
+    const dropdownHeight=300;
     const dropW=Math.max(200,btn.offsetWidth);
-    drop.style.left=Math.min(rect.left,window.innerWidth-dropW-8)+'px';
+    // Abrir para cima se não houver espaço abaixo
+    const spaceBelow=window.innerHeight-rect.bottom;
+    if(spaceBelow<dropdownHeight){
+      drop.style.top='auto';
+      drop.style.bottom='100%';
+    }else{
+      drop.style.top='100%';
+      drop.style.bottom='auto';
+    }
+    // Evitar overflow na borda direita da viewport
+    drop.style.left='0';
+    drop.style.right='auto';
+    const rightOverflow=rect.left+dropW-window.innerWidth;
+    if(rightOverflow>0){
+      drop.style.left=`${-rightOverflow-8}px`;
+    }
     drop.style.minWidth=dropW+'px';
     drop.classList.add('open');
     setTimeout(()=>{const s=drop.querySelector('.ms-search');if(s){s.value='';filterMSOpts(id);s.focus();}},50);
