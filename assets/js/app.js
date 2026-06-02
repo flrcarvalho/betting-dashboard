@@ -2,7 +2,7 @@
 
 // Helpers
 function fmt(v,d=2){return Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
-function fmtPL(v){return(v>=0?'+ R$ ':'- R$ ')+fmt(Math.abs(v));}
+function fmtPL(v){return`<span class="money"><span class="money-sign">${v>=0?'+':'-'} R$</span><span class="money-val">${fmt(Math.abs(v))}</span></span>`;}
 function fmtR(v){return'R$ '+fmt(v,0);}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return;charts[id]=new Chart(document.getElementById(id),cfg);}
@@ -217,7 +217,7 @@ function buildHTML(){
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <img src="brand/Versão_Dark_Mode_para_Fundo_Escuro.png" class="logo-dark" alt="FDC Capital" draggable="false"><img src="brand/Versão_Clara_Mode_para_Fundo_Claro.png" class="logo-light" alt="FDC Capital" draggable="false">
+        <img src="brand/Logo_Vertical_Dark.png?v=3" class="logo-dark" alt="FDC Capital" draggable="false"><img src="brand/Logo_Vertical_Claro.png?v=3" class="logo-light" alt="FDC Capital" draggable="false">
       </div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
