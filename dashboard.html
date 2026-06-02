@@ -930,27 +930,28 @@ function renderOddsDist(rows){
   const counts=bdata.map(b=>b.n);
   const wrs=bdata.map(b=>b.n>0?parseFloat((b.w/b.n*100).toFixed(1)):null);
   const rois=bdata.map(b=>b.s>0?parseFloat((b.pl/b.s*100).toFixed(1)):null);
-  // Linha de referência ROI=0 no eixo Y1
+  // Linha de referência ROI=0 no eixo Y1 (direito)
   const zeroLine={id:'zeroLineOdds',beforeDraw(chart){
     const y1=chart.scales['y1'];if(!y1)return;
     const zero=y1.getPixelForValue(0);
     const{ctx,chartArea:{left,right}}=chart;
     ctx.save();ctx.beginPath();ctx.moveTo(left,zero);ctx.lineTo(right,zero);
-    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.setLineDash([4,4]);ctx.lineWidth=1;ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.setLineDash([4,4]);ctx.lineWidth=1;ctx.stroke();
     ctx.restore();
   }};
+  const fmtPct=v=>v==null?'—':v.toFixed(1).replace('.',',');
+  const fmtCount=n=>(n||0).toLocaleString('pt-BR');
   mkChart('chartOddsDist',{type:'bar',data:{labels:lbls,datasets:[
     {type:'bar',data:counts,backgroundColor:'rgba(91,156,246,.55)',borderRadius:3,label:'Apostas',yAxisID:'y'},
-    {type:'line',data:wrs,borderColor:'#00C896',backgroundColor:'transparent',tension:.3,pointRadius:4,pointBackgroundColor:'#00C896',borderWidth:2,label:'Win Rate %',yAxisID:'y1',spanGaps:false},
-    {type:'line',data:rois,borderColor:'#1E90FF',backgroundColor:'transparent',tension:.3,pointRadius:4,pointBackgroundColor:'#1E90FF',borderWidth:2,label:'ROI %',yAxisID:'y1',borderDash:[4,3],spanGaps:false}
+    {type:'line',data:wrs,borderColor:'#00E5FF',backgroundColor:'transparent',tension:.3,pointRadius:4,pointBackgroundColor:'#00E5FF',borderWidth:2,label:'Win Rate %',yAxisID:'y1',spanGaps:false},
+    {type:'line',data:rois,borderColor:'#F5A623',backgroundColor:'transparent',tension:.3,pointRadius:4,pointBackgroundColor:'#F5A623',borderWidth:2,label:'ROI %',yAxisID:'y1',borderDash:[4,3],spanGaps:false}
   ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,position:'top',labels:{color:tc(),font:{size:11},boxWidth:12,padding:16}},
       tooltip:{callbacks:{
         label:ctx=>{
-          const fmt1=v=>v==null?'—':v.toFixed(1).replace('.',',');
-          if(ctx.datasetIndex===0)return'Apostas: '+ctx.raw;
-          if(ctx.datasetIndex===1)return'Win Rate: '+fmt1(ctx.raw)+'%';
-          return'ROI: '+(ctx.raw>=0?'+':'')+fmt1(ctx.raw)+'%';
+          if(ctx.datasetIndex===0)return fmtCount(ctx.raw)+' apostas';
+          if(ctx.datasetIndex===1)return'Win Rate: '+fmtPct(ctx.raw)+'%';
+          return'ROI: '+(ctx.raw>=0?'+':'')+fmtPct(ctx.raw)+'%';
         }
       }}},
     scales:{
