@@ -26,6 +26,31 @@ function casaCell(nome){
   const img=casaImg(nome);
   return img?`<span style="display:inline-flex;align-items:center;gap:0">${img}${nome||'—'}</span>`:(nome||'—');
 }
+// ── Normalização de nomes (evita duplicatas como "Faz1Bet" vs "Faz1bet") ────
+function normalizeName(name){
+  if(!name)return'';
+  return name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ');
+}
+function getMostFrequentName(names){
+  const freq={};names.forEach(n=>{if(n)freq[n]=(freq[n]||0)+1;});
+  const ents=Object.entries(freq);if(!ents.length)return'';
+  return ents.sort((a,b)=>b[1]-a[1])[0][0];
+}
+function normalizeDados(dados){
+  const fields=['tipster','casa','esporte'];
+  const canonical={};
+  fields.forEach(f=>{
+    const groups={};
+    dados.forEach(r=>{if(!r[f])return;const key=normalizeName(r[f]);if(!groups[key])groups[key]=[];groups[key].push(r[f]);});
+    canonical[f]={};
+    Object.entries(groups).forEach(([key,names])=>{canonical[f][key]=getMostFrequentName(names);});
+  });
+  return dados.map(r=>{
+    const nr={...r};
+    fields.forEach(f=>{if(nr[f])nr[f]=canonical[f][normalizeName(nr[f])]||nr[f];});
+    return nr;
+  });
+}
 function normalCDF(z){const t=1/(1+.2316419*Math.abs(z)),d=.3989423*Math.exp(-z*z/2);const p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p;}
 function calcROI(rows){const s=rows.reduce((a,r)=>a+r.stake,0),l=rows.reduce((a,r)=>a+r.lucro,0);return s>0?(l/s)*100:0;}
 function calcWR(rows){const v=rows.filter(r=>['W','HW'].includes(r.resultado));const t=rows.filter(r=>r.resultado!=='V');return t.length>0?(v.length/t.length)*100:0;}
@@ -179,7 +204,7 @@ function buildHTML(){
   const tipsters=[...new Set(DADOS.map(r=>r.tipster).filter(Boolean))].sort();
   const sports=[...new Set(DADOS.map(r=>r.esporte).filter(Boolean))].sort();
   const casas=[...new Set(DADOS.map(r=>r.casa).filter(Boolean))].sort();
-  ['overview','daily','sports','casas','apostas','tipsters','parceiros','custos','metrics','consolidado','mensal','diario','semana','resultados_casa'].forEach(p=>{msInit('sp_'+p);msInit('ca_'+p);msInit('ti_'+p);});
+  ['overview','analise','daily','sports','casas','apostas','tipsters','parceiros','custos','metrics','consolidado','mensal','diario','semana','resultados_casa'].forEach(p=>{msInit('sp_'+p);msInit('ca_'+p);msInit('ti_'+p);});
   msInit('tipsters');
 
   document.getElementById('root').innerHTML=`
@@ -510,7 +535,7 @@ async function loadData(){
     const res=await fetch(APPS_SCRIPT_URL);
     const json=await res.json();
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
-    DADOS=json.data;
+    DADOS=normalizeDados(json.data);
   }catch(err){
     _fetchErr=err.message||'Falha na conexão';
     DADOS=[];

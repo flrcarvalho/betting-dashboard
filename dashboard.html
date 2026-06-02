@@ -773,8 +773,89 @@ function renderAnalise(rows){
     <button class="analise-small-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.startsWith('▶')?'▼ Ocultar menores (${small.length})':'▶ Ver menores (${small.length})'">▶ Ver menores (${small.length})</button>
     <div style="display:none"><div class="analise-cards-grid">${small.map(e=>mkAnaliseCard(e,dimKey)).join('')}</div></div>`:'';
 
-  el.innerHTML=sortBar+mainCards+smallSection;
+  el.innerHTML=sortBar+mainCards+smallSection+renderAnaliseCrossTable(rows,dimKey);
 }
+
+// ── Tabela cruzada da aba Análise ────────────────────────────────────────────
+function renderAnaliseCrossTable(rows,dimKey){
+  const DIM_LABEL={tipster:'Tipster',casa:'Casa',esporte:'Esporte'};
+  const [dim2,dim3]=['tipster','casa','esporte'].filter(d=>d!==dimKey);
+
+  function topN(dim,n=5){
+    const cnt={};rows.forEach(r=>{const k=(r[dim]||'').trim();if(k)cnt[k]=(cnt[k]||0)+1;});
+    return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,n).map(e=>e[0]);
+  }
+  const top2=topN(dim2,5),top3=topN(dim3,5);
+  if(!top2.length&&!top3.length)return'';
+
+  // Linhas únicas (mesmo critério da grid: >= 5 apostas e todos)
+  const rowCnt={};rows.forEach(r=>{const k=(r[dimKey]||'').trim();if(k)rowCnt[k]=(rowCnt[k]||0)+1;});
+  const rowItems=Object.keys(rowCnt);
+
+  // Acumula células
+  const cellMap={};
+  const acc=(key,r)=>{if(!cellMap[key])cellMap[key]={pl:0,s:0,n:0,w:0,t:0};cellMap[key].pl+=r.lucro;cellMap[key].s+=r.stake;cellMap[key].n++;if(r.resultado!=='V'){cellMap[key].t++;if(['W','HW'].includes(r.resultado))cellMap[key].w++;}};
+  rows.forEach(r=>{
+    const ri=(r[dimKey]||'').trim();if(!ri)return;
+    top2.forEach(v=>{if((r[dim2]||'').trim()===v)acc(`${ri}|2|${v}`,r);});
+    top3.forEach(v=>{if((r[dim3]||'').trim()===v)acc(`${ri}|3|${v}`,r);});
+    acc(`__tot__`,r);
+    top2.forEach(v=>{if((r[dim2]||'').trim()===v)acc(`__c2|${v}`,r);});
+    top3.forEach(v=>{if((r[dim3]||'').trim()===v)acc(`__c3|${v}`,r);});
+  });
+
+  // Totais por linha
+  const rowTot={};rowItems.forEach(ri=>{rowTot[ri]={pl:0};rows.filter(r=>(r[dimKey]||'').trim()===ri).forEach(r=>rowTot[ri].pl+=r.lucro);});
+  rowItems.sort((a,b)=>rowTot[b].pl-rowTot[a].pl);
+
+  // Cor por intensidade
+  const maxAbs=Math.max(...Object.values(cellMap).map(c=>Math.abs(c.pl)),1);
+  function cellBg(pl){
+    if(!pl)return{bg:'var(--bg4)',clr:'var(--text3)'};
+    const a=(0.12+Math.min(1,Math.abs(pl)/maxAbs)*0.78).toFixed(2);
+    return pl>0?{bg:`rgba(0,200,150,${a})`,clr:+a>0.5?'#d0fff0':'var(--green)'}
+              :{bg:`rgba(255,71,87,${a})`,clr:+a>0.5?'#ffe0e5':'var(--danger)'};
+  }
+  function mkCell(d,bold){
+    if(!d||!d.n)return`<td style="background:var(--bg4);text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3)">—</td>`;
+    const{bg,clr}=cellBg(d.pl);
+    const roi=d.s>0?d.pl/d.s*100:0,wr=d.t>0?d.w/d.t*100:0;
+    const warn=roi<-10?'⚠ ':'';
+    const title=`P/L: ${d.pl>=0?'+':''}R$ ${fmt(Math.abs(d.pl))} | ROI: ${roi>=0?'+':''}${roi.toFixed(1)}% | ${d.n} apostas | WR: ${wr.toFixed(1)}%`;
+    return`<td title="${title}" style="background:${bg};color:${clr};text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);font-size:11px;font-variant-numeric:tabular-nums;font-family:var(--font-mono);white-space:nowrap;font-weight:${bold?700:500}">${warn}${d.pl>=0?'+':''}${fmtK(d.pl)}</td>`;
+  }
+  const sep=`<td style="width:3px;background:var(--border2);padding:0"></td>`;
+  const thStyle=(i,border)=>`text-align:right;padding:5px 8px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);background:var(--bg4);white-space:nowrap;${i===0&&border?'border-left:2px solid var(--border2);':''}`;
+
+  const thead=`<thead>
+    <tr>
+      <th rowspan="2" style="text-align:left;padding:5px 10px;font-size:10px;color:var(--text2);background:var(--bg4);position:sticky;left:0;z-index:2;border-bottom:2px solid var(--border2)">${DIM_LABEL[dimKey]}</th>
+      ${top2.length?`<th colspan="${top2.length}" style="text-align:center;padding:3px 6px;font-size:9px;color:var(--text3);background:var(--bg4);border-left:2px solid var(--border2);text-transform:uppercase;letter-spacing:.08em">${DIM_LABEL[dim2]}</th>`:''}
+      <td style="width:3px;background:var(--border2);padding:0" rowspan="2"></td>
+      ${top3.length?`<th colspan="${top3.length}" style="text-align:center;padding:3px 6px;font-size:9px;color:var(--text3);background:var(--bg4);border-left:2px solid var(--border2);text-transform:uppercase;letter-spacing:.08em">${DIM_LABEL[dim3]}</th>`:''}
+    </tr>
+    <tr>
+      ${top2.map((v,i)=>`<th style="${thStyle(i,true)}">${v}</th>`).join('')}
+      ${top3.map((v,i)=>`<th style="${thStyle(i,true)}">${v}</th>`).join('')}
+    </tr>
+  </thead>`;
+
+  const tbodyRows=rowItems.map(ri=>`<tr>
+    <td style="padding:5px 10px;font-weight:600;color:var(--text);font-size:12px;position:sticky;left:0;background:var(--bg3);border-bottom:1px solid var(--border);white-space:nowrap;z-index:1">${ri}</td>
+    ${top2.map(v=>mkCell(cellMap[`${ri}|2|${v}`],false)).join('')}${sep}
+    ${top3.map(v=>mkCell(cellMap[`${ri}|3|${v}`],false)).join('')}
+  </tr>`).join('');
+
+  const totalRow=`<tr style="border-top:2px solid var(--border2)">
+    <td style="padding:5px 10px;font-weight:700;font-size:11px;color:var(--text2);background:var(--bg4);position:sticky;left:0;z-index:1;text-transform:uppercase;letter-spacing:.04em">Total</td>
+    ${top2.map(v=>mkCell(cellMap[`__c2|${v}`],true)).join('')}${sep}
+    ${top3.map(v=>mkCell(cellMap[`__c3|${v}`],true)).join('')}
+  </tr>`;
+
+  return`<div style="margin-top:1.75rem">
+    <div style="font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem">Tabela Cruzada — Top 5</div>
+    <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse">${thead}<tbody>${tbodyRows}${totalRow}</tbody></table></div>
+  </div>`;
 
 // ── Popup de análise individual ──────────────────────────────────────────────
 function openAnalisePopup(name,dim){
