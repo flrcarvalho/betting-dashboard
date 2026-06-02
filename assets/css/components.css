@@ -71,7 +71,7 @@
   overflow-y: auto;
   display: none;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 9999;
   box-shadow: var(--shadow-md);
 }
 .ms-dd.open { display: flex; }
@@ -772,3 +772,7 @@
 
 /* Virtual scroll spacers */
 .virt-spacer { pointer-events: none; }
+
+.filters { position: relative; z-index: 100; }
+.ms-wrap { position: relative; z-index: 100; }
+.ms-dd { z-index: 9999 !important; }
