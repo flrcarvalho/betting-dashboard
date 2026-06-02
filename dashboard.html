@@ -98,7 +98,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrop
 #kpiGrid{display:block;}
 .kpi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem}
 .kpi-label{font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.02em;text-transform:uppercase;margin-bottom:5px}
-.kpi-val{font-size:22px;font-weight:700;letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-val{font-size:22px;font-weight:700;letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums;text-align:right;font-feature-settings:"tnum"}
 .kpi-val.pos{color:var(--green)}.kpi-val.neg{color:var(--red)}.kpi-val.neu{color:var(--text)}
 .kpi-sub{font-size:10px;color:var(--text3);margin-top:4px;font-family:'JetBrains Mono',monospace}
 /* Cards */
@@ -243,10 +243,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Manrop
 .col-rsz:hover,.col-rsz.active{background:var(--green);opacity:.5}
 
 /* Typography: numeric table cells get Mono, name cells stay Sans */
-.tbl td.td-num,.tbl th.td-num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.tbl td.td-num,.tbl th.td-num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;text-align:right !important;font-feature-settings:"tnum"}
 .tbl td.td-name,.tbl th.td-name{font-family:'Manrope',sans-serif}
 
 
+.money{display:inline-flex;justify-content:flex-end;gap:4px;width:100%;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.money-sign{color:#8899AA;min-width:2ch;text-align:right;flex-shrink:0}
+.money-val{text-align:right;font-variant-numeric:tabular-nums;min-width:10ch}
 [data-theme="light"] .sidebar{background:#f0f4f8}[data-theme="light"] .nav-item{color:#2D323A}[data-theme="light"] .nav-item:hover{color:#1E90FF;background:rgba(30,144,255,.06)}[data-theme="light"] .nav-item.active{color:#1E90FF;background:rgba(30,144,255,.10)}[data-theme="light"] .nav-group{color:#2D323A;opacity:.6}[data-theme="light"] .nav-item.active svg{color:#1E90FF}
 </style>
 </head>
@@ -1409,15 +1412,15 @@ function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
   const betsBreak=[W?`<span class="res-w">W:${W}</span>`:'',HW?`<span class="res-hw">HW:${HW}</span>`:'',L?`<span class="res-l">L:${L}</span>`:'',HL?`<span class="res-hl">HL:${HL}</span>`:'',V?`<span class="res-v">V:${V}</span>`:''].filter(Boolean).join(' ');
   const mkK=(l,v,c,s,subFlex)=>`<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-val ${c}">${v}</div><div class="kpi-sub"${subFlex?' style="display:flex;flex-wrap:wrap;gap:2px 5px"':''}>${s}</div></div>`;
   const row1=[
-    mkK(plLabel,fmtPL(pl),pl>=0?'pos':'neg','Turnover: '+fmtR(stake)),
-    mkK('Turnover',fmtR(stake),'neu',n+' apostas'),
+    mkK(plLabel,fmtPLm(pl),pl>=0?'pos':'neg','Turnover: '+fmtR(stake)),
+    mkK('Turnover',fmtRm(stake),'neu',n+' apostas'),
     mkK('ROI',(roi>=0?'+':'')+roi.toFixed(2)+'%',roi>=0?'pos':'neg',(settled)+' encerradas'),
     mkK('Apostas',n.toLocaleString('pt-BR'),'neu',betsBreak,true),
   ].join('');
   const row2=[
     mkK('Win Rate',wr.toFixed(1)+'%',wr>=50?'pos':'neg',settled+' encerradas'),
     mkK('Odd Média Pond.',avgOdd.toFixed(2),'neu','Σ(odd×stake)/Σ(stake)'),
-    mkK('Stake Média',fmtR(avgStake),'neu','por aposta'),
+    mkK('Stake Média',fmtRm(avgStake),'neu','por aposta'),
     mkK(contextLabel,contextVal,'neu',contextSub),
   ].join('');
   return`<div class="kpi-grid" style="margin-bottom:.5rem">${row1}</div><div class="kpi-grid" style="margin-bottom:1.25rem">${row2}</div>`;
@@ -1495,12 +1498,12 @@ function renderConsolidado(){
   const totalAnnualRow=`<tr style="border-bottom:2px solid var(--border2);background:var(--bg4)">
     <td style="font-weight:700;color:var(--text);padding:5px 8px;text-align:left;font-size:12px">Total</td>
     <td style="text-align:right;padding:5px 7px;font-size:11px;font-family:'JetBrains Mono',monospace"><span style="font-size:10px;color:var(--text3);margin-right:6px">${totDetail}</span><span style="font-size:13px;font-weight:700;color:var(--text)">${totN.toLocaleString('pt-BR')}</span></td>
-    ${tdR(fmtPL(totPL),`color:${tlc};font-weight:700`)}
-    ${tdR(fmtR(totS))}
+    ${tdR(fmtPLm(totPL),`color:${tlc};font-weight:700`)}
+    ${tdR(fmtRm(totS))}
     ${tdR((totROI>=0?'+':'')+totROI.toFixed(2)+'%',`color:${trc};font-weight:700`)}
     ${tdR(totWR.toFixed(1)+'%')}
     ${tdR(calcAvgOdd(rows).toFixed(2))}
-    ${tdR(totN>0?fmtR(totS/totN):'—')}
+    ${tdR(totN>0?fmtRm(totS/totN):'—')}
   </tr>`;
   const anualRows=allTipsters.map(t=>{
     const d=annualByT[t];if(!d)return'';
@@ -1517,12 +1520,12 @@ function renderConsolidado(){
     return`<tr>
       <td style="font-weight:700;color:var(--text);padding:5px 8px;text-align:left;font-size:11px">${t}</td>
       <td style="text-align:right;padding:5px 7px;font-size:11px;font-family:'JetBrains Mono',monospace"><span style="font-size:10px;color:var(--text3);margin-right:6px">${detail}</span><span style="font-size:13px;font-weight:600;color:var(--text)">${d.n.toLocaleString('pt-BR')}</span></td>
-      ${tdR(fmtPL(d.pl),`color:${lc};font-weight:600`)}
-      ${tdR(fmtR(turnover))}
+      ${tdR(fmtPLm(d.pl),`color:${lc};font-weight:600`)}
+      ${tdR(fmtRm(turnover))}
       ${tdR((roiV>=0?'+':'')+roiV.toFixed(2)+'%',`color:${rc}`)}
       ${tdR(wr.toFixed(1)+'%')}
       ${tdR(avgOdd.toFixed(2))}
-      ${tdR(fmtR(avgStake))}
+      ${tdR(fmtRm(avgStake))}
     </tr>`;
   }).join('');
   const resumoAnualHTML=mkCard('cons_resumo',
@@ -1747,8 +1750,8 @@ function renderMensal(){
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
     return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td>
       <td><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
-      <td style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
-      <td>${fmtR(s)}</td>
+      <td style="${lc};font-weight:600">${fmtPLm(d.pl)}</td>
+      <td>${fmtRm(s)}</td>
       <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td>
       <td>${wr2.toFixed(1)}%</td>
       <td>${calcAvgOdd(tR).toFixed(2)}</td></tr>`;
@@ -1767,7 +1770,7 @@ function renderMensal(){
     `<div class="tbl-wrap"><table class="tbl" id="tblMensalTip">
       <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Odd Méd.<span class="sort-icon"></span></th></tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
+        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPLm(totPL)}</td><td>${fmtRm(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -1865,8 +1868,8 @@ function renderDiario(){
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
     return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td>
       <td><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
-      <td style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
-      <td>${fmtR(d.s)}</td>
+      <td style="${lc};font-weight:600">${fmtPLm(d.pl)}</td>
+      <td>${fmtRm(d.s)}</td>
       <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td>
       <td>${wr2.toFixed(1)}%</td>
       <td>${avgOdd.toFixed(2)}</td></tr>`;
@@ -1877,7 +1880,7 @@ function renderDiario(){
     `<div class="tbl-wrap"><table class="tbl" id="tblDiarioTip">
       <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Odd Méd.<span class="sort-icon"></span></th></tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
+        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPLm(totPL)}</td><td>${fmtRm(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -2205,12 +2208,12 @@ function buildSummaryTable(tableId,label,ents,isCasa=false){
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
     const label_cell=isCasa?casaCell(nome):sportCell(nome);
-    return`<tr><td style="font-weight:600;color:var(--text)">${label_cell}</td><td>${d.n}</td><td>${wr.toFixed(1)}%</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td></tr>`;
+    return`<tr><td style="font-weight:600;color:var(--text)">${label_cell}</td><td>${d.n}</td><td>${wr.toFixed(1)}%</td><td>${fmtRm(d.s)}</td><td style="${lc}">${fmtPLm(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td></tr>`;
   }).join('');
   const tot=ents.reduce((a,[,d])=>({n:a.n+d.n,w:a.w+d.w,t:a.t+d.t,s:a.s+d.s,l:a.l+d.l}),{n:0,w:0,t:0,s:0,l:0});
   const tRoi=tot.s>0?(tot.l/tot.s*100):0,tWr=tot.t>0?(tot.w/tot.t*100):0;
   const tlc=tot.l>=0?'color:var(--green)':'color:var(--red)';const trc=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr><th>${label}<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Profit<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th></tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td>${tot.n}</td><td>${tWr.toFixed(1)}%</td><td>${fmtR(tot.s)}</td><td style="${tlc}">${fmtPL(tot.l)}</td><td style="${trc}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td></tr></tbody></table></div>`;
+  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr><th>${label}<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Profit<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th></tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td>${tot.n}</td><td>${tWr.toFixed(1)}%</td><td>${fmtRm(tot.s)}</td><td style="${tlc}">${fmtPLm(tot.l)}</td><td style="${trc}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td></tr></tbody></table></div>`;
 }
 
 
@@ -2401,7 +2404,7 @@ function renderTipsters(){
     const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td><td>${wr.toFixed(1)}%</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td><td>${fmtR(avgStake)}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td><td>${wr.toFixed(1)}%</td><td>${fmtRm(d.s)}</td><td style="${lc}">${fmtPLm(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td><td>${fmtRm(avgStake)}</td></tr>`;
   }).join('');
   document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Profit<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th><th>Stake Média<span class="sort-icon"></span></th></tr></thead><tbody>${compRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblTipComp',[1,3,4,5,6,7]),100);
@@ -2420,7 +2423,7 @@ function renderTipsters(){
     const avgOdd=d.stk>0?d.wt/d.stk:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:700;color:var(--text)">${d.tipster}</td><td>${casaCell(d.casa)}</td><td>${d.n}</td><td>${wr.toFixed(1)}%</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${d.tipster}</td><td>${casaCell(d.casa)}</td><td>${d.n}</td><td>${wr.toFixed(1)}%</td><td>${fmtRm(d.s)}</td><td style="${lc}">${fmtPLm(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td></tr>`;
   }).join('');
   document.getElementById('tipsterCasaTable').innerHTML=`<table class="tbl" id="tblTipCasa"><thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Casa<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Profit<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th></tr></thead><tbody>${casaRows2}</tbody></table>`;
   setTimeout(()=>makeSortable('tblTipCasa',[2,4,5,6,7]),100);
@@ -2435,11 +2438,11 @@ function renderTipsters(){
     totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
     const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPL(v.pl)}</td><td>${fmtR(v.s)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${fmtR(avgStake)}</td><td>${avgOdd.toFixed(2)}</td></tr>`;
+    return`<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPLm(v.pl)}</td><td>${fmtRm(v.s)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${fmtRm(avgStake)}</td><td>${avgOdd.toFixed(2)}</td></tr>`;
   }).join('');
   const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
   const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  document.querySelector('#tipsterMonthTable tbody').innerHTML=mHTML+`<tr class="total-row"><td>Total</td><td>${totB}</td><td style="${tc2}">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${rc2}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td><td>${tWr.toFixed(1)}%</td><td>${totB>0?fmtR(totS/totB):'—'}</td><td>—</td></tr>`;
+  document.querySelector('#tipsterMonthTable tbody').innerHTML=mHTML+`<tr class="total-row"><td>Total</td><td>${totB}</td><td style="${tc2}">${fmtPLm(totPL)}</td><td>${fmtRm(totS)}</td><td style="${rc2}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td><td>${tWr.toFixed(1)}%</td><td>${totB>0?fmtRm(totS/totB):'—'}</td><td>—</td></tr>`;
   setTimeout(()=>makeSortable('tipsterMonthTable',[1,2,3,4,5,6,7]),100);
 }
 
@@ -2485,14 +2488,14 @@ function renderApostas(){
     ].filter(Boolean).join('');
     const activeTips=[...new Set(apostasFiltered.map(r=>r.tipster).filter(Boolean))];
     const row1=[
-      mkKA('P/L', fmtPL(pl), pl>=0?'pos':'neg', ''),
-      mkKA('Turnover', fmtR(stake), 'neu', ''),
+      mkKA('P/L', fmtPLm(pl), pl>=0?'pos':'neg', ''),
+      mkKA('Turnover', fmtRm(stake), 'neu', ''),
       mkKA('ROI', (roi>=0?'+':'')+roi.toFixed(2)+'%', roi>=0?'pos':'neg', ''),
       mkKA('Tipsters Ativos', activeTips.length.toString(), 'neu', activeTips.slice(0,3).join(', ')+(activeTips.length>3?'...':'')),
     ];
     const row2=[
       mkKA('Apostas', apostasFiltered.length.toLocaleString('pt-BR'), 'neu', betsBreak),
-      mkKA('Stake Média', fmtR(avgStakeAp), 'neu', 'por aposta'),
+      mkKA('Stake Média', fmtRm(avgStakeAp), 'neu', 'por aposta'),
       mkKA('Odd Média Pond.', avgOddAp.toFixed(2), 'neu', 'Σ(odd×stake)/Σ(stake)'),
       mkKA('Win Rate', wr.toFixed(1)+'%', wr>=50?'pos':'neg', settled+' encerradas'),
     ];
@@ -2789,7 +2792,7 @@ function renderParceiros(rows){
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
     const cc=custo>0?'color:var(--amber)':'color:var(--text3)';
-    return`<tr><td style="font-weight:700;color:var(--text)">${f}</td><td>${d.contas.size}</td><td>${d.n}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td style="${cc}">${custo>0?'R$ '+fmt(custo,0):'—'}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${f}</td><td>${d.contas.size}</td><td>${d.n}</td><td>${fmtRm(d.s)}</td><td style="${lc}">${fmtPLm(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td style="${cc}">${custo>0?'R$ '+fmt(custo,0):'—'}</td></tr>`;
   }).join('');
   const totFornPL=fornEnts.reduce((a,[,d])=>a+d.l,0);
   const totFornS=fornEnts.reduce((a,[,d])=>a+d.s,0);
@@ -2799,7 +2802,7 @@ function renderParceiros(rows){
   const totFornROI=totFornS>0?(totFornPL/totFornS*100):0;
   const totFornLC=totFornPL>=0?'color:var(--green)':'color:var(--red)';
   const totFornRC=totFornROI>=0?'color:var(--green)':'color:var(--red)';
-  const fornTotalRow=`<tr class="total-row"><td style="font-weight:700">Total</td><td>${totFornContas}</td><td>${totFornN}</td><td>${fmtR(totFornS)}</td><td style="${totFornLC}">${fmtPL(totFornPL)}</td><td style="${totFornRC}">${(totFornROI>=0?'+':'')+totFornROI.toFixed(2)}%</td><td style="color:var(--amber)">${totFornCusto>0?'R$ '+fmt(totFornCusto,0):'—'}</td></tr>`;
+  const fornTotalRow=`<tr class="total-row"><td style="font-weight:700">Total</td><td>${totFornContas}</td><td>${totFornN}</td><td>${fmtRm(totFornS)}</td><td style="${totFornLC}">${fmtPLm(totFornPL)}</td><td style="${totFornRC}">${(totFornROI>=0?'+':'')+totFornROI.toFixed(2)}%</td><td style="color:var(--amber)">${totFornCusto>0?'R$ '+fmt(totFornCusto,0):'—'}</td></tr>`;
   document.getElementById('fornTable').innerHTML=`<table class="tbl" id="tblForn"><thead><tr><th>Fornecedor<span class="sort-icon"></span></th><th>Contas<span class="sort-icon"></span></th><th>Apostas<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Lucro<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Custo<span class="sort-icon"></span></th></tr></thead><tbody>${fornTotalRow}${fornRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblForn',[1,2,3,4,5,6]),100);
   const grandTotal=allCasas.reduce((a,c)=>a+(casaTotal[c]||0),0);
@@ -2921,12 +2924,12 @@ function renderOvStreaks(rows){
       </div>
       <div class="kpi" style="border-color:var(--amber)22">
         <div class="kpi-label" style="color:var(--amber)">Topo Histórico</div>
-        <div class="kpi-val pos">${fmtPL(peakVal)}</div>
+        <div class="kpi-val pos">${fmtPLm(peakVal)}</div>
         <div class="kpi-sub">atingido em ${peakDateFmt}</div>
       </div>
       <div class="kpi">
         <div class="kpi-label">Distância do Topo</div>
-        <div class="kpi-val ${cum<peakVal?'neg':'pos'}">${cum<peakVal?fmtPL(cum-peakVal):fmtPL(0)}</div>
+        <div class="kpi-val ${cum<peakVal?'neg':'pos'}">${cum<peakVal?fmtPLm(cum-peakVal):fmtPLm(0)}</div>
         <div class="kpi-sub">P/L atual: ${fmtPL(cum)}</div>
       </div>
     </div>`;
@@ -3063,7 +3066,7 @@ function renderResultadosCasa(){
   const totWR=totT>0?(totW/totT*100):0;
   const kpiEl=document.getElementById('resultadosCasaKPI');
   if(kpiEl)kpiEl.innerHTML=[
-    {l:'P/L Total',v:fmtPL(totPL),c:totPL>=0?'pos':'neg',s:'Turnover: '+fmtR(totS)},
+    {l:'P/L Total',v:fmtPLm(totPL),c:totPL>=0?'pos':'neg',s:'Turnover: '+fmtR(totS)},
     {l:'ROI',v:(totROI>=0?'+':'')+totROI.toFixed(2)+'%',c:totROI>=0?'pos':'neg',s:rows.length+' apostas'},
     {l:'Win Rate',v:totWR.toFixed(1)+'%',c:totWR>=50?'pos':'neg',s:`${ents.length} casas`},
     {l:'Odd Média Pond.',v:calcAvgOdd(rows).toFixed(2),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
@@ -3091,7 +3094,7 @@ function renderResultadosCasa(){
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?((d.w+d.hw)/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--green)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--red)">L:${d.l2}</span> <span style="color:var(--text3)">V:${d.v}</span></td><td>${wr.toFixed(1)}%</td><td>${fmtR(d.s)}</td><td style="${lc};font-weight:600">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td></tr>`;
+    return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--green)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--red)">L:${d.l2}</span> <span style="color:var(--text3)">V:${d.v}</span></td><td>${wr.toFixed(1)}%</td><td>${fmtRm(d.s)}</td><td style="${lc};font-weight:600">${fmtPLm(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td></tr>`;
   }).join('');
   const tblEl=document.getElementById('resultadosCasaTable');
   if(tblEl)tblEl.innerHTML=`<table class="tbl" id="tblResCasa"><thead><tr><th>Casa<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th></tr></thead><tbody>${tblRows}</tbody></table>`;
@@ -3107,10 +3110,10 @@ function renderMetrics(rows){
   const roi=calcROI(rows),wr=calcWR(rows),avgOdd=calcAvgOdd(rows);
   const stake=rows.reduce((a,r)=>a+r.stake,0);
   document.getElementById('metricsKPI').innerHTML=[
-    {l:'MDD Real (R$)',v:'R$ '+fmt(mddR,0),c:mddR<5000?'pos':mddR<15000?'neu':'neg'},
+    {l:'MDD Real (R$)',v:fmtRm(mddR),c:mddR<5000?'pos':mddR<15000?'neu':'neg'},
     {l:'MDD Real (%)',v:mddPct.toFixed(2)+'%',c:mddPct<15?'pos':mddPct<30?'neu':'neg'},
-    {l:'EMDD (R$)',v:'R$ '+fmt(emdd,0),c:emdd<5000?'pos':emdd<15000?'neu':'neg'},
-    {l:'XMDD Monte Carlo',v:'R$ '+fmt(xmdd,0),c:xmdd<5000?'pos':xmdd<15000?'neu':'neg'},
+    {l:'EMDD (R$)',v:fmtRm(emdd),c:emdd<5000?'pos':emdd<15000?'neu':'neg'},
+    {l:'XMDD Monte Carlo',v:fmtRm(xmdd),c:xmdd<5000?'pos':xmdd<15000?'neu':'neg'},
     {l:'P-Value',v:pval<0.001?'<0.001':pval.toFixed(3),c:pval<0.05?'pos':pval<0.15?'neu':'neg'},
     {l:'Profit / EMDD',v:profEmdd,c:parseFloat(profEmdd)>=5?'pos':parseFloat(profEmdd)>=2?'neu':'neg'},
   ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div></div>`).join('');

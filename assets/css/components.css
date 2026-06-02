@@ -287,10 +287,15 @@
 .tbl tbody tr:hover td { background: rgba(30,144,255,0.04); }
 .tbl td.td-num,
 .tbl th.td-num,
-.num {
+.num,
+.kpi-val {
   text-align: right !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
+}
+.tbl td.td-num,
+.tbl th.td-num,
+.num {
   font-family: var(--font-mono);
 }
 .tbl td.td-name, .tbl th.td-name { font-family: var(--font-sans); }
