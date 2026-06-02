@@ -216,8 +216,7 @@ function buildHTML(){
   </div>
   <div class="app">
     <aside class="sidebar">
-      <div class="sidebar-logo">
-      </div>
+      <div class="sidebar-logo"><img src="brand/Logo_Vertical_Dark.png?v=3" class="logo-dark" alt="FDC Capital" draggable="false" style="width:202px;display:block;margin:0 auto;"><img src="brand/Logo_Vertical_Claro.png?v=3" class="logo-light" alt="FDC Capital" draggable="false" style="width:202px;display:block;margin:0 auto;"></div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
         ${[
