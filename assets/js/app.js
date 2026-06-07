@@ -526,8 +526,10 @@ window.deleteCG=function(idx){
 };
 
 async function loadData(){
-  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><img src="brand/fdc-logo-horizontal-dark.svg" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div></div></div>`;
-  // Fase 1: animação CSS 0→70% em 2s — sem setTimeout de simulação
+  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><img src="brand/fdc-logo-horizontal-dark.svg" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-pct" id="loaderPct">0%</div><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div></div>`;
+  // Fase 1: animação CSS 0→70% em 2s — contador JS sincronizado
+  let _pctRAF;const _pctT0=Date.now();
+  (function _tick(){const pEl=document.getElementById('loaderPct');if(!pEl)return;const t=Math.min((Date.now()-_pctT0)/2000,1);const e=1-Math.pow(1-t,3);pEl.textContent=Math.round(e*70)+'%';if(t<1)_pctRAF=requestAnimationFrame(_tick);})();
   let _fetchErr=null;
   try{
     const _ctrl=new AbortController();
@@ -542,8 +544,11 @@ async function loadData(){
     DADOS=[];
   }
   // Fase 2: fetch retornou → completa barra em 0.3s, depois fade out
+  cancelAnimationFrame(_pctRAF);
   const bar=document.getElementById('loaderBar');
   const loader=document.getElementById('loaderEl');
+  const pctEl=document.getElementById('loaderPct');
+  if(pctEl)pctEl.textContent='100%';
   if(bar){bar.classList.remove('p1');bar.style.width='100%';}
   await new Promise(r=>setTimeout(r,320));
   if(loader){loader.style.opacity='0';}
