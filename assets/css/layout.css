@@ -323,19 +323,25 @@ html, body {
   z-index: 9999;
   transition: opacity 0.35s ease;
 }
+.loader-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  width: 676px;
+  max-width: 88vw;
+}
 .loader-pct {
-  margin-top: 20px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: .06em;
   color: var(--text3);
 }
 .loader-bar-wrap {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
   width: 100%;
-  height: 10px;
-  border-radius: 0;
+  height: 8px;
+  border-radius: 100px;
   background: var(--border2);
   overflow: hidden;
 }
@@ -343,7 +349,7 @@ html, body {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  border-radius: 0;
+  border-radius: 100px;
   transition: width 0.3s ease;
 }
 /* Fase 1: CSS animation 0→70% enquanto fetch corre */
