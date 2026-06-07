@@ -45,7 +45,6 @@ html, body {
 }
 
 .sidebar-logo img {
-  display: block;
   width: 100%;
   max-width: 160px;
   height: auto;
@@ -353,8 +352,8 @@ html, body {
   transition: width 0.3s ease;
 }
 /* Fase 1: CSS animation 0→70% enquanto fetch corre */
-@keyframes _loaderP1 { from { width: 0% } to { width: 70% } }
-.loader-bar-fill.p1 { animation: _loaderP1 2s ease-out forwards; }
+@keyframes _loaderP1 { from { width: 0% } to { width: 90% } }
+.loader-bar-fill.p1 { animation: _loaderP1 90s ease-out forwards; }
 .spinner { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
