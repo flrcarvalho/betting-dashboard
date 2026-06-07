@@ -41,7 +41,7 @@ const CASA_ICONS={
 };
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MESES_CURTOS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const TC_COLORS=['#00C896','#1E90FF','#F5A623','#a78bfa','#FF4757','#2dd4bf','#ffd700','#ff8c69','#98fb98','#dda0dd','#87ceeb','#ffa07a','#c084fc','#fb923c','#34d399'];
+const TC_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#E5524B','#34d399','#fbbf24','#60a5fa','#fb923c','#AEB7C2','#95A1B0','#1E7CF0','#fbbf24','#2BC07E','#2E8BFF'];
 
 // Sport emoji map
 // Sport SVG icons — minimal line style
@@ -107,3 +107,4 @@ function sportCell(nome){
 let DADOS=[], charts={};
 
 // Theme
+

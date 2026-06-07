@@ -216,7 +216,7 @@ function buildHTML(){
   </div>
   <div class="app">
     <aside class="sidebar">
-      <div class="sidebar-logo"><img src="brand/Logo_Vertical_Dark.png?v=4" class="logo-dark" alt="FDC Capital" draggable="false" style="width:202px;display:block;margin:0 auto;"><img src="brand/Logo_Vertical_Claro.png?v=4" class="logo-light" alt="FDC Capital" draggable="false" style="width:202px;display:block;margin:0 auto;"></div>
+      <div class="sidebar-logo"><img src="brand/fdc-logo-vertical-dark.svg" class="logo-dark" alt="FDC Capital" draggable="false" style="width:202px;display:block;margin:0 auto;"><img src="brand/fdc-logo-vertical-light.svg" class="logo-light" alt="FDC Capital" draggable="false" style="width:202px;display:block;margin:0 auto;"></div>
       <nav class="sidebar-nav">
         <div class="nav-group">Análise</div>
         ${[
@@ -520,7 +520,7 @@ window.deleteCG=function(idx){
 };
 
 async function loadData(){
-  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><img src="brand/01_logo_principal_dark.png" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div></div></div>`;
+  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><img src="brand/fdc-logo-horizontal-dark.svg" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div></div></div>`;
   // Fase 1: animação CSS 0→70% em 2s — sem setTimeout de simulação
   let _fetchErr=null;
   try{
@@ -542,11 +542,12 @@ async function loadData(){
   buildHTML();
   if(_fetchErr){
     const banner=document.createElement('div');
-    banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(255,71,87,0.12);border-bottom:1px solid rgba(255,71,87,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#FF4757';
-    banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${_fetchErr}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(255,71,87,0.4);color:#FF4757;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#FF4757;cursor:pointer;font-size:14px">×</button>`;
+    banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(229,82,75,0.12);border-bottom:1px solid rgba(229,82,75,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#E5524B';
+    banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${_fetchErr}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(229,82,75,0.4);color:#E5524B;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#E5524B;cursor:pointer;font-size:14px">×</button>`;
     document.body.appendChild(banner);
   }else{
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   }
 }
 loadData();
+

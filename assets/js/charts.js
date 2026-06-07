@@ -36,11 +36,11 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     if(!data) return {bg:'var(--bg4)',border:'var(--border)',clr:'var(--text3)',pl:null,n:0};
     const pl=data.pl;
     let bg,border,clr='#fff';
-    if(pl>5000)      {bg='#00C896';border='rgba(0,200,150,.5)';}
+    if(pl>5000)      {bg='#2BC07E';border='rgba(43,192,126,.5)';}
     else if(pl>1000) {bg='#00a876';border='rgba(0,168,118,.5)';}
     else if(pl>=0)   {bg='#4db896';border='rgba(77,184,150,.5)';}
     else if(pl>=-1000){bg='#ff8a94';border='rgba(255,138,148,.5)';}
-    else if(pl>=-5000){bg='#FF4757';border='rgba(255,71,87,.5)';}
+    else if(pl>=-5000){bg='#E5524B';border='rgba(229,82,75,.5)';}
     else              {bg='#cc1a2a';border='rgba(204,26,42,.5)';}
     return{bg,border,clr,pl,n:data.n};
   };
@@ -156,7 +156,7 @@ function renderBankroll(rows){
     const p=d.split('-');return p[2]+'/'+p[1];
   });
   mkChart('chartBankroll',{type:'bar',data:{labels:lbl,datasets:[
-    {type:'line',data:cumPL,borderColor:'#00C896',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
+    {type:'line',data:cumPL,borderColor:'#2BC07E',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
     {type:'bar',data:dpL,backgroundColor:dpL.map(v=>v>=0?'rgba(0,214,143,.6)':'rgba(240,80,110,.6)'),borderRadius:1,yAxisID:'y',label:'Diário',barPercentage:0.9,categoryPercentage:1.0}
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
@@ -212,17 +212,17 @@ function renderOddsDist(rows){
   const wrs=bdata.map(b=>b.n>0?parseFloat((b.w/b.n*100).toFixed(1)):null);
   const rois=bdata.map(b=>b.s>0?parseFloat((b.pl/b.s*100).toFixed(2)):null);
   mkChart('chartOddsDist',{type:'bar',data:{labels:lbls,datasets:[
-    {type:'bar',data:counts,backgroundColor:'rgba(91,156,246,.55)',borderRadius:3,label:'Apostas',yAxisID:'y'},
-    {type:'line',data:wrs,borderColor:'#00C896',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#00C896',borderWidth:2,label:'Win Rate %',yAxisID:'y1',spanGaps:false},
-    {type:'line',data:rois,borderColor:'#F5A623',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#F5A623',borderWidth:2,label:'ROI %',yAxisID:'y2',borderDash:[4,3],spanGaps:false}
+    {type:'bar',data:counts,backgroundColor:'rgba(46,139,255,.55)',borderRadius:3,label:'Apostas',yAxisID:'y'},
+    {type:'line',data:wrs,borderColor:'#2BC07E',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#2BC07E',borderWidth:2,label:'Win Rate %',yAxisID:'y1',spanGaps:false},
+    {type:'line',data:rois,borderColor:'#E0A21A',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#E0A21A',borderWidth:2,label:'ROI %',yAxisID:'y2',borderDash:[4,3],spanGaps:false}
   ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,position:'top',labels:{color:tc(),font:{size:11},boxWidth:12,padding:16}},
       tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return'Apostas: '+ctx.raw;if(ctx.datasetIndex===1)return'Win Rate: '+(ctx.raw?.toFixed(1)||'—')+'%';return'ROI: '+(ctx.raw?.toFixed(2)||'—')+'%';}}}},
     scales:{
       x:{ticks:{color:tc(),font:{size:10}},grid:{display:false},border:{display:false}},
       y:{ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false},position:'left'},
-      y1:{ticks:{color:'#00C896',font:{size:10},callback:v=>v+'%'},grid:{display:false},border:{display:false},position:'right'},
-      y2:{ticks:{color:'#F5A623',font:{size:10},callback:v=>v+'%'},grid:{display:false},border:{display:false},position:'right',offset:true}
+      y1:{ticks:{color:'#2BC07E',font:{size:10},callback:v=>v+'%'},grid:{display:false},border:{display:false},position:'right'},
+      y2:{ticks:{color:'#E0A21A',font:{size:10},callback:v=>v+'%'},grid:{display:false},border:{display:false},position:'right',offset:true}
     }}});
 }
 
@@ -302,12 +302,12 @@ function renderOvTipsters(rows){
   // Donut chart: participation in positive P/L
   const winners=ents.filter(e=>e[1].pl>0);
   const totalPos=winners.reduce((a,e)=>a+e[1].pl,0);
-  const PIE_COLORS=['#00C896','#1E90FF','#F5A623','#a78bfa','#2dd4bf','#f87171','#34d399','#fbbf24','#60a5fa','#c084fc','#fb923c','#ffd700','#ff8c69','#dda0dd','#87ceeb'];
+  const PIE_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#95A1B0','#E5524B','#34d399','#fbbf24','#60a5fa','#AEB7C2','#fb923c','#E0A21A','#1E7CF0','#AEB7C2','#60a5fa'];
   mkChart('chartOvTipsterPie',{type:'doughnut',
     data:{labels:winners.map(e=>e[0]),datasets:[{
       data:winners.map(e=>parseFloat(e[1].pl.toFixed(2))),
       backgroundColor:PIE_COLORS.slice(0,winners.length),
-      borderWidth:2,borderColor:isDark()?'#081320':'#fff'
+      borderWidth:2,borderColor:isDark()?'#0A0D12':'#fff'
     }]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{
@@ -712,7 +712,7 @@ function renderMensal(){
     const dailyVals=cumByDay.map(d=>d.pl);
     const cumVals=cumByDay.map(d=>d.cum);
     mkChart('chartMensalCum',{type:'bar',data:{labels,datasets:[
-      {type:'line',data:cumVals,borderColor:'#00C896',tension:.4,pointRadius:3,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
+      {type:'line',data:cumVals,borderColor:'#2BC07E',tension:.4,pointRadius:3,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
       {type:'bar',data:dailyVals,backgroundColor:dailyVals.map(v=>v>=0?'rgba(0,214,143,.6)':'rgba(240,80,110,.6)'),borderRadius:2,yAxisID:'y',label:'Diário'}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:true,position:'top',labels:{color:isDark()?'#eeedf0':'#0f0f18',font:{size:11},boxWidth:10,padding:12}},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtPL(ctx.raw)}}},
@@ -1123,7 +1123,7 @@ function renderSemana(){
     const posPerc = calcPercentiles(posVals);
     const negPerc = calcPercentiles(negVals);
     mkChart('chartSemanaPL',{type:'bar',data:{labels:dayLabels,datasets:[
-      {type:'line',data:cumData,borderColor:'#00E5FF',tension:.4,pointRadius:4,pointBackgroundColor:'#00E5FF',fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
+      {type:'line',data:cumData,borderColor:'#7FB2FF',tension:.4,pointRadius:4,pointBackgroundColor:'#7FB2FF',fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
       {type:'bar',data:dailyPLs,backgroundColor:dailyPLs.map(v=>getBarColor(v,posPerc,negPerc)),borderRadius:4,yAxisID:'y',label:'Diário'}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:true,position:'top',labels:{color:isDark()?'#eeedf0':'#0f0f18',font:{size:11},boxWidth:10,padding:12}},
@@ -1618,7 +1618,7 @@ function renderCostPies(){
   const casaTots={};
   allCasas.forEach(c=>{casaTots[c]=allForns.reduce((a,f)=>{const k=f+'||'+c;return a+(custoData[k]||0)*(contaCount[k]||0);},0);});
   const cEnts=Object.entries(casaTots).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
-  const PIE_COLORS=['#00C896','#1E90FF','#F5A623','#a78bfa','#2dd4bf','#f87171','#34d399','#fbbf24','#60a5fa','#c084fc','#fb923c','#ffd700','#ff8c69','#dda0dd','#87ceeb'];
+  const PIE_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#95A1B0','#E5524B','#34d399','#fbbf24','#60a5fa','#AEB7C2','#fb923c','#E0A21A','#1E7CF0','#AEB7C2','#60a5fa'];
   if(!fEnts.length){destroyChart('chartCostForn');destroyChart('chartCostCasa');return;}
   const txtColor=isDark()?'#eeedf0':'#0f0f18';
   const pieOpts=(totalVal)=>({responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{
@@ -1633,9 +1633,9 @@ function renderCostPies(){
       });}}},
     tooltip:{callbacks:{label:ctx=>{const pct=totalVal>0?(ctx.raw/totalVal*100).toFixed(1):'0';return`${ctx.label}: R$ ${fmt(ctx.raw,0)} (${pct}%)`}}}}});
   const fTotal=fEnts.reduce((a,e)=>a+e[1],0);
-  mkChart('chartCostForn',{type:'doughnut',data:{labels:fEnts.map(e=>e[0]),datasets:[{data:fEnts.map(e=>parseFloat(e[1].toFixed(2))),backgroundColor:PIE_COLORS.slice(0,fEnts.length),borderWidth:3,borderColor:isDark()?'#081320':'#fff',hoverOffset:8}]},options:pieOpts(fTotal)});
+  mkChart('chartCostForn',{type:'doughnut',data:{labels:fEnts.map(e=>e[0]),datasets:[{data:fEnts.map(e=>parseFloat(e[1].toFixed(2))),backgroundColor:PIE_COLORS.slice(0,fEnts.length),borderWidth:3,borderColor:isDark()?'#0A0D12':'#fff',hoverOffset:8}]},options:pieOpts(fTotal)});
   const cTotal=cEnts.reduce((a,e)=>a+e[1],0);
-  mkChart('chartCostCasa',{type:'doughnut',data:{labels:cEnts.map(e=>e[0]),datasets:[{data:cEnts.map(e=>parseFloat(e[1].toFixed(2))),backgroundColor:PIE_COLORS.slice(0,cEnts.length),borderWidth:3,borderColor:isDark()?'#081320':'#fff',hoverOffset:8}]},options:pieOpts(cTotal)});
+  mkChart('chartCostCasa',{type:'doughnut',data:{labels:cEnts.map(e=>e[0]),datasets:[{data:cEnts.map(e=>parseFloat(e[1].toFixed(2))),backgroundColor:PIE_COLORS.slice(0,cEnts.length),borderWidth:3,borderColor:isDark()?'#0A0D12':'#fff',hoverOffset:8}]},options:pieOpts(cTotal)});
 }
 
 function buildCostTable(allForns,allCasas,contaCount){
@@ -1727,7 +1727,7 @@ function renderParceiros(rows){
 function renderCustoCards(allForns,allCasas,contaCount){
   const el=document.getElementById('fornCustoCards');
   if(!el)return;
-  const PIE_COLORS=['#00C896','#1E90FF','#F5A623','#a78bfa','#2dd4bf','#f87171','#34d399','#fbbf24','#60a5fa','#c084fc','#fb923c'];
+  const PIE_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#95A1B0','#E5524B','#34d399','#fbbf24','#60a5fa','#AEB7C2','#fb923c'];
   const fornTots={};
   allForns.forEach(f=>{fornTots[f]=allCasas.reduce((a,c)=>{const k=f+'||'+c;return a+(custoData[k]||0)*(contaCount[k]||0);},0);});
   const grandCost=Object.values(fornTots).reduce((a,v)=>a+v,0);
@@ -1846,7 +1846,7 @@ function renderOvCusto(){
     el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:12px;font-family:'Manrope',sans-serif">Aguardando dados...</div>`;
     return;
   }
-  const PIE_COLORS=['#00C896','#1E90FF','#F5A623','#a78bfa','#2dd4bf','#f87171','#34d399','#fbbf24','#60a5fa','#c084fc','#fb923c'];
+  const PIE_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#95A1B0','#E5524B','#34d399','#fbbf24','#60a5fa','#AEB7C2','#fb923c'];
   const fornTots={};
   allForns.forEach(f=>{fornTots[f]=allCasas.reduce((a,c)=>{const k=f+'||'+c;return a+(custoData[k]||0)*(contaCount[k]||0);},0);});
   const grandCost=Object.values(fornTots).reduce((a,v)=>a+v,0);
@@ -2109,4 +2109,8 @@ function renderCustoTipster(){
       `)}
     </div>`;
 }
+
+
+
+
 

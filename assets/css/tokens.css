@@ -1,120 +1,95 @@
-/* ── FDC Capital — Design Tokens ─────────────────────────────────────────── */
+/* ============================================================
+   FDC CAPITAL — Design Tokens
+   Paleta: Platinum + Electric Blue
+   Dark é o tema padrão; [data-theme="light"] inverte.
+   ============================================================ */
 
-[data-theme="dark"] {
-  /* Backgrounds */
-  --bg:       #081320;
-  --bg2:      #0d1f34;
-  --bg3:      rgba(13,31,52,0.6);
-  --bg4:      rgba(8,19,32,0.8);
-  --bg5:      #1a2b3c;
-
-  /* Borders */
-  --border:   rgba(183,190,200,0.08);
-  --border2:  rgba(183,190,200,0.15);
-  --border3:  rgba(183,190,200,0.25);
-  --border-blue: rgba(30,144,255,0.3);
-
-  /* Text */
-  --text:     #FFFFFF;
-  --text2:    #B7BEC8;
-  --text3:    rgba(183,190,200,0.55);
-
-  /* Brand */
-  --blue:     #1E90FF;
-  --cyan:     #00E5FF;
-  --navy:     #081320;
-  --graphite: #2D323A;
-  --silver:   #B7BEC8;
-
-  /* Semantic */
-  --green:      #00C896;
-  --green-dim:  rgba(0,200,150,0.12);
-  --red:        #FF4757;
-  --red-dim:    rgba(255,71,87,0.12);
-  --amber:      #F5A623;
-  --purple:     #a78bfa;
-  --teal:       #2dd4bf;
-
-  /* Half-win / half-loss */
-  --hw:     #34d399;
-  --hw-dim: rgba(52,211,153,0.12);
-  --hl:     #f87171;
-  --hl-dim: rgba(248,113,113,0.12);
-
-  /* Chart helpers */
-  --grid: rgba(255,255,255,0.05);
-  --tick: #505060;
-
-  /* Scrollbar */
-  --sb-track:       #0d1f34;
-  --sb-thumb:       #2D323A;
-  --sb-thumb-hover: #3d4a5a;
-
-  /* Shadows */
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md:   0 4px 16px rgba(0,0,0,0.4);
-  --shadow-blue: 0 0 24px rgba(30,144,255,0.15);
-}
-
-[data-theme="light"] {
-  --bg:       #ffffff;
-  --bg2:      #f0f4f8;
-  --bg3:      rgba(255,255,255,0.95);
-  --bg4:      #edf1f5;
-  --bg5:      #e2e8ef;
-
-  --border:   rgba(0,0,0,0.08);
-  --border2:  rgba(0,0,0,0.14);
-  --border3:  rgba(0,0,0,0.22);
-  --border-blue: rgba(30,144,255,0.3);
-
-  --text:     #0f0f18;
-  --text2:    #505068;
-  --text3:    #a0a0b8;
-
-  --blue:     #1565c0;
-  --cyan:     #0097a7;
-  --navy:     #f2f2f5;
-  --graphite: #c8cdd6;
-  --silver:   #505068;
-
-  --green:      #00a876;
-  --green-dim:  rgba(0,168,118,0.08);
-  --red:        #d63050;
-  --red-dim:    rgba(214,48,80,0.08);
-  --amber:      #d97706;
-  --purple:     #7c3aed;
-  --teal:       #0d9488;
-
-  --hw:     #059669;
-  --hw-dim: rgba(5,150,105,0.08);
-  --hl:     #b91c1c;
-  --hl-dim: rgba(185,28,28,0.08);
-
-  --grid: rgba(0,0,0,0.06);
-  --tick: #b0b0c0;
-
-  --sb-track:       #e4e4ea;
-  --sb-thumb:       #b0b0c0;
-  --sb-thumb-hover: #8080a0;
-
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.1);
-  --shadow-md:   0 4px 16px rgba(0,0,0,0.15);
-  --shadow-blue: 0 0 24px rgba(30,144,255,0.1);
-}
-
-/* ── Typography scale ──────────────────────────────────────────────────────── */
 :root {
-  --font-sans: 'Manrope', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* ---- Marca (constantes, não mudam por tema) ---- */
+  --fdc-base:        #0A0D12;
+  --fdc-blue:        #2E8BFF;
+  --fdc-blue-2:      #7FB2FF;
+  --fdc-steel:       #222831;
+  --fdc-platinum:    #AEB7C2;
+  --fdc-white:       #FFFFFF;
 
-  --text-xs:   11px;   /* labels, badges */
-  --text-sm:   13px;   /* body, tables */
-  --text-base: 15px;   /* texto corrido */
-  --text-lg:   18px;   /* subtítulos */
-  --text-xl:   22px;   /* títulos */
-  --text-2xl:  28px;   /* KPI values, headlines */
-  --text-3xl:  36px;   /* hero */
+  /* ---- Funcionais ---- */
+  --pos:  #2BC07E;
+  --neg:  #E5524B;
+  --warn: #E0A21A;
+
+  /* ---- Superfícies (dark, padrão) ---- */
+  --bg:        #0A0D12;
+  --surface:   #12161D;
+  --surface-2: #161B22;
+  --elevated:  #1A2029;
+  --field:     #161B22;
+  --line:      rgba(255, 255, 255, 0.08);
+  --line-2:    rgba(255, 255, 255, 0.05);
+
+  /* ---- Tinta ---- */
+  --ink:       #EEF2F7;
+  --ink-soft:  #95A1B0;
+  --ink-mute:  #5E6775;
+
+  /* ---- Acento ---- */
+  --accent:    #2E8BFF;
+  --accent-2:  #7FB2FF;
+
+  /* ---- Sombras / brilho ---- */
+  --shadow-card: 0 40px 90px -40px rgba(0, 0, 0, 0.7);
+  --glow: 0 0 0 1px rgba(46, 139, 255, 0.35), 0 8px 40px -12px rgba(46, 139, 255, 0.45);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ---- Aliases backward-compat (layout/components/charts/app) ---- */
+  --blue:     var(--accent);
+  --navy:     var(--bg);
+  --graphite: var(--fdc-steel);
+  --silver:   var(--fdc-platinum);
+  --text:     var(--ink);
+  --text2:    var(--ink-soft);
+  --text3:    var(--ink-mute);
+  --bg2:      var(--surface);
+  --bg3:      var(--surface-2);
+  --bg4:      var(--field);
+  --bg5:      var(--elevated);
+  --border:   var(--line-2);
+  --border2:  var(--line);
+  --border3:  rgba(255, 255, 255, 0.20);
+  --border-blue: rgba(46, 139, 255, 0.30);
+  --green:    var(--pos);
+  --red:      var(--neg);
+  --amber:    var(--warn);
+
+  /* ---- Específicos Betting Dashboard ---- */
+  --green-dim:  rgba(43, 192, 126, 0.12);
+  --red-dim:    rgba(229, 82, 75, 0.12);
+  --hw:         #2BC07E;
+  --hw-dim:     rgba(43, 192, 126, 0.12);
+  --hl:         #E5524B;
+  --hl-dim:     rgba(229, 82, 75, 0.12);
+  --grid:       rgba(255, 255, 255, 0.05);
+  --tick:       #5E6775;
+  --sb-track:       var(--surface);
+  --sb-thumb:       var(--fdc-steel);
+  --sb-thumb-hover: var(--elevated);
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-blue: 0 0 24px rgba(46, 139, 255, 0.15);
+
+  /* ---- Tipografia ---- */
+  --font-sans: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-lg:   18px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+  --text-3xl:  36px;
 
   --weight-regular:   400;
   --weight-medium:    500;
@@ -122,20 +97,79 @@
   --weight-bold:      700;
   --weight-extrabold: 800;
 
-  /* Spacing (4px grid) */
-  --space-1:  4px;
-  --space-2:  8px;
-  --space-3:  12px;
-  --space-4:  16px;
-  --space-6:  24px;
-  --space-8:  32px;
-  --space-12: 48px;
-  --space-16: 64px;
+  /* ---- Espaçamento (escala 4px) ---- */
+  --space-1:  4px;  --space-2:  8px;  --space-3: 12px; --space-4: 16px;
+  --space-6: 24px;  --space-8: 32px;  --space-12: 48px; --space-16: 64px;
+  --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px;  --sp-8: 32px; --sp-10: 40px;
+  --sp-14: 56px; --sp-20: 80px;
 
-  /* Radius */
-  --radius-sm: 4px;
-  --radius:    8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* ---- Raio ---- */
+  --radius-sm:   4px;
+  --radius:      8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
   --radius-pill: 100px;
+  --r-xs:  4px;
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  18px;
+  --r-xl:  26px;
+  --r-pill: 999px;
+}
+
+/* ============ Tema claro ============ */
+:root[data-theme="light"] {
+  --bg:        #F4F7FB;
+  --surface:   #FFFFFF;
+  --surface-2: #EDF2F7;
+  --elevated:  #FFFFFF;
+  --field:     #FFFFFF;
+  --line:      rgba(10, 15, 25, 0.10);
+  --line-2:    rgba(10, 15, 25, 0.055);
+
+  --ink:       #0E1626;
+  --ink-soft:  #46586D;
+  --ink-mute:  #7C8BA0;
+
+  --accent:    #1E7CF0;
+  --accent-2:  #2E8BFF;
+  --glow: 0 0 0 1px rgba(30, 124, 240, 0.30), 0 10px 36px -14px rgba(30, 124, 240, 0.40);
+
+  /* ---- Aliases light ---- */
+  --blue:    var(--accent);
+  --text:    var(--ink);
+  --text2:   var(--ink-soft);
+  --text3:   var(--ink-mute);
+  --bg2:     var(--surface);
+  --bg3:     var(--surface-2);
+  --bg4:     var(--field);
+  --bg5:     #EDF2F7;
+  --border:  var(--line-2);
+  --border2: var(--line);
+  --border3: rgba(10, 15, 25, 0.20);
+  --border-blue: rgba(30, 124, 240, 0.30);
+  --green:   var(--pos);
+  --red:     var(--neg);
+  --amber:   var(--warn);
+
+  /* ---- Específicos light ---- */
+  --green-dim:  rgba(43, 192, 126, 0.08);
+  --red-dim:    rgba(229, 82, 75, 0.08);
+  --hw:         #2BC07E;
+  --hw-dim:     rgba(43, 192, 126, 0.08);
+  --hl:         #E5524B;
+  --hl-dim:     rgba(229, 82, 75, 0.08);
+  --grid:       rgba(0, 0, 0, 0.06);
+  --tick:       #7C8BA0;
+  --sb-track:       #EDF2F7;
+  --sb-thumb:       #AEB7C2;
+  --sb-thumb-hover: #7C8BA0;
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-blue: 0 0 24px rgba(30, 124, 240, 0.1);
+
+  --pos:  #2BC07E;
+  --neg:  #E5524B;
+  --warn: #E0A21A;
 }

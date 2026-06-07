@@ -1,8 +1,8 @@
-/* ── FDC Capital — Components ────────────────────────────────────────────── */
+﻿/* ── FDC Capital — Components ────────────────────────────────────────────── */
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .btn-export {
-  background: #1E90FF;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -16,8 +16,8 @@
   transition: background .12s;
   margin-left: auto;
 }
-.btn-export:hover { background: #1a7ee0; }
-.btn-export:disabled { background: #334455; color: #6677aa; cursor: not-allowed; }
+.btn-export:hover { background: #2070E8; }
+.btn-export:disabled { background: var(--surface-2); color: var(--ink-mute); cursor: not-allowed; }
 .qbtn {
   font-size: var(--text-xs);
   padding: 3px var(--space-2);
@@ -32,7 +32,7 @@
 .qbtn:hover {
   border-color: var(--blue);
   color: var(--blue);
-  background: rgba(30,144,255,0.08);
+  background: rgba(46,139,255,0.08);
 }
 .qbtn.active {
   border-color: var(--blue);
@@ -85,7 +85,7 @@
   font-size: 12px;
   color: var(--text2);
 }
-.ms-opt:hover { background: rgba(30,144,255,0.07); color: var(--text); }
+.ms-opt:hover { background: rgba(46,139,255,0.07); color: var(--text); }
 .ms-opt.sel { color: var(--blue); }
 .ms-chk {
   width: 13px; height: 13px;
@@ -195,7 +195,7 @@
   min-height: 44px;
   border-bottom: 1px solid var(--border);
 }
-.card-hdr:hover { background: rgba(30,144,255,0.03); }
+.card-hdr:hover { background: rgba(46,139,255,0.03); }
 .card-title {
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
@@ -284,7 +284,7 @@
   color: var(--text);
   background: var(--bg4);
 }
-.tbl tbody tr:hover td { background: rgba(30,144,255,0.04); }
+.tbl tbody tr:hover td { background: rgba(46,139,255,0.04); }
 .tbl td.td-num,
 .tbl th.td-num,
 .num,
@@ -310,7 +310,7 @@
   font-feature-settings: "tnum";
 }
 .money-sign {
-  color: #8899AA;
+  color: var(--ink-soft);
   min-width: 2ch;
   text-align: right;
   flex-shrink: 0;
@@ -526,14 +526,14 @@
   white-space: nowrap;
   letter-spacing: 0.04em;
 }
-.badge-win    { background: rgba(0,200,150,0.12);  color: var(--green); border: 1px solid rgba(0,200,150,0.2); }
-.badge-loss   { background: rgba(255,71,87,0.12);   color: var(--red);   border: 1px solid rgba(255,71,87,0.2); }
-.badge-hw     { background: rgba(52,211,153,0.12);  color: var(--hw);    border: 1px solid rgba(52,211,153,0.25); }
-.badge-hl     { background: rgba(248,113,113,0.12); color: var(--hl);    border: 1px solid rgba(248,113,113,0.25); }
+.badge-win    { background: rgba(43,192,126,0.12);  color: var(--green); border: 1px solid rgba(43,192,126,0.2); }
+.badge-loss   { background: rgba(229,82,75,0.12);   color: var(--red);   border: 1px solid rgba(229,82,75,0.2); }
+.badge-hw     { background: rgba(43,192,126,0.12);  color: var(--hw);    border: 1px solid rgba(43,192,126,0.25); }
+.badge-hl     { background: rgba(229,82,75,0.12); color: var(--hl);    border: 1px solid rgba(229,82,75,0.25); }
 .badge-void   { background: rgba(128,128,128,0.1);  color: var(--text3); border: 1px solid var(--border2); }
-.badge-blue   { background: rgba(30,144,255,0.15);  color: var(--blue);  border: 1px solid rgba(30,144,255,0.2); }
-.badge-cyan   { background: rgba(0,229,255,0.12);   color: var(--cyan);  border: 1px solid rgba(0,229,255,0.2); }
-.badge-amber  { background: rgba(245,166,35,0.12);  color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+.badge-blue   { background: rgba(46,139,255,0.15);  color: var(--blue);  border: 1px solid rgba(46,139,255,0.2); }
+.badge-cyan   { background: rgba(127,178,255,0.12);   color: var(--accent-2);  border: 1px solid rgba(127,178,255,0.2); }
+.badge-amber  { background: rgba(224,162,26,0.12);  color: var(--amber); border: 1px solid rgba(224,162,26,0.2); }
 
 /* ── Streak dots ─────────────────────────────────────────────────────────── */
 .streak { display: flex; flex-wrap: wrap; gap: 3px; }
@@ -584,7 +584,7 @@
   padding: 0.75rem var(--space-3);
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--cyan);
+  color: var(--accent-2);
   margin: 0.5rem 0;
 }
 .metric-desc { font-size: var(--text-sm); color: var(--text2); line-height: 1.7; margin: 0.5rem 0; }
@@ -649,7 +649,7 @@
   gap: 4px;
 }
 .apostas-sort-btn:hover,
-.apostas-sort-btn.active { border-color: var(--blue); color: var(--blue); background: rgba(30,144,255,0.08); }
+.apostas-sort-btn.active { border-color: var(--blue); color: var(--blue); background: rgba(46,139,255,0.08); }
 
 /* Bet card */
 .bet-card {
@@ -680,8 +680,8 @@
   font-weight: var(--weight-bold);
   color: var(--text);
   letter-spacing: 0.02em;
-  background: rgba(30,144,255,0.1);
-  border: 1px solid rgba(30,144,255,0.25);
+  background: rgba(46,139,255,0.1);
+  border: 1px solid rgba(46,139,255,0.25);
   padding: 1px 6px;
   border-radius: var(--radius-sm);
 }
@@ -764,10 +764,10 @@
   white-space: nowrap;
   letter-spacing: 0.04em;
 }
-.bet-res-W  { background: rgba(0,200,150,0.15);  color: var(--green); border: 1px solid rgba(0,200,150,0.3); }
-.bet-res-HW { background: rgba(52,211,153,0.12); color: var(--hw);    border: 1px solid rgba(52,211,153,0.25); }
-.bet-res-L  { background: rgba(255,71,87,0.13);  color: var(--red);   border: 1px solid rgba(255,71,87,0.25); }
-.bet-res-HL { background: rgba(248,113,113,0.12);color: var(--hl);    border: 1px solid rgba(248,113,113,0.25); }
+.bet-res-W  { background: rgba(43,192,126,0.15);  color: var(--green); border: 1px solid rgba(43,192,126,0.3); }
+.bet-res-HW { background: rgba(43,192,126,0.12); color: var(--hw);    border: 1px solid rgba(43,192,126,0.25); }
+.bet-res-L  { background: rgba(229,82,75,0.13);  color: var(--red);   border: 1px solid rgba(229,82,75,0.25); }
+.bet-res-HL { background: rgba(229,82,75,0.12);color: var(--hl);    border: 1px solid rgba(229,82,75,0.25); }
 .bet-res-V  { background: rgba(128,128,128,0.1); color: var(--text3); border: 1px solid var(--border2); }
 
 /* Virtual scroll spacers */
@@ -781,3 +781,5 @@
 .logo-light { display: none; }
 [data-theme="light"] .logo-dark  { display: none; }
 [data-theme="light"] .logo-light { display: block; }
+
+
