@@ -174,14 +174,20 @@ function mkCard(id,title,bodyHTML,extraHdrHTML=''){
 }
 
 // Nav
+let _lastPage='',_lastPageSig='';
+function _pageSig(id){return JSON.stringify(gfs(id))+'|'+[...msGet('sp_'+id)].sort().join(',')+'|'+[...msGet('ca_'+id)].sort().join(',')+'|'+[...msGet('ti_'+id)].sort().join(',');}
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
   document.getElementById('nav-'+id)?.classList.add('active');
+  const sig=_pageSig(id);
+  if(id===_lastPage&&sig===_lastPageSig)return;
+  _lastPage=id;_lastPageSig=sig;
   renderPage(id);
 }
 function renderPage(id){
+  _filterCache={};_lastPage=id;_lastPageSig=_pageSig(id);
   const rows=filtrarPagina(id);
   if(id==='overview'){renderKPI(rows);renderBankroll(rows);renderROIMonthly(rows);renderOddsDist(rows);renderOvCusto();renderOvStreaks(rows);renderOvTipsters(rows);renderOvHeatmap();}
   else if(id==='daily'||id==='consolidado'){renderConsolidado();}
@@ -314,7 +320,7 @@ function buildHTML(){
           ${[['Data',0],['Odd',8],['Stake',7],['P/L',10],['Resultado',9],['Tipster',2],['Casa',3]].map(([lbl,i])=>`<button class="apostas-sort-btn" data-col="${i}" onclick="apostasSort(${i})">${lbl} <span class="sort-arrow"></span></button>`).join('')}
         </div>
         <!-- Cards container -->
-        <div class="apostas-cont" id="apostasCont" style="height:calc(100vh - 380px)" onscroll="renderApostasVirt()">
+        <div class="apostas-cont" id="apostasCont" style="height:calc(100vh - 380px)">
           <div id="apostasCardWrap"></div>
         </div>
       </div>
@@ -524,12 +530,15 @@ async function loadData(){
   // Fase 1: animação CSS 0→70% em 2s — sem setTimeout de simulação
   let _fetchErr=null;
   try{
-    const res=await fetch(APPS_SCRIPT_URL);
+    const _ctrl=new AbortController();
+    const _tid=setTimeout(()=>_ctrl.abort(),30000);
+    const res=await fetch(APPS_SCRIPT_URL,{signal:_ctrl.signal});
+    clearTimeout(_tid);
     const json=await res.json();
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
     DADOS=normalizeDados(json.data);
   }catch(err){
-    _fetchErr=err.message||'Falha na conexão';
+    _fetchErr=err.name==='AbortError'?'Tempo esgotado (30s) — Apps Script lento ou offline':err.message||'Falha na conexão';
     DADOS=[];
   }
   // Fase 2: fetch retornou → completa barra em 0.3s, depois fade out

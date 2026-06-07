@@ -1466,6 +1466,8 @@ function renderApostas(){
   });
   // Virtual scroll render
   renderApostasVirt();
+  const _ac=document.getElementById('apostasCont');
+  if(_ac){let _raf=null;_ac.onscroll=function(){if(_raf)return;_raf=requestAnimationFrame(()=>{renderApostasVirt();_raf=null;});};}
 }
 
 function betResLabel(r){return{W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'}[r]||r;}

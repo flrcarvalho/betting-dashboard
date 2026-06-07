@@ -2,6 +2,11 @@
 const FS={};
 function gfs(p){if(!FS[p])FS[p]={df:'',dt:'',qd:0,qt:''};return FS[p];}
 
+// Cache de filtro (limpo no início de cada renderPage) + debounce
+let _filterCache={};
+let _renderDebounceT;
+function _renderPageDebounced(p){clearTimeout(_renderDebounceT);_renderDebounceT=setTimeout(()=>renderPage(p),120);}
+
 // Date helpers for WTD/MTD/YTD/Hoje
 function _today(){return new Date().toISOString().slice(0,10);}
 function _wtdStart(){const d=new Date(),day=d.getDay()||7;d.setDate(d.getDate()-(day-1));return d.toISOString().slice(0,10);}
@@ -9,23 +14,29 @@ function _mtdStart(){const d=new Date();return new Date(d.getFullYear(),d.getMon
 function _ytdStart(){return new Date().getFullYear()+'-01-01';}
 
 function filtrarPagina(p){
-  const st=gfs(p);let d=[...DADOS];
-  if(st.df)d=d.filter(r=>r.data>=st.df);
-  if(st.dt)d=d.filter(r=>r.data<=st.dt);
-  if(st.qd>0){const lim=new Date(Date.now()-st.qd*864e5).toISOString().slice(0,10);d=d.filter(r=>r.data>=lim);}
+  if(_filterCache[p])return _filterCache[p];
+  const st=gfs(p);
   const sp=msGet('sp_'+p),ca=msGet('ca_'+p),ti=msGet('ti_'+p);
-  if(sp.size>0)d=d.filter(r=>sp.has(r.esporte));
-  if(ca.size>0)d=d.filter(r=>ca.has(r.casa));
-  if(ti.size>0)d=d.filter(r=>ti.has(r.tipster));
-  return d;
+  const lim=st.qd>0?new Date(Date.now()-st.qd*864e5).toISOString().slice(0,10):'';
+  const res=DADOS.filter(r=>{
+    if(st.df&&r.data<st.df)return false;
+    if(st.dt&&r.data>st.dt)return false;
+    if(lim&&r.data<lim)return false;
+    if(sp.size>0&&!sp.has(r.esporte))return false;
+    if(ca.size>0&&!ca.has(r.casa))return false;
+    if(ti.size>0&&!ti.has(r.tipster))return false;
+    return true;
+  });
+  _filterCache[p]=res;
+  return res;
 }
 
-function setDateF(p,type,val){const st=gfs(p);st.qd=0;st.qt='';if(type==='f')st.df=val;else st.dt=val;rqb(p);renderPage(p);}
+function setDateF(p,type,val){const st=gfs(p);st.qd=0;st.qt='';if(type==='f')st.df=val;else st.dt=val;rqb(p);_renderPageDebounced(p);}
 
 function setQuick(p,days){
   const st=gfs(p);st.qd=days;st.qt='';st.df='';st.dt='';
   ['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  rqb(p);renderPage(p);
+  rqb(p);_renderPageDebounced(p);
 }
 
 function setQuickType(p,qt){
@@ -36,10 +47,10 @@ function setQuickType(p,qt){
   st.df=f;st.dt=today;
   const fEl=document.getElementById('df_f_'+p);if(fEl)fEl.value=f;
   const tEl=document.getElementById('df_t_'+p);if(tEl)tEl.value=today;
-  rqb(p);renderPage(p);
+  rqb(p);_renderPageDebounced(p);
 }
 
-function clearDate(p){const st=gfs(p);st.qd=0;st.qt='';st.df='';st.dt='';['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});rqb(p);renderPage(p);}
+function clearDate(p){const st=gfs(p);st.qd=0;st.qt='';st.df='';st.dt='';['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});rqb(p);_renderPageDebounced(p);}
 
 function rqb(p){
   const st=gfs(p);
@@ -162,10 +173,10 @@ function toggleMS(id,val,page,cb){
 
 function applyMS(id,page,cb){
   document.querySelectorAll('.ms-dd.open').forEach(d=>d.classList.remove('open'));
-  if(cb&&window[cb])window[cb](page);else renderPage(page);
+  if(cb&&window[cb])window[cb](page);else _renderPageDebounced(page);
 }
 
-function clickMS(id,val,page,cb){msToggle(id,val);refreshMS(id);if(cb&&window[cb])window[cb](page);else renderPage(page);}
+function clickMS(id,val,page,cb){msToggle(id,val);refreshMS(id);if(cb&&window[cb])window[cb](page);else _renderPageDebounced(page);}
 
 function refreshMS(id){
   const hs=MSS[id]?.size>0;
