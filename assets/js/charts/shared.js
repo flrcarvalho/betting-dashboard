@@ -179,7 +179,7 @@ function buildSummaryTable(tableId,label,ents,isCasa=false){
   const tot=ents.reduce((a,[,d])=>({n:a.n+d.n,w:a.w+d.w,t:a.t+d.t,s:a.s+d.s,l:a.l+d.l}),{n:0,w:0,t:0,s:0,l:0});
   const tRoi=tot.s>0?(tot.l/tot.s*100):0,tWr=tot.t>0?(tot.w/tot.t*100):0;
   const tlc=tot.l>=0?'color:var(--green)':'color:var(--red)';const trc=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr><th>${label}<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Profit<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th></tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td>${tot.n}</td><td>${tWr.toFixed(1)}%</td><td>${fmtR(tot.s)}</td><td style="${tlc}">${fmtPL(tot.l)}</td><td style="${trc}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td></tr></tbody></table></div>`;
+  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr><th>${label}<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th></tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td>${tot.n}</td><td>${tWr.toFixed(1)}%</td><td>${fmtR(tot.s)}</td><td style="${tlc}">${fmtPL(tot.l)}</td><td style="${trc}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td></tr></tbody></table></div>`;
 }
 
 

@@ -16,7 +16,7 @@
   transition: background .12s;
   margin-left: auto;
 }
-.btn-export:hover { background: #2070E8; }
+.btn-export:hover { filter: brightness(0.88); }
 .btn-export:disabled { background: var(--surface-2); color: var(--ink-mute); cursor: not-allowed; }
 .qbtn {
   font-size: var(--text-xs);
@@ -303,6 +303,7 @@
   font-family: var(--font-mono);
 }
 .tbl td.td-name, .tbl th.td-name { font-family: var(--font-sans); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ── Money layout (R$ alinhado como planilha) ────────────────────────────── */
 .money {
