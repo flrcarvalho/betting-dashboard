@@ -22,7 +22,7 @@ assets/js/
                           + helpers de normalização, cálculos de métricas, utilidades
   filters.js            → lógica de filtros (data, período rápido, multiselect por esporte/casa/tipster)
   charts/
-    shared.js           → mkCalendarHeatmap, mkKpiGrid, toggleBlock, buildSummaryTable,
+    shared.js           → mkCalendarHeatmap, mkSparkline, mkKpiGrid, toggleBlock, buildSummaryTable,
                           mkStatCards, mkOneStatCard, constantes APOSTAS_COLS/CARD_H
     gestao.js           → custoData, buildCostState, renderParceiros, renderCustos,
                           renderCustoTipster, renderCustoCards, renderMetrics
@@ -33,7 +33,7 @@ assets/js/
     performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
     apostas.js          → renderApostas, renderApostasVirt, apostasSort, apostasFilter
   app.js                → buildHTML(), loadData(), renderPage(), PAGE_META, updateTopbarTitle(),
-                          showPage(), tema, utilitários de UI
+                          showPage(), APARENCIA/applyAparencia()/setAparencia(), utilitários de UI
 brand/                  → logos e favicons FDC Capital
 ```
 
@@ -94,15 +94,37 @@ brand/                  → logos e favicons FDC Capital
 - **NÃO adicionar `.page-header` dentro de páginas** — título fica sempre no topbar.
 - Para nova página: adicionar entrada em `PAGE_META` + ID na lista de `msInit` em `buildHTML()`.
 - Tipsters: o filtro de tipster vai como 4º parâmetro de `buildFilters('tipsters', sports, casas, tipsters)`.
+- **Não há mais `#themeLabel` no DOM** — foi substituído pelo painel Aparência (`#aparenciaPanel`).
 
-## Design system aplicado (Claude Designer guidelines)
+## Sistema de Aparência
 
-- **Topbar:** Manrope 800 22px tracking-0.035em (título) + JetBrains Mono 9px uppercase tracking-0.18em (eyebrow).
+O topbar contém um painel dropdown (`#aparenciaPanel`) com 5 seções de preferências visuais:
+
+| Chave | Opções | Efeito |
+|-------|--------|--------|
+| `titlePage` | neutro / blue / **gradient** | Classe `t-page-*` no `<html>` |
+| `titlePanel` | tick / accent2 / **blue** | Classe `panel-title-*` no `<html>` |
+| `kpiStyle` | neutro / **azul** | Classe `kpi-azul` no `<html>` |
+| `density` | comfortable / **compact** | Atributo `data-density="compact"` no `<html>` |
+| `theme` | **dark** / light | Atributo `data-theme` no `<html>` |
+
+- Persiste em `localStorage` como JSON na chave `aparencia_v1`.
+- `applyAparencia()` aplica todas as preferências. Deve ser chamado após `buildHTML()`.
+- `index.html` tem init script inline que aplica `aparencia_v1` antes do primeiro render (evita FOUC).
+- **Defaults:** gradient, blue, azul, compact, dark.
+
+## Design system aplicado
+
+- **Topbar:** Manrope 800 22px tracking -0.035em (título) + JetBrains Mono 9px uppercase tracking 0.18em (eyebrow/sub).
 - **KPI labels** (`.kpi-label`): JetBrains Mono — tudo que é dado usa mono, não sans.
-- **P/L Líquido:** único card com realce azul `rgba(46,139,255,.08)` + tick azul. Os demais ficam neutros.
-- **Calendário** (`mkCalendarHeatmap` em `shared.js`): mini-cards de P/L · Turnover · ROI · Apostas+WR · Odd Média · Stake Média acima do grid de dias.
-- **Gráfico "Tipsters — P/L, Win Rate e ROI"** foi removido da Visão Geral (commit f46b506).
+- **P/L Líquido:** realce azul `rgba(46,139,255,.08)` + borda azul + sparkline de 90d. Os demais ficam neutros (a menos que `kpi-azul` esteja ativo no painel Aparência).
+- **Sparkline** (`mkSparkline` em `shared.js`): SVG inline, linha `--ink-soft`, ponto final `--accent`. Ultimos 90 dias de P/L acumulado.
+- **Calendário** (`mkCalendarHeatmap` em `shared.js`): opacidade proporcional ao P/L do mês (0.15–0.93). Mini-cards acima do grid.
+- **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`.
 - **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural.
+- **Nav icons:** `stroke-width="1.6"`, cor `var(--ink-mute)`, ativo em `var(--accent)`.
+- **Tabelas** (`.tbl`): header em JetBrains Mono, zebra `rgba(255,255,255,0.015)`, hover azul.
+- **Grid de fundo:** `repeating-linear-gradient` 64px em `body`, usando `var(--grid)`.
 
 ## Regras específicas
 
@@ -114,3 +136,5 @@ brand/                  → logos e favicons FDC Capital
 - `dashboard.html` é versão legada; não editar, serve como referência histórica.
 - Custos de contas e custos de tipsters são persistidos em `localStorage` (não no Apps Script).
 - Filtros são por página e independentes entre si (estado em `FS[page]`).
+- `fmtPL`: sinal colado sem espaço (`+R$`/`-R$`). `money-sign` em `0.78em` (R$ menor que o número).
+- Sidebar bottom: `#lastUpdate` é flexbox com `.pulse-dot` + `#lastUpdateText`.
