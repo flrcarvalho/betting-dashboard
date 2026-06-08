@@ -84,10 +84,10 @@ body::before {
 .nav-group {
   padding: var(--space-2) var(--space-4) var(--space-1);
   font-size: 9.5px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text2);
-  font-family: var(--font-sans);
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
   font-weight: var(--weight-bold);
   border-top: 1px solid var(--border);
   margin-top: 2px;

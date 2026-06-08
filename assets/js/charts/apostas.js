@@ -104,7 +104,7 @@ function renderApostasVirt(){
           <span class="bet-sport-tag">${svgIcon}<span style="color:var(--text3)">${r.esporte||''}</span></span>
           ${r.tipster?`<span class="bet-tipster">${r.tipster}</span>`:''}
           <span class="bet-casa-pill">${casaIcon}<span>${r.casa||'—'}</span></span>
-          ${r.parceiro&&r.parceiro!=='—'?`<span style="font-size:9px;color:var(--text3);font-family:'Manrope',sans-serif">${r.parceiro}</span>`:''}
+          ${r.parceiro&&r.parceiro!=='—'?`<span style="font-size:9px;color:var(--text3);font-family:var(--font-sans)">${r.parceiro}</span>`:''}
         </div>
         <div class="bet-aposta">${r.aposta||'—'}</div>
         ${r.descricao?`<div class="bet-desc">${r.descricao}</div>`:''}

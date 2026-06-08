@@ -251,7 +251,7 @@ function renderOvCusto(){
   }
   const{allForns,allCasas,contaCount}=_costState;
   if(!allForns||!allForns.length){
-    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:12px;font-family:'Manrope',sans-serif">Aguardando dados...</div>`;
+    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:12px;font-family:var(--font-sans)">Aguardando dados...</div>`;
     return;
   }
   const PIE_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#95A1B0','#E5524B','#34d399','#fbbf24','#60a5fa','#AEB7C2','#fb923c'];
@@ -259,7 +259,7 @@ function renderOvCusto(){
   allForns.forEach(f=>{fornTots[f]=allCasas.reduce((a,c)=>{const k=f+'||'+c;return a+(custoData[k]||0)*(contaCount[k]||0);},0);});
   const grandCost=Object.values(fornTots).reduce((a,v)=>a+v,0);
   if(!grandCost){
-    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:12px;font-family:'Manrope',sans-serif">💡 Preencha os custos na aba <strong style="color:var(--amber)">Custos de Contas</strong> para ver o resumo aqui.</div>`;
+    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:12px;font-family:var(--font-sans)">💡 Preencha os custos na aba <strong style="color:var(--amber)">Custos de Contas</strong> para ver o resumo aqui.</div>`;
     return;
   }
   const totalContas=allForns.reduce((a,f)=>a+allCasas.reduce((b,c)=>b+(contaCount[f+'||'+c]||0),0),0);

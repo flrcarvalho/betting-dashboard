@@ -88,7 +88,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const navHTML=opts.showNav?`
     <div style="display:flex;align-items:center;gap:10px">
       <button onclick="${opts.onPrev||''}" style="padding:4px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px" ${idxCur>=months.length-1?'disabled':''}>‹</button>
-      <select onchange="${opts.onSelect||''}" style="font-size:13px;font-weight:700;padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:5px;font-family:'Manrope',sans-serif">
+      <select onchange="${opts.onSelect||''}" style="font-size:13px;font-weight:700;padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:5px;font-family:var(--font-sans)">
         ${months.map(m=>{const[y2,m2]=m.split('-');return`<option value="${m}"${m===cur?' selected':''}>${MESES[parseInt(m2)-1]} ${y2}</option>`;}).join('')}
       </select>
       <button onclick="${opts.onNext||''}" style="padding:4px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px" ${idxCur<=0?'disabled':''}>›</button>

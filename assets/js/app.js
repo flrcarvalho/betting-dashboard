@@ -468,7 +468,7 @@ function buildHTML(){
       <div class="page" id="page-custos">
         <div id="custosContent">
           ${mkCard('custos_table','Tabela de Custos por Casa × Fornecedor',`
-            <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem;font-family:'Manrope',sans-serif">💡 Insira o custo de cada conta por fornecedor/casa. O total é calculado pelo nº de contas. Valores salvos permanentemente no navegador.</p>
+            <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem;font-family:var(--font-sans)">💡 Insira o custo de cada conta por fornecedor/casa. O total é calculado pelo nº de contas. Valores salvos permanentemente no navegador.</p>
             <div id="costTableWrap"></div>`)}
         </div>
       </div>

@@ -201,7 +201,7 @@
 .card-title {
   font-size: 14px;
   font-weight: var(--weight-extrabold);
-  color: var(--accent);
+  color: var(--accent-2);
   letter-spacing: -0.025em;
   margin: 0;
   flex: 1;
@@ -479,7 +479,7 @@
 .analise-popup-section:last-child { border-bottom: none; }
 .analise-popup-section-title {
   font-size: 11px;
-  color: var(--text2);
+  color: var(--accent-2);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
@@ -582,7 +582,7 @@
 .metric-title {
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
-  color: var(--text);
+  color: var(--accent-2);
   margin-bottom: 0.5rem;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--border2);

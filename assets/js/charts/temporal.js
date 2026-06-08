@@ -378,7 +378,7 @@ function renderDiario(){
     <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Dia</div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <button onclick="prevDiario()" style="padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px">←</button>
-      <select id="diarioDaySel" onchange="selectDiario(this.value)" style="font-size:14px;font-weight:700;padding:6px 12px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:5px;font-family:'Manrope',sans-serif;cursor:pointer">
+      <select id="diarioDaySel" onchange="selectDiario(this.value)" style="font-size:14px;font-weight:700;padding:6px 12px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:5px;font-family:var(--font-sans);cursor:pointer">
         ${days.map(d=>{const[y2,m2,d2]=d.split('-');return`<option value="${d}"${d===selDay?' selected':''}>${d2}/${m2}/${y2}</option>`;}).join('')}
       </select>
       <button onclick="nextDiario()" style="padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px">→</button>

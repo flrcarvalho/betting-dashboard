@@ -122,7 +122,7 @@ function buildCostTable(allForns,allCasas,contaCount){
   }).join('');
 
   document.getElementById('costTableWrap').innerHTML=`
-    <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem;font-family:'Manrope',sans-serif">💡 Insira o custo de cada conta comprada por fornecedor/casa. O total é calculado pelo nº de contas ativas. Valores salvos automaticamente no navegador.</p>
+    <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem;font-family:var(--font-sans)">💡 Insira o custo de cada conta comprada por fornecedor/casa. O total é calculado pelo nº de contas ativas. Valores salvos automaticamente no navegador.</p>
     <div class="tbl-wrap"><table class="tbl" id="tblCost"><thead>${header}</thead><tbody id="costTbody">${totalRow}${bodyRows}</tbody></table></div>`;
   setTimeout(()=>makeSortable('tblCost',[]),100);
   renderCostPies();
@@ -188,7 +188,7 @@ function renderCustoCards(allForns,allCasas,contaCount){
   const grandCost=Object.values(fornTots).reduce((a,v)=>a+v,0);
 
   if(!grandCost){
-    el.innerHTML=`<div style="text-align:center;padding:2rem;font-size:12px;color:var(--text3);font-family:'Manrope',sans-serif">
+    el.innerHTML=`<div style="text-align:center;padding:2rem;font-size:12px;color:var(--text3);font-family:var(--font-sans)">
       💡 Preencha os custos de contas na aba <strong style="color:var(--amber)">Custos de Contas</strong> para ver o resumo aqui.
     </div>`;
     return;
@@ -249,7 +249,7 @@ function renderCustos(rows){
   const fonte=rows&&rows.length?rows:DADOS;
   if(!fonte||!fonte.length){
     const wrap=document.getElementById('costTableWrap');
-    if(wrap)wrap.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text3);font-family:'Manrope',sans-serif;font-size:12px">Aguardando carregamento dos dados...</div>`;
+    if(wrap)wrap.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text3);font-family:var(--font-sans);font-size:12px">Aguardando carregamento dos dados...</div>`;
     return;
   }
   // Sempre usa DADOS completo para o estado (custos devem refletir todas as contas, não filtradas)
@@ -295,7 +295,7 @@ function renderCustoTipster(){
       }).join('');
       const tc2=totalRow>0?'color:var(--amber)':'color:var(--text3)';
       return`<tr>
-        <td style="padding:4px 8px"><input type="text" value="${row.tipo||''}" placeholder="Descrição do custo" data-cgidx="${idx}" data-cgtipo="1" style="width:160px;padding:3px 7px;background:var(--bg5);border:1px solid var(--border2);color:var(--text);border-radius:4px;font-family:'Manrope',sans-serif;font-size:12px;outline:none;font-weight:600" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)';saveCGTipo(this)" onkeydown="if(event.key==='Enter')this.blur()"></td>
+        <td style="padding:4px 8px"><input type="text" value="${row.tipo||''}" placeholder="Descrição do custo" data-cgidx="${idx}" data-cgtipo="1" style="width:160px;padding:3px 7px;background:var(--bg5);border:1px solid var(--border2);color:var(--text);border-radius:4px;font-family:var(--font-sans);font-size:12px;outline:none;font-weight:600" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border2)';saveCGTipo(this)" onkeydown="if(event.key==='Enter')this.blur()"></td>
         ${vals}
         <td style="text-align:center;font-weight:700;font-family:'JetBrains Mono',monospace;font-size:11px;border-left:1px solid var(--border2);padding:0 8px;${tc2}">${totalRow>0?'R$ '+fmt(totalRow,0):'—'}</td>
         <td style="text-align:center;padding:0 6px"><button onclick="deleteCG(${idx})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1;padding:2px 4px;border-radius:3px" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">✕</button></td>
@@ -344,7 +344,7 @@ function renderCustoTipster(){
             ${buildCGRows()}
           </tbody>
         </table></div>
-        <button onclick="addCG()" style="margin-top:.75rem;padding:5px 14px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:11px;font-family:'Manrope',sans-serif;display:flex;align-items:center;gap:5px" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">+ Adicionar linha</button>
+        <button onclick="addCG()" style="margin-top:.75rem;padding:5px 14px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:11px;font-family:var(--font-sans);display:flex;align-items:center;gap:5px" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">+ Adicionar linha</button>
       `)}
     </div>
     <div>
