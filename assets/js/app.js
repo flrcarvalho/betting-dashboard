@@ -73,13 +73,21 @@ function mkSpChip(sport){
   if(!key){const k=Object.keys(SPORT_KEY).find(k=>k.toLowerCase()===sport?.toLowerCase());key=k?SPORT_KEY[k]:null;}
   return`<span class="sp-chip">${SPORT_EMOJI[key]||'🏅'}</span>`;
 }
+// Fallback de favicon: substitui img por inicial mono quando imagem falha
+document.addEventListener('error',e=>{
+  const chip=e.target.closest?.('.house-chip');
+  if(chip&&e.target.tagName==='IMG'){
+    const init=chip.dataset.initial||'?';
+    e.target.replaceWith(Object.assign(document.createElement('span'),{className:'chip-initial',textContent:init}));
+  }
+},true);
 function mkHouseChip(nome){
   if(!nome)return`<span class="house-chip chip-initial">?</span>`;
   const domain=_houseDomain(nome);
   if(domain){
     const init=(nome[0]||'?').toUpperCase();
     const esc=nome.replace(/"/g,'&quot;');
-    return`<span class="house-chip"><img src="${favicon(domain)}" alt="${esc}" onerror="this.outerHTML='<span class=\\"chip-initial\\">${init}</span>'" loading="lazy"></span>`;
+    return`<span class="house-chip" data-initial="${init}"><img src="${favicon(domain)}" alt="${esc}" loading="lazy"></span>`;
   }
   return`<span class="house-chip chip-initial">${(nome[0]||'?').toUpperCase()}</span>`;
 }
