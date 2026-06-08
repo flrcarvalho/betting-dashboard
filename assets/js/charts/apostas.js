@@ -1,0 +1,148 @@
+// ── apostas.js — Espelho da base com virtual scroll ─────────────────────────────
+
+// Apostas — espelho da base de dados com virtual scroll
+let apostasFiltered=[], apostasSortCol=0, apostasSortAsc=false;
+let apostasColFilters={};
+
+function renderApostas(){
+  const baseRows=filtrarPagina('apostas');
+  apostasFiltered=baseRows.filter(r=>{
+    return APOSTAS_COLS.every((col,i)=>{
+      const f=(apostasColFilters[i]||'').toLowerCase().trim();
+      if(!f)return true;
+      const v=col==='lucro'?r.lucro.toFixed(2):col==='stake'?r.stake.toString():col==='odd'?r.odd.toString():(r[col]||'').toString();
+      return v.toLowerCase().includes(f);
+    });
+  });
+  apostasFiltered.sort((a,b)=>{
+    const col=APOSTAS_COLS[apostasSortCol];
+    const av=APOSTAS_NUM.includes(apostasSortCol)?parseFloat(a[col]||0):String(a[col]||'');
+    const bv=APOSTAS_NUM.includes(apostasSortCol)?parseFloat(b[col]||0):String(b[col]||'');
+    const res=APOSTAS_NUM.includes(apostasSortCol)?(av-bv):av.localeCompare(bv);
+    return apostasSortAsc?res:-res;
+  });
+  // KPI
+  const pl=apostasFiltered.reduce((a,r)=>a+r.lucro,0);
+  const stake=apostasFiltered.reduce((a,r)=>a+r.stake,0);
+  const roi=stake>0?(pl/stake*100):0;
+  const wins=apostasFiltered.filter(r=>['W','HW'].includes(r.resultado)).length;
+  const settled=apostasFiltered.filter(r=>r.resultado!=='V').length;
+  const wr=settled>0?(wins/settled*100):0;
+  const avgOddAp=calcAvgOdd(apostasFiltered);
+  const avgStakeAp=apostasFiltered.length>0?stake/apostasFiltered.length:0;
+  const kpiEl=document.getElementById('apostasKPI');
+  if(kpiEl){
+    const mkKA=(l,v,c,sub)=>`<div class="kpi" style="height:110px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;padding:14px 16px;overflow:hidden"><div class="kpi-label" style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:8px;white-space:nowrap;flex-shrink:0">${l}</div><div class="kpi-val ${c}" style="font-size:22px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0">${v}</div>${sub?`<div class="kpi-sub" style="font-size:10px;margin-top:8px;font-family:'JetBrains Mono',monospace;display:flex;flex-wrap:wrap;gap:2px 5px;overflow:hidden">${sub}</div>`:''}</div>`;
+    const betsBreak=[
+      apostasFiltered.filter(r=>r.resultado==='W').length?`<span class="res-w">W:${apostasFiltered.filter(r=>r.resultado==='W').length}</span>`:'',
+      apostasFiltered.filter(r=>r.resultado==='HW').length?`<span class="res-hw">HW:${apostasFiltered.filter(r=>r.resultado==='HW').length}</span>`:'',
+      apostasFiltered.filter(r=>r.resultado==='L').length?`<span class="res-l">L:${apostasFiltered.filter(r=>r.resultado==='L').length}</span>`:'',
+      apostasFiltered.filter(r=>r.resultado==='HL').length?`<span class="res-hl">HL:${apostasFiltered.filter(r=>r.resultado==='HL').length}</span>`:'',
+      apostasFiltered.filter(r=>r.resultado==='V').length?`<span class="res-v">V:${apostasFiltered.filter(r=>r.resultado==='V').length}</span>`:''
+    ].filter(Boolean).join('');
+    const activeTips=[...new Set(apostasFiltered.map(r=>r.tipster).filter(Boolean))];
+    const row1=[
+      mkKA('P/L', fmtPL(pl), pl>=0?'pos':'neg', ''),
+      mkKA('Turnover', fmtR(stake), 'neu', ''),
+      mkKA('ROI', (roi>=0?'+':'')+roi.toFixed(2)+'%', roi>=0?'pos':'neg', ''),
+      mkKA('Tipsters Ativos', activeTips.length.toString(), 'neu', activeTips.slice(0,3).join(', ')+(activeTips.length>3?'...':'')),
+    ];
+    const row2=[
+      mkKA('Apostas', apostasFiltered.length.toLocaleString('pt-BR'), 'neu', betsBreak),
+      mkKA('Stake Média', fmtR(avgStakeAp), 'neu', 'por aposta'),
+      mkKA('Odd Média Pond.', avgOddAp.toFixed(2), 'neu', 'Σ(odd×stake)/Σ(stake)'),
+      mkKA('Win Rate', wr.toFixed(1)+'%', wr>=50?'pos':'neg', settled+' encerradas'),
+    ];
+    kpiEl.innerHTML=
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;width:100%">${row1.join('')}</div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;width:100%">${row2.join('')}</div>`;
+  }
+  // Update sort button active states
+  document.querySelectorAll('.apostas-sort-btn').forEach(btn=>{
+    const ci=parseInt(btn.dataset.col);
+    btn.classList.toggle('active',ci===apostasSortCol);
+    const arrow=btn.querySelector('.sort-arrow');
+    if(arrow)arrow.textContent=ci===apostasSortCol?(apostasSortAsc?'↑':'↓'):'';
+  });
+  // Virtual scroll render
+  renderApostasVirt();
+  const _ac=document.getElementById('apostasCont');
+  if(_ac){let _raf=null;_ac.onscroll=function(){if(_raf)return;_raf=requestAnimationFrame(()=>{renderApostasVirt();_raf=null;});};}
+}
+
+function betResLabel(r){return{W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'}[r]||r;}
+function renderApostasVirt(){
+  const cont=document.getElementById('apostasCont');
+  if(!cont)return;
+  const rows=apostasFiltered;
+  const total=rows.length;
+  const wrapper=document.getElementById('apostasCardWrap');
+  if(!wrapper)return;
+  const scrollTop=cont.scrollTop;
+  const contH=cont.clientHeight||600;
+  const buf=10;
+  const startIdx=Math.max(0,Math.floor(scrollTop/CARD_H)-buf);
+  const endIdx=Math.min(total,Math.ceil((scrollTop+contH)/CARD_H)+buf);
+  const topPad=startIdx*CARD_H;
+  const botPad=Math.max(0,(total-endIdx)*CARD_H);
+  const RES_LABELS={W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'};
+  const cards=rows.slice(startIdx,endIdx).map(r=>{
+    const d=r.data.slice(0,10);
+    const [yr,mo,dy]=d.split('-');
+    const hora=r.data.length>10?r.data.slice(11,16):'';
+    const dateStr=`${dy}/${mo}`;
+    const plC=r.lucro>0?'var(--green)':r.lucro<0?'var(--red)':'var(--text3)';
+    const resLabel=RES_LABELS[r.resultado]||r.resultado;
+    const resClass=`bet-res-${r.resultado}`;
+    const cardClass=`bet-card res-${r.resultado}`;
+    const casaIcon=casaImg(r.casa,13);
+    const svgIcon=sportEmoji(r.esporte);
+    return`<div class="${cardClass}" style="height:${CARD_H}px">
+      <div class="bet-card-main" style="min-width:0;overflow:hidden">
+        <div class="bet-card-meta">
+          <span class="bet-time">${dateStr}${hora?' · '+hora:''}</span>
+          <span class="bet-sport-tag">${svgIcon}<span style="color:var(--text3)">${r.esporte||''}</span></span>
+          ${r.tipster?`<span class="bet-tipster">${r.tipster}</span>`:''}
+          <span class="bet-casa-pill">${casaIcon}<span>${r.casa||'—'}</span></span>
+          ${r.parceiro&&r.parceiro!=='—'?`<span style="font-size:9px;color:var(--text3);font-family:'Manrope',sans-serif">${r.parceiro}</span>`:''}
+        </div>
+        <div class="bet-aposta">${r.aposta||'—'}</div>
+        ${r.descricao?`<div class="bet-desc">${r.descricao}</div>`:''}
+      </div>
+      <div class="bet-card-nums">
+        <div class="bet-num">
+          <span class="bet-res-pill ${resClass}">${resLabel}</span>
+          <span class="bet-num-lbl">Resultado</span>
+        </div>
+        <div class="bet-num">
+          <span class="bet-num-val" style="color:var(--text)">${r.odd.toFixed(2)}</span>
+          <span class="bet-num-lbl">Odd</span>
+        </div>
+        <div class="bet-num">
+          <span class="bet-num-val" style="color:var(--text)">${fmtR(r.stake)}</span>
+          <span class="bet-num-lbl">Stake</span>
+        </div>
+        <div class="bet-num" style="width:90px;min-width:90px">
+          <span class="bet-num-val" style="color:${plC};font-size:12px">${fmtPL(r.lucro)}</span>
+          <span class="bet-num-lbl">P/L</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  wrapper.innerHTML=
+    `<div class="virt-spacer" style="height:${topPad}px"></div>`+
+    cards+
+    `<div class="virt-spacer" style="height:${botPad}px"></div>`;
+}
+
+function apostasSort(colIdx){
+  if(apostasSortCol===colIdx)apostasSortAsc=!apostasSortAsc;
+  else{apostasSortCol=colIdx;apostasSortAsc=false;}
+  renderApostas();
+}
+function apostasFilter(colIdx,val){apostasColFilters[colIdx]=val;renderApostas();}
+function clearApostasFilters(){
+  apostasColFilters={};
+  document.querySelectorAll('.acf').forEach(el=>el.value='');
+  renderApostas();
+}

@@ -21,8 +21,18 @@ assets/js/
   data.js               → constantes (APPS_SCRIPT_URL, BASE_BANK, CASA_ICONS, SPORT_SVG)
                           + helpers de normalização, cálculos de métricas, utilidades
   filters.js            → lógica de filtros (data, período rápido, multiselect por esporte/casa/tipster)
-  charts.js             → gráficos Chart.js + heatmap de calendário
-  app.js                → buildHTML(), loadData(), renderPage(), todas as views
+  charts/
+    shared.js           → mkCalendarHeatmap, mkKpiGrid, toggleBlock, buildSummaryTable,
+                          mkStatCards, mkOneStatCard, constantes APOSTAS_COLS/CARD_H
+    gestao.js           → custoData, buildCostState, renderParceiros, renderCustos,
+                          renderCustoTipster, renderCustoCards, renderMetrics
+    overview.js         → renderKPI, renderBankroll, renderROIMonthly, renderOddsDist,
+                          renderHeatmap, renderOvTipsters, renderOvHeatmap, renderOvStreaks, renderOvCusto
+    temporal.js         → renderConsolidado, renderMensal, renderDiario, renderSemana
+                          (+ getAvailableMonths/Days/Weeks e helpers de navegação)
+    performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
+    apostas.js          → renderApostas, renderApostasVirt, apostasSort, apostasFilter
+  app.js                → buildHTML(), loadData(), renderPage(), tema, utilitários de UI
 brand/                  → logos e favicons FDC Capital
 ```
 

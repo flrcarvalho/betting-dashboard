@@ -325,6 +325,8 @@ html, body {
 .loader-content {
   display: flex;
   flex-direction: column;
+  width: fit-content;
+  max-width: 88vw;
 }
 .loader-bottom {
   display: flex;
