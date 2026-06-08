@@ -70,7 +70,7 @@
   --hw-dim:     rgba(43, 192, 126, 0.12);
   --hl:         #E5524B;
   --hl-dim:     rgba(229, 82, 75, 0.12);
-  --grid:       rgba(255, 255, 255, 0.05);
+  --grid:       rgba(255, 255, 255, 0.07);
   --tick:       #5E6775;
   --sb-track:       var(--surface);
   --sb-thumb:       var(--fdc-steel);
@@ -160,7 +160,7 @@
   --hw-dim:     rgba(43, 192, 126, 0.08);
   --hl:         #E5524B;
   --hl-dim:     rgba(229, 82, 75, 0.08);
-  --grid:       rgba(0, 0, 0, 0.06);
+  --grid:       rgba(0, 0, 0, 0.08);
   --tick:       #7C8BA0;
   --sb-track:       #EDF2F7;
   --sb-thumb:       #AEB7C2;
