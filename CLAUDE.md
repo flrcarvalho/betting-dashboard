@@ -23,7 +23,7 @@ assets/js/
   filters.js            → lógica de filtros (data, período rápido, multiselect por esporte/casa/tipster)
   charts/
     shared.js           → mkCalendarHeatmap, mkSparkline, mkKpiGrid, toggleBlock, buildSummaryTable,
-                          mkStatCards, mkOneStatCard, constantes APOSTAS_COLS/CARD_H
+                          mkStatCards, mkOneStatCard, mkWRC(wr), mkEmpty(msg), constantes APOSTAS_COLS/CARD_H
     gestao.js           → custoData, buildCostState, renderParceiros, renderCustos,
                           renderCustoTipster, renderCustoCards, renderMetrics
     overview.js         → renderKPI, renderBankroll, renderROIMonthly, renderOddsDist,
@@ -128,6 +128,9 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **Grid de fundo:** pseudo-elemento `body::before` com `position: fixed; z-index: 0; opacity: 0.55`. Grid via `linear-gradient + background-size: 44px 44px`, cor `--grid` (`rgba(255,255,255,0.05)` dark / `rgba(0,0,0,0.06)` light). `.app` tem `position: relative; z-index: 1` para ficar acima do grid.
 - **`.mono`**: alias de `.num` em `components.css` — `font-family: var(--font-mono); font-variant-numeric: tabular-nums`. Não força `text-align: right` (diferente de `.num`).
 - **`.sport-emoji`**: classe em `components.css` com `filter: grayscale(1)`. Todo emoji de esporte renderizado como HTML deve usar essa classe (em `sportCell` de `data.js` e nos cards de `performance.js`).
+- **`.wrc`** (`mkWRC(wr)` em `shared.js`): componente de Win Rate — número em cima + barra proporcional azul (`--accent-2`) abaixo. Largura fixa 76px em tabelas. Em cards KPI, override `.kpi .wrc { width:100% }` e `.kpi .wrc .t { width:100% }` fazem a barra ocupar toda a largura sem repetir o número (já está no `.kpi-val`).
+- **`.empty-state`** (`mkEmpty(msg)` em `shared.js`): estado vazio reutilizável — ícone inbox SVG neutro + mensagem JetBrains Mono. Usar em toda view/tabela que pode ficar sem dados no período selecionado.
+- **`.stat-card-*`**: classes CSS para os cards de resumo por entidade (esporte/tipster/casa). Rodapé em 3 colunas — ROI (colorido) · Turnover (neutro) · WR (neutro) — com `border-right` como divisória. P/L é o elemento hero do card. Callers: `renderSport`, `renderCasa`, `renderTipsters` em `performance.js`.
 
 ## Regras específicas
 
@@ -144,3 +147,4 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **Win Rate (WR) é NEUTRO** — nunca usar `pos`/`neg` no WR. Verde/vermelho somente em P/L, ROI e badges de win/loss. Locais: `mkCalendarHeatmap` (shared.js), `mkKpiGrid` (shared.js), `renderKPI` (overview.js).
 - **Emoji de esporte**: sempre envolvido em `<span class="sport-emoji">` para aplicar `filter:grayscale(1)`. Fallback: `•` (ponto central) — nunca `?` ou `❓`. O glifo de múltiplas é `🔗` — `🎰` (cassino) é proibido pela marca.
 - **CSS sem hex hardcoded**: `.btn-export:hover` usa `filter: brightness(0.88)` (não hex). Toda cor deve vir de token CSS.
+- **Hex em Chart.js é permitido**: Chart.js (canvas) não lê variáveis CSS. Cores `#2E8BFF`, `#2BC07E`, `#E5524B` etc. podem aparecer como literais nos arquivos `.js` de charts — não são desvios de marca.
