@@ -201,7 +201,7 @@
 .card-title {
   font-size: 14px;
   font-weight: var(--weight-extrabold);
-  color: var(--text);
+  color: var(--accent);
   letter-spacing: -0.025em;
   margin: 0;
   flex: 1;

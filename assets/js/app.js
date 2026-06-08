@@ -1,10 +1,9 @@
 ﻿// ── Aparência system ──────────────────────────────────────────────────────────
-const APARENCIA_DEFAULTS={titlePage:'gradient',titlePanel:'blue',kpiStyle:'azul',density:'compact',theme:'dark'};
+const APARENCIA_DEFAULTS={titlePage:'gradient',kpiStyle:'azul',density:'compact',theme:'dark'};
 let APARENCIA={...APARENCIA_DEFAULTS};
 try{const s=localStorage.getItem('aparencia_v1');if(s)APARENCIA={...APARENCIA_DEFAULTS,...JSON.parse(s)};}catch(e){}
 
 const APARENCIA_PAGE_CLASSES=['t-page-neutro','t-page-blue','t-page-gradient'];
-const APARENCIA_PANEL_CLASSES=['panel-title-tick','panel-title-accent2','panel-title-blue'];
 const APARENCIA_KPI_CLASSES=['kpi-neutro','kpi-azul'];
 
 function applyAparencia(){
@@ -18,10 +17,6 @@ function applyAparencia(){
   APARENCIA_PAGE_CLASSES.forEach(c=>h.classList.remove(c));
   if(APARENCIA.titlePage==='blue')h.classList.add('t-page-blue');
   else if(APARENCIA.titlePage==='gradient')h.classList.add('t-page-gradient');
-  // panel title
-  APARENCIA_PANEL_CLASSES.forEach(c=>h.classList.remove(c));
-  if(APARENCIA.titlePanel==='accent2')h.classList.add('panel-title-accent2');
-  else if(APARENCIA.titlePanel==='blue')h.classList.add('panel-title-blue');
   // kpi style
   APARENCIA_KPI_CLASSES.forEach(c=>h.classList.remove(c));
   if(APARENCIA.kpiStyle==='azul')h.classList.add('kpi-azul');
@@ -311,15 +306,6 @@ function buildHTML(){
             <button class="ap-btn" data-ap-key="titlePage" data-ap-val="neutro"   onclick="setAparencia('titlePage','neutro')">Neutro</button>
             <button class="ap-btn" data-ap-key="titlePage" data-ap-val="blue"     onclick="setAparencia('titlePage','blue')">Azul</button>
             <button class="ap-btn" data-ap-key="titlePage" data-ap-val="gradient" onclick="setAparencia('titlePage','gradient')">Gradiente</button>
-          </div>
-        </div>
-        <div class="ap-divider"></div>
-        <div class="ap-section">
-          <div class="ap-label">Título dos Painéis</div>
-          <div class="ap-btns">
-            <button class="ap-btn" data-ap-key="titlePanel" data-ap-val="tick"    onclick="setAparencia('titlePanel','tick')">| azul</button>
-            <button class="ap-btn" data-ap-key="titlePanel" data-ap-val="accent2" onclick="setAparencia('titlePanel','accent2')">| + texto</button>
-            <button class="ap-btn" data-ap-key="titlePanel" data-ap-val="blue"    onclick="setAparencia('titlePanel','blue')">Texto azul</button>
           </div>
         </div>
         <div class="ap-divider"></div>

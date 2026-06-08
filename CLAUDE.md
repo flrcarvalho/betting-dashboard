@@ -98,20 +98,20 @@ brand/                  → logos e favicons FDC Capital
 
 ## Sistema de Aparência
 
-O topbar contém um painel dropdown (`#aparenciaPanel`) com 5 seções de preferências visuais:
+O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de preferências visuais:
 
 | Chave | Opções | Efeito |
 |-------|--------|--------|
 | `titlePage` | neutro / blue / **gradient** | Classe `t-page-*` no `<html>` |
-| `titlePanel` | tick / accent2 / **blue** | Classe `panel-title-*` no `<html>` |
 | `kpiStyle` | neutro / **azul** | Classe `kpi-azul` no `<html>` |
 | `density` | comfortable / **compact** | Atributo `data-density="compact"` no `<html>` |
 | `theme` | **dark** / light | Atributo `data-theme` no `<html>` |
 
+- `titlePanel` foi removido — `.card-title { color: var(--accent) }` é hardcoded na CSS base.
 - Persiste em `localStorage` como JSON na chave `aparencia_v1`.
 - `applyAparencia()` aplica todas as preferências. Deve ser chamado após `buildHTML()`.
 - `index.html` tem init script inline que aplica `aparencia_v1` antes do primeiro render (evita FOUC).
-- **Defaults:** gradient, blue, azul, compact, dark.
+- **Defaults:** gradient, azul, compact, dark.
 
 ## Design system aplicado
 
@@ -121,7 +121,8 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 5 seções de prefer
 - **Sparkline** (`mkSparkline` em `shared.js`): SVG inline, linha `--ink-soft`, ponto final `--accent`. Ultimos 90 dias de P/L acumulado.
 - **Calendário** (`mkCalendarHeatmap` em `shared.js`): opacidade proporcional ao P/L do mês (0.15–0.93). Mini-cards acima do grid.
 - **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`.
-- **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural.
+- **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural (hardcoded).
+- **Card titles** (`.card-title`): `color: var(--accent)` — sempre azul, não é preferência variável.
 - **Nav icons:** `stroke-width="1.6"`, cor `var(--ink-mute)`, ativo em `var(--accent)`.
 - **Tabelas** (`.tbl`): header em JetBrains Mono, zebra `rgba(255,255,255,0.015)`, hover azul.
 - **Grid de fundo:** pseudo-elemento `body::before` com `position: fixed; z-index: 0; opacity: 0.55`. Grid via `linear-gradient + background-size: 44px 44px`, cor `--grid` (`rgba(255,255,255,0.05)` dark / `rgba(0,0,0,0.06)` light). `.app` tem `position: relative; z-index: 1` para ficar acima do grid.

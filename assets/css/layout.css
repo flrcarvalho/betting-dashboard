@@ -492,10 +492,6 @@ html[data-theme="light"].t-page-gradient .page-title {
   border-color: rgba(46,139,255,0.25);
 }
 
-/* ── Aparência — panel-title variants ─────────────────────────────────────── */
-html.panel-title-accent2 .card-title { color: var(--accent-2); }
-html.panel-title-blue    .card-title { color: var(--accent); }
-
 /* ── Aparência — KPI tick azul ─────────────────────────────────────────────── */
 html.kpi-azul .kpi { border-left: 3px solid var(--accent); }
 
