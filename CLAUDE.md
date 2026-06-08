@@ -18,7 +18,9 @@ assets/css/
   components.css        → botões, cards, badges, tabelas, multiselect
   layout.css            → grid, sidebar, topbar, responsividade
 assets/js/
-  data.js               → constantes (APPS_SCRIPT_URL, BASE_BANK, CASA_ICONS, SPORT_SVG)
+  data.js               → constantes (APPS_SCRIPT_URL, BASE_BANK, CASA_ICONS, SPORT_SVG,
+                            SPORT_EMOJI, HOUSE_DOMAIN, SPORT_KEY)
+                          + sportEmoji(), sportCell(), sportSvg()
                           + helpers de normalização, cálculos de métricas, utilidades
   filters.js            → lógica de filtros (data, período rápido, multiselect por esporte/casa/tipster)
   charts/
@@ -34,6 +36,8 @@ assets/js/
     apostas.js          → renderApostas, renderApostasVirt, apostasSort, apostasFilter
   app.js                → buildHTML(), loadData(), renderPage(), PAGE_META, updateTopbarTitle(),
                           showPage(), APARENCIA/applyAparencia()/setAparencia(), utilitários de UI
+                          favicon(domain), mkSpChip(sport), mkHouseChip(nome), casaCell(),
+                          auditCasas(dados)
 brand/                  → logos e favicons FDC Capital
 ```
 
@@ -129,7 +133,8 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **Tabelas** (`.tbl`): header em JetBrains Mono, zebra `rgba(255,255,255,0.015)`, hover azul. Cabeçalhos em pt-BR: "P/L" (nunca "Profit"), "Win Rate", "Turnover".
 - **Grid de fundo:** pseudo-elemento `body::before` com `position: fixed; z-index: 0; opacity: 0.55`. Grid via `linear-gradient + background-size: 44px 44px`, cor `--grid` (`rgba(255,255,255,0.05)` dark / `rgba(0,0,0,0.06)` light). `.app` tem `position: relative; z-index: 1` para ficar acima do grid.
 - **`.mono`**: alias de `.num` em `components.css` — `font-family: var(--font-mono); font-variant-numeric: tabular-nums`. Não força `text-align: right` (diferente de `.num`).
-- **`.sport-emoji`**: classe em `components.css` com `filter: grayscale(1)`. Todo emoji de esporte renderizado como HTML deve usar essa classe (em `sportCell` de `data.js` e nos cards de `performance.js`).
+- **`.sp-chip` / `.house-chip`** (`components.css`): chips simétricos 24×24px, `border-radius: 7px`, fundo `--fdc-steel`, borda `--line`, `filter: grayscale(1)`. `.sp-chip` exibe emoji (14px). `.house-chip` exibe favicon via `<img>` (object-fit: cover). Fallback de casa sem domínio: `.chip-initial` (inicial da casa em JetBrains Mono). Gerados por `mkSpChip(sport)` e `mkHouseChip(nome)` em `app.js`.
+- **`.sport-emoji`**: classe legada com `filter: grayscale(1)` — ainda usada em chart labels do `performance.js`. Em todos os outros contextos (tabelas, cards, apostas) usar `.sp-chip` via `mkSpChip()`.
 - **`.wrc`** (`mkWRC(wr)` em `shared.js`): componente de Win Rate — número em cima + barra proporcional azul (`--accent-2`) abaixo. Largura fixa 76px em tabelas. Em cards KPI, override `.kpi .wrc { width:100% }` e `.kpi .wrc .t { width:100% }` fazem a barra ocupar toda a largura sem repetir o número (já está no `.kpi-val`).
 - **`.empty-state`** (`mkEmpty(msg)` em `shared.js`): estado vazio reutilizável — ícone inbox SVG neutro + mensagem JetBrains Mono. Usar em toda view/tabela que pode ficar sem dados no período selecionado.
 - **`.stat-card-*`**: classes CSS para os cards de resumo por entidade (esporte/tipster/casa). Rodapé em 3 colunas — ROI (colorido) · Turnover (neutro) · WR (neutro) — com `border-right` como divisória. P/L é o elemento hero do card. Callers: `renderSport`, `renderCasa`, `renderTipsters` em `performance.js`.
@@ -147,6 +152,8 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - `fmtPL`: sinal colado sem espaço (`+R$`/`-R$`). `money-sign` em `0.78em` (R$ menor que o número).
 - Sidebar bottom: `#lastUpdate` é flexbox com `.pulse-dot` + `#lastUpdateText`.
 - **Win Rate (WR) é NEUTRO** — nunca usar `pos`/`neg` no WR. Verde/vermelho somente em P/L, ROI e badges de win/loss. Locais: `mkCalendarHeatmap` (shared.js), `mkKpiGrid` (shared.js), `renderKPI` (overview.js).
-- **Emoji de esporte**: sempre envolvido em `<span class="sport-emoji">` para aplicar `filter:grayscale(1)`. Fallback: `•` (ponto central) — nunca `?` ou `❓`. O glifo de múltiplas é `🔗` — `🎰` (cassino) é proibido pela marca.
+- **Chips de esporte e casa**: usar `mkSpChip(sport)` e `mkHouseChip(nome)` — nunca construir chips à mão. Fallback de esporte: `🏅` (nunca `•`, nunca `?`). Fallback de casa sem domínio em `HOUSE_DOMAIN`: inicial mono via `.chip-initial`. O glifo de múltiplas é `🔗` — `🎰` (cassino) é proibido pela marca.
+- **`HOUSE_DOMAIN`** (`data.js`): mapa nome→domínio para todas as casas. Para nova casa: adicionar entrada aqui. `favicon(domain)` em `app.js` constrói a URL Google S2. Para produção offline: substituir `favicon()` por `assets/casas/NOME.png` — o CSS `.house-chip img` continua igual.
+- **`auditCasas(dados)`** (`app.js`): chamada em `loadData` após `normalizeDados`. Loga `[audit-casas]` no console para casas sem entrada em `HOUSE_DOMAIN`.
 - **CSS sem hex hardcoded**: `.btn-export:hover` usa `filter: brightness(0.88)` (não hex). Toda cor deve vir de token CSS.
 - **Hex em Chart.js é permitido**: Chart.js (canvas) não lê variáveis CSS. Cores `#2E8BFF`, `#2BC07E`, `#E5524B` etc. podem aparecer como literais nos arquivos `.js` de charts — não são desvios de marca.
