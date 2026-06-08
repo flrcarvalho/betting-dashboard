@@ -22,12 +22,19 @@ function renderKPI(rows){
   },0);
   const totalCost=costConta+costTipster;
   const lucroLiq=lucro-totalCost;
+  // ── Sparkline: últimos 90 dias de P/L acumulado ──────────────────────────
+  const byDay90={};
+  rows.forEach(r=>{const k=r.data.slice(0,10);if(!byDay90[k])byDay90[k]=0;byDay90[k]+=r.lucro;});
+  const days90=Object.keys(byDay90).sort().slice(-90);
+  let cum90=0;const cumPL90=days90.map(d=>{cum90+=byDay90[d];return parseFloat(cum90.toFixed(2));});
+  const spark=mkSparkline(cumPL90,96,26);
+
   // ── Andar 1: P/L Bruto → Custo Conta → Custo Tipster → P/L Líquido ────────
   const row1=[
     {l:'P/L Bruto',v:fmtPL(lucro),c:lucro>=0?'pos':'neg',s:'antes de custos',accent:''},
     {l:'Custo de Contas',v:costConta>0?fmtPL(-costConta):fmtR(0),c:costConta>0?'neg':'neu',s:'total aquisição',accent:''},
     {l:'Custo de Tipsters',v:costTipster>0?fmtPL(-costTipster):fmtR(0),c:costTipster>0?'neg':'neu',s:'assinaturas / serviços',accent:''},
-    {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'background:rgba(46,139,255,0.08);border-color:rgba(46,139,255,.22);'},
+    {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'background:rgba(46,139,255,0.08);border-color:rgba(46,139,255,.22);',spark},
   ];
   // ── Andar 2: Turnover → ROI → Odd Média → Win Rate ──────────────────────
   const row2=[
@@ -36,12 +43,9 @@ function renderKPI(rows){
     {l:'Odd Média Pond.',v:calcAvgOdd(rows).toFixed(2),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
     {l:'Win Rate',v:wr.toFixed(1)+'%',c:wr>=50?'pos':'neg',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`},
   ];
-  const kpiCard=(k)=>`<div class="kpi" style="${k.accent||''}">${
-    k.accent?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);border-radius:8px 8px 0 0;opacity:.7"></div>`:''}
-    <div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`;
   const divider=`<div style="grid-column:1/-1;height:1px;background:var(--border);margin:2px 0;opacity:.6"></div>`;
   document.getElementById('kpiGrid').innerHTML=
-    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.5rem">${row1.map(k=>`<div class="kpi" style="position:relative;${k.accent||''}">${k.accent?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;opacity:.8"></div>`:''}<div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`+
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.5rem">${row1.map(k=>`<div class="kpi" style="position:relative;${k.accent||''}">${k.accent?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;opacity:.8"></div>`:''}<div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div>${k.spark?`<div class="kpi-sparkline">${k.spark}</div>`:''}</div>`).join('')}</div>`+
     `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">${row2.map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`;
 }
 
@@ -56,11 +60,28 @@ function renderBankroll(rows){
     if(i%labelStep!==0&&i!==days.length-1)return'';
     const p=d.split('-');return p[2]+'/'+p[1];
   });
+  const ptR=cumPL.map((_,i)=>i===cumPL.length-1?5:0);
   mkChart('chartBankroll',{type:'bar',data:{labels:lbl,datasets:[
-    {type:'line',data:cumPL,borderColor:'#2BC07E',tension:.4,pointRadius:0,fill:false,borderWidth:2,yAxisID:'y1',label:'Acumulado'},
-    {type:'bar',data:dpL,backgroundColor:dpL.map(v=>v>=0?'rgba(0,214,143,.6)':'rgba(240,80,110,.6)'),borderRadius:1,yAxisID:'y',label:'Diário',barPercentage:0.9,categoryPercentage:1.0}
+    {type:'line',data:cumPL,
+     borderColor:'#2E8BFF',
+     backgroundColor:(ctx)=>{const c=ctx.chart,{ctx:cx,chartArea:ca}=c;if(!ca)return'rgba(46,139,255,0)';const g=cx.createLinearGradient(0,ca.top,0,ca.bottom);g.addColorStop(0,'rgba(46,139,255,.16)');g.addColorStop(1,'rgba(46,139,255,0)');return g;},
+     tension:.4,fill:true,borderWidth:2,
+     pointRadius:ptR,pointBackgroundColor:'#2E8BFF',pointBorderColor:isDark()?'#12161D':'#ffffff',pointBorderWidth:2,
+     yAxisID:'y1',label:'P/L acumulado'},
+    {type:'bar',data:dpL,
+     backgroundColor:dpL.map(v=>v>=0?'rgba(43,192,126,.55)':'rgba(229,82,75,.55)'),
+     hoverBackgroundColor:dpL.map(v=>v>=0?'rgba(43,192,126,.8)':'rgba(229,82,75,.8)'),
+     borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
   ]},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
+    plugins:{
+      legend:{display:true,position:'top',align:'start',
+        labels:{color:tc(),font:{family:'JetBrains Mono, monospace',size:11},boxWidth:12,padding:16,
+          generateLabels:()=>[
+            {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0},
+            {text:'Dia positivo', strokeStyle:'rgba(43,192,126,.8)',fillStyle:'rgba(43,192,126,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1},
+            {text:'Dia negativo', strokeStyle:'rgba(229,82,75,.8)',fillStyle:'rgba(229,82,75,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1}
+          ]}},
+      tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
     scales:{
       x:{ticks:{color:tc(),font:{size:9},maxRotation:90,minRotation:90,autoSkip:false,callback:(v,i)=>lbl[i]||null},grid:{display:false},border:{display:false}},
       y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false},position:'left'},

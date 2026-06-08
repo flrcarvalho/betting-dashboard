@@ -237,6 +237,7 @@
 .tbl th {
   font-size: 11px;
   font-weight: var(--weight-bold);
+  font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text2);
@@ -286,7 +287,8 @@
   color: var(--text);
   background: var(--bg4);
 }
-.tbl tbody tr:hover td { background: rgba(46,139,255,0.04); }
+.tbl tbody tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+.tbl tbody tr:hover td { background: rgba(46,139,255,0.05); }
 .tbl td.td-num,
 .tbl th.td-num,
 .num,
@@ -315,6 +317,8 @@
   min-width: 2ch;
   text-align: right;
   flex-shrink: 0;
+  font-size: 0.78em;
+  vertical-align: baseline;
 }
 .money-val {
   text-align: right;
@@ -567,6 +571,7 @@
   font-family: var(--font-mono);
   cursor: default;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 .heat-cell:hover { opacity: 0.75; }
 .heat-empty { height: 26px; background: var(--bg4); border-radius: 3px; opacity: 0.25; }
@@ -746,6 +751,7 @@
   font-weight: var(--weight-bold);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
   line-height: 1.2;
   white-space: nowrap;
 }

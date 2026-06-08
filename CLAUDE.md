@@ -27,12 +27,13 @@ assets/js/
     gestao.js           → custoData, buildCostState, renderParceiros, renderCustos,
                           renderCustoTipster, renderCustoCards, renderMetrics
     overview.js         → renderKPI, renderBankroll, renderROIMonthly, renderOddsDist,
-                          renderHeatmap, renderOvTipsters, renderOvHeatmap, renderOvStreaks, renderOvCusto
+                          renderHeatmap, renderOvHeatmap, renderOvStreaks, renderOvCusto
     temporal.js         → renderConsolidado, renderMensal, renderDiario, renderSemana
                           (+ getAvailableMonths/Days/Weeks e helpers de navegação)
     performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
     apostas.js          → renderApostas, renderApostasVirt, apostasSort, apostasFilter
-  app.js                → buildHTML(), loadData(), renderPage(), tema, utilitários de UI
+  app.js                → buildHTML(), loadData(), renderPage(), PAGE_META, updateTopbarTitle(),
+                          showPage(), tema, utilitários de UI
 brand/                  → logos e favicons FDC Capital
 ```
 
@@ -85,6 +86,23 @@ brand/                  → logos e favicons FDC Capital
 | Sidebar light mode | `brand/fdc-logo-vertical-light.svg` |
 
 ---
+
+## Arquitetura do topbar e navegação
+
+- O topbar (68px fixo) exibe o título da página ativa via `#topbarTitle` e `#topbarSub`.
+- `showPage(id)` chama `updateTopbarTitle(id)` que consulta `PAGE_META` em `app.js`.
+- **NÃO adicionar `.page-header` dentro de páginas** — título fica sempre no topbar.
+- Para nova página: adicionar entrada em `PAGE_META` + ID na lista de `msInit` em `buildHTML()`.
+- Tipsters: o filtro de tipster vai como 4º parâmetro de `buildFilters('tipsters', sports, casas, tipsters)`.
+
+## Design system aplicado (Claude Designer guidelines)
+
+- **Topbar:** Manrope 800 22px tracking-0.035em (título) + JetBrains Mono 9px uppercase tracking-0.18em (eyebrow).
+- **KPI labels** (`.kpi-label`): JetBrains Mono — tudo que é dado usa mono, não sans.
+- **P/L Líquido:** único card com realce azul `rgba(46,139,255,.08)` + tick azul. Os demais ficam neutros.
+- **Calendário** (`mkCalendarHeatmap` em `shared.js`): mini-cards de P/L · Turnover · ROI · Apostas+WR · Odd Média · Stake Média acima do grid de dias.
+- **Gráfico "Tipsters — P/L, Win Rate e ROI"** foi removido da Visão Geral (commit f46b506).
+- **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural.
 
 ## Regras específicas
 

@@ -1,8 +1,64 @@
-﻿function toggleTheme(){const h=document.documentElement;const t=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',t);localStorage.setItem('theme',t);const lbl=document.getElementById('themeLabel');if(lbl)lbl.textContent=t==='dark'?'Claro':'Escuro';const active=document.querySelector('.page.active')?.id?.replace('page-','');if(active)renderPage(active);}
+﻿// ── Aparência system ──────────────────────────────────────────────────────────
+const APARENCIA_DEFAULTS={titlePage:'gradient',titlePanel:'blue',kpiStyle:'azul',density:'compact',theme:'dark'};
+let APARENCIA={...APARENCIA_DEFAULTS};
+try{const s=localStorage.getItem('aparencia_v1');if(s)APARENCIA={...APARENCIA_DEFAULTS,...JSON.parse(s)};}catch(e){}
+
+const APARENCIA_PAGE_CLASSES=['t-page-neutro','t-page-blue','t-page-gradient'];
+const APARENCIA_PANEL_CLASSES=['panel-title-tick','panel-title-accent2','panel-title-blue'];
+const APARENCIA_KPI_CLASSES=['kpi-neutro','kpi-azul'];
+
+function applyAparencia(){
+  const h=document.documentElement;
+  // theme
+  h.setAttribute('data-theme',APARENCIA.theme);
+  // density
+  if(APARENCIA.density==='compact')h.setAttribute('data-density','compact');
+  else h.removeAttribute('data-density');
+  // page title
+  APARENCIA_PAGE_CLASSES.forEach(c=>h.classList.remove(c));
+  if(APARENCIA.titlePage==='blue')h.classList.add('t-page-blue');
+  else if(APARENCIA.titlePage==='gradient')h.classList.add('t-page-gradient');
+  // panel title
+  APARENCIA_PANEL_CLASSES.forEach(c=>h.classList.remove(c));
+  if(APARENCIA.titlePanel==='accent2')h.classList.add('panel-title-accent2');
+  else if(APARENCIA.titlePanel==='blue')h.classList.add('panel-title-blue');
+  // kpi style
+  APARENCIA_KPI_CLASSES.forEach(c=>h.classList.remove(c));
+  if(APARENCIA.kpiStyle==='azul')h.classList.add('kpi-azul');
+  // sync button states in panel (if rendered)
+  document.querySelectorAll('.ap-btn[data-ap-key]').forEach(btn=>{
+    const key=btn.dataset.apKey,val=btn.dataset.apVal;
+    btn.classList.toggle('active',APARENCIA[key]===val);
+  });
+  // sync logos
+  const lbl=document.getElementById('themeLabel');if(lbl)lbl.textContent=APARENCIA.theme==='dark'?'Claro':'Escuro';
+}
+
+function setAparencia(key,val){
+  APARENCIA[key]=val;
+  localStorage.setItem('aparencia_v1',JSON.stringify(APARENCIA));
+  applyAparencia();
+  // re-render active page for theme change
+  if(key==='theme'){const active=document.querySelector('.page.active')?.id?.replace('page-','');if(active)renderPage(active);}
+}
+
+function toggleAparenciaPanel(){
+  const p=document.getElementById('aparenciaPanel');
+  if(p)p.classList.toggle('open');
+}
+
+// close panel on outside click
+document.addEventListener('click',e=>{
+  const p=document.getElementById('aparenciaPanel');
+  const w=document.getElementById('aparenciaWrap');
+  if(p&&p.classList.contains('open')&&!w?.contains(e.target))p.classList.remove('open');
+});
+
+function toggleTheme(){const h=document.documentElement;const t=h.getAttribute('data-theme')==='dark'?'light':'dark';APARENCIA.theme=t;localStorage.setItem('aparencia_v1',JSON.stringify(APARENCIA));h.setAttribute('data-theme',t);const lbl=document.getElementById('themeLabel');if(lbl)lbl.textContent=t==='dark'?'Claro':'Escuro';const active=document.querySelector('.page.active')?.id?.replace('page-','');if(active)renderPage(active);}
 
 // Helpers
 function fmt(v,d=2){return Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
-function fmtPL(v){const cls=v>=0?'pos':'neg';return`<span class="money ${cls}"><span class="money-sign">${v>=0?'+':'-'} R$</span><span class="money-val">${fmt(Math.abs(v))}</span></span>`;}
+function fmtPL(v){const cls=v>=0?'pos':'neg';return`<span class="money ${cls}"><span class="money-sign">${v>=0?'+':'-'}R$</span><span class="money-val">${fmt(Math.abs(v))}</span></span>`;}
 function fmtR(v){return`<span class="money"><span class="money-sign">R$</span><span class="money-val">${fmt(v,0)}</span></span>`;}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return;charts[id]=new Chart(document.getElementById(id),cfg);}
@@ -243,9 +299,54 @@ function buildHTML(){
       <div class="page-title" id="topbarTitle">Visão Geral</div>
       <div class="page-sub" id="topbarSub">performance consolidada</div>
     </div>
-    <div class="theme-toggle" onclick="toggleTheme()">
-      <div class="tog-track"><div class="tog-thumb"></div></div>
-      <span id="themeLabel">${document.documentElement.getAttribute('data-theme')==='dark'?'Claro':'Escuro'}</span>
+    <div class="aparencia-wrap" id="aparenciaWrap">
+      <div class="aparencia-trigger" onclick="toggleAparenciaPanel()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+        Aparência
+      </div>
+      <div class="aparencia-panel" id="aparenciaPanel">
+        <div class="ap-section">
+          <div class="ap-label">Título da Página</div>
+          <div class="ap-btns">
+            <button class="ap-btn" data-ap-key="titlePage" data-ap-val="neutro"   onclick="setAparencia('titlePage','neutro')">Neutro</button>
+            <button class="ap-btn" data-ap-key="titlePage" data-ap-val="blue"     onclick="setAparencia('titlePage','blue')">Azul</button>
+            <button class="ap-btn" data-ap-key="titlePage" data-ap-val="gradient" onclick="setAparencia('titlePage','gradient')">Gradiente</button>
+          </div>
+        </div>
+        <div class="ap-divider"></div>
+        <div class="ap-section">
+          <div class="ap-label">Título dos Painéis</div>
+          <div class="ap-btns">
+            <button class="ap-btn" data-ap-key="titlePanel" data-ap-val="tick"    onclick="setAparencia('titlePanel','tick')">| azul</button>
+            <button class="ap-btn" data-ap-key="titlePanel" data-ap-val="accent2" onclick="setAparencia('titlePanel','accent2')">| + texto</button>
+            <button class="ap-btn" data-ap-key="titlePanel" data-ap-val="blue"    onclick="setAparencia('titlePanel','blue')">Texto azul</button>
+          </div>
+        </div>
+        <div class="ap-divider"></div>
+        <div class="ap-section">
+          <div class="ap-label">Cards (KPI)</div>
+          <div class="ap-btns">
+            <button class="ap-btn" data-ap-key="kpiStyle" data-ap-val="neutro" onclick="setAparencia('kpiStyle','neutro')">Sem destaque</button>
+            <button class="ap-btn" data-ap-key="kpiStyle" data-ap-val="azul"   onclick="setAparencia('kpiStyle','azul')">| azul</button>
+          </div>
+        </div>
+        <div class="ap-divider"></div>
+        <div class="ap-section">
+          <div class="ap-label">Densidade</div>
+          <div class="ap-btns">
+            <button class="ap-btn" data-ap-key="density" data-ap-val="comfortable" onclick="setAparencia('density','comfortable')">Confortável</button>
+            <button class="ap-btn" data-ap-key="density" data-ap-val="compact"     onclick="setAparencia('density','compact')">Compacto</button>
+          </div>
+        </div>
+        <div class="ap-divider"></div>
+        <div class="ap-section">
+          <div class="ap-label">Tema</div>
+          <div class="ap-btns">
+            <button class="ap-btn" data-ap-key="theme" data-ap-val="dark"  onclick="setAparencia('theme','dark')">Escuro</button>
+            <button class="ap-btn" data-ap-key="theme" data-ap-val="light" onclick="setAparencia('theme','light')">Claro</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="app">
@@ -259,7 +360,7 @@ function buildHTML(){
           ['casas','Bookies','<rect x="1" y="3" width="14" height="10" rx="1"/><path d="M1 8h14M5 3v10"/>'],
           ['apostas','Apostas','<path d="M2 4h12M2 8h12M2 12h8"/><rect x="1" y="2" width="14" height="12" rx="1"/>'],
           ['tipsters','Tipsters','<circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.5 2.2-4 5-4s5 1.5 5 4"/><circle cx="12" cy="5" r="2"/><path d="M12 9c1.5.3 3 1.2 3 4"/>'],
-        ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">${icon}</svg>${label}</div>`).join('')}
+        ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">${icon}</svg>${label}</div>`).join('')}
         <div class="nav-group">Resultados</div>
         ${[
           ['consolidado','Consolidado','<path d="M1 4h14M1 8h14M1 12h8"/><rect x="1" y="2" width="14" height="12" rx="1"/>'],
@@ -267,18 +368,18 @@ function buildHTML(){
           ['diario','Diário','<circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/>'],
           ['semana','Semana','<rect x="1" y="3" width="14" height="11" rx="1"/><path d="M1 7h14M5 1v4M11 1v4M4 11h2M7 11h2M10 11h2"/>'],
           ['resultados_casa','Por Casa','<path d="M1 4h14M1 8h14M1 12h8"/><circle cx="12" cy="12" r="3"/>'],
-        ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">${icon}</svg>${label}</div>`).join('')}
+        ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">${icon}</svg>${label}</div>`).join('')}
         <div class="nav-group">Gestão</div>
         ${[
           ['parceiros','Fornecedores & Parceiros','<rect x="2" y="4" width="12" height="9" rx="1"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/>'],
           ['custos','Custos de Contas','<path d="M8 2v12M5 5h4.5a2 2 0 010 4H5m0 0h5a2 2 0 010 4H5"/>'],
           ['custos_tipster','Custo de Tipsters','<circle cx="6" cy="5" r="2.5"/><path d="M1 13.5C1 11 3 10 6 10s5 1 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M10 13.2c.6-.5 2-.7 2-.7"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="10" y1="10" x2="14" y2="10"/>'],
           ['metrics','Métricas','<path d="M8 2v2M8 12v2M2 8h2m8 0h2"/><circle cx="8" cy="8" r="3"/>'],
-        ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">${icon}</svg>${label}</div>`).join('')}
+        ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">${icon}</svg>${label}</div>`).join('')}
       </nav>
       <div class="sidebar-bottom">
         <button class="update-btn" onclick="loadData()">↻ Atualizar dados</button>
-        <div class="last-update" id="lastUpdate">${new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="last-update" id="lastUpdate"><span class="pulse-dot"></span><span id="lastUpdateText">${new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
       </div>
     </aside>
     <main class="main"><div class="main-content">
@@ -287,7 +388,7 @@ function buildHTML(){
       <div class="page" id="page-overview">
         ${buildFilters('overview',sports,casas,tipsters)}
         <div class="kpi-grid" id="kpiGrid"></div>
-        ${mkCard('bankroll','Resultado Geral','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>')}
+        ${mkCard('bankroll','Resultado Geral','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>','<span style="margin-left:auto;margin-right:8px;font-family:JetBrains Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--text2);opacity:.7">P/L diário · evolução acumulada</span>')}
         ${mkCard('ov_streaks','Sequências & Topo Histórico','<div id="ovStreaksContent"></div>')}
         ${mkCard('roi_monthly','ROI Mensal (%)','<div class="chart-wrap" style="min-height:220px"><canvas id="chartROI" role="img" aria-label="ROI mensal"></canvas></div>')}
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
@@ -556,14 +657,18 @@ async function loadData(){
   if(loader){loader.style.opacity='0';}
   await new Promise(r=>setTimeout(r,360));
   buildHTML();
+  applyAparencia();
   if(_fetchErr){
     const banner=document.createElement('div');
     banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(229,82,75,0.12);border-bottom:1px solid rgba(229,82,75,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#E5524B';
     banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${_fetchErr}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(229,82,75,0.4);color:#E5524B;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#E5524B;cursor:pointer;font-size:14px">×</button>`;
     document.body.appendChild(banner);
   }else{
-    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const lu=document.getElementById('lastUpdateText');
+    if(lu)lu.textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   }
 }
+// Apply persisted Aparência before first render (theme, density, etc.)
+applyAparencia();
 loadData();
 

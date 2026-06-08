@@ -45,18 +45,18 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   let startDow = firstDay.getDay();
   startDow = (startDow + 6) % 7; // 0=Mon
 
+  // Proportional opacity: intensity ∝ |P/L| relative to month max
+  const maxAbs=Math.max(...Object.values(dayMap).map(d=>Math.abs(d.pl)),1);
   const cellStyle=(d)=>{
     const key=`${yr}-${mo}-${String(d).padStart(2,'0')}`;
     const data=dayMap[key];
     if(!data) return {bg:'var(--bg4)',border:'var(--border)',clr:'var(--text3)',pl:null,n:0};
     const pl=data.pl;
+    const intensity=Math.min(Math.abs(pl)/maxAbs,1)*0.78+0.15;
+    const a=intensity.toFixed(2),ab=(intensity*0.6).toFixed(2);
     let bg,border,clr='#fff';
-    if(pl>5000)       {bg='#2BC07E';border='rgba(43,192,126,.5)';}
-    else if(pl>1000)  {bg='#00a876';border='rgba(0,168,118,.5)';}
-    else if(pl>=0)    {bg='#4db896';border='rgba(77,184,150,.5)';}
-    else if(pl>=-1000){bg='#ff8a94';border='rgba(255,138,148,.5)';}
-    else if(pl>=-5000){bg='#E5524B';border='rgba(229,82,75,.5)';}
-    else              {bg='#cc1a2a';border='rgba(204,26,42,.5)';}
+    if(pl>=0){bg=`rgba(43,192,126,${a})`;border=`rgba(43,192,126,${ab})`;}
+    else     {bg=`rgba(229,82,75,${a})`;  border=`rgba(229,82,75,${ab})`;}
     return{bg,border,clr,pl,n:data.n};
   };
 
@@ -222,6 +222,23 @@ function mkOneStatCard(icon, name, pl, roi, turnover, bets, extra){
 }
 
 // Apostas — constantes globais (devem vir antes do buildHTML)
+// ── Sparkline ────────────────────────────────────────────────────────────────
+function mkSparkline(data,w=88,h=28){
+  if(!data||data.length<2)return'';
+  const min=Math.min(...data),max=Math.max(...data);
+  const range=max-min||1;
+  const pad=2;
+  const pts=data.map((v,i)=>{
+    const x=pad+(i/(data.length-1))*(w-pad*2);
+    const y=h-pad-(v-min)/range*(h-pad*2);
+    return`${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const last=data[data.length-1];
+  const lx=parseFloat(pts.split(' ').pop().split(',')[0]);
+  const ly=parseFloat(pts.split(' ').pop().split(',')[1]);
+  return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><polyline points="${pts}" fill="none" stroke="var(--ink-soft,#95A1B0)" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.5" fill="var(--accent,#2E8BFF)" stroke="var(--bg,#0A0D12)" stroke-width="1.5"/></svg>`;
+}
+
 const APOSTAS_COLS=['data','esporte','tipster','casa','parceiro','aposta','descricao','stake','odd','resultado','lucro'];
 const APOSTAS_HDRS=['Data','Esporte','Tipster','Casa','Parceiro','Aposta','Descrição','Stake','Odd','Resultado','P/L'];
 const APOSTAS_NUM=[7,8,10];
