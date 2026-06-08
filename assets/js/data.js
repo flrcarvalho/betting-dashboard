@@ -96,12 +96,12 @@ function sportSvg(nome,size=14){
 // Keep sportEmoji as alias returning SVG (used in chart labels — fallback to short text)
 function sportEmoji(nome){
   if(!nome)return'';
-  const SHORT={'futebol':'⚽','nba':'🏀','basquete':'🏀','tenis':'🎾','mma':'🥊','f1':'🏎️','nfl':'🏈','nhl':'🏒','baseball':'⚾','beisebol':'⚾','volei':'🏐','handbol':'🤾','handeball':'🤾','handball':'🤾','dardos':'🎯','esports':'🎮','e-sports':'🎮','cs':'🖱️','multiplos':'🎰','peixe':'🐟','snooker':'🎱','golf':'⛳','rugby':'🏉','outro':'❓'};
+  const SHORT={'futebol':'⚽','nba':'🏀','basquete':'🏀','tenis':'🎾','mma':'🥊','f1':'🏎️','nfl':'🏈','nhl':'🏒','baseball':'⚾','beisebol':'⚾','volei':'🏐','handbol':'🤾','handeball':'🤾','handball':'🤾','dardos':'🎯','esports':'🎮','e-sports':'🎮','cs':'🖱️','multiplos':'🔗','peixe':'🐟','snooker':'🎱','golf':'⛳','rugby':'🏉','outro':'•'};
   let key=SPORT_KEY[nome];if(!key){const k=Object.keys(SPORT_KEY).find(k=>k.toLowerCase()===nome.toLowerCase());key=k?SPORT_KEY[k]:'outro';}
   return SHORT[key]||'';
 }
 function sportCell(nome){
-  return`<span style="display:inline-flex;align-items:center;gap:5px">${sportEmoji(nome)}${nome||'—'}</span>`;
+  return`<span style="display:inline-flex;align-items:center;gap:5px"><span class="sport-emoji">${sportEmoji(nome)}</span>${nome||'—'}</span>`;
 }
 
 let DADOS=[], charts={};

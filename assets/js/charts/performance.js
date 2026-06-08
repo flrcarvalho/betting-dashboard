@@ -9,7 +9,7 @@ function renderSport(rows){
   const sportCards = entsByTurnover.map(([sport,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0;
     const wr=d.t>0?(d.w/d.t*100):0;
-    const iconHtml=`<span style="font-size:16px">${sportEmoji(sport)}</span>`;
+    const iconHtml=`<span class="sport-emoji" style="font-size:16px">${sportEmoji(sport)}</span>`;
     return mkOneStatCard(iconHtml, sport, d.l, roi, d.s, d.n, `WR ${wr.toFixed(0)}%`);
   });
   mkStatCards(sportCards, 'sportKpiCards');

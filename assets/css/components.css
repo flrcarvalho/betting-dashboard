@@ -787,6 +787,9 @@
 .ms-wrap { position: relative; z-index: 100; }
 .ms-dd { z-index: 9999 !important; }
 
+/* ── Sport emoji chip — grayscale per brand rules ────────────────────────── */
+.sport-emoji { filter: grayscale(1); }
+
 .logo-dark  { display: block; }
 .logo-light { display: none; }
 [data-theme="light"] .logo-dark  { display: none; }
