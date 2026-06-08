@@ -209,20 +209,31 @@ function mkStatCards(items, containerId){
   el.innerHTML = html;
 }
 
-function mkOneStatCard(icon, name, pl, roi, turnover, bets, extra){
+function mkOneStatCard(icon, name, pl, roi, turnover, bets, wr){
   const plColor = pl>=0 ? 'var(--green)' : 'var(--red)';
   const roiColor = roi>=0 ? 'var(--green)' : 'var(--red)';
   const roiStr = (roi>=0?'+':'')+roi.toFixed(1)+'%';
-  return `<div style="background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:14px 16px;height:130px;box-sizing:border-box;display:flex;flex-direction:column;gap:0;overflow:hidden">
-    <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;overflow:hidden;flex-shrink:0">
+  const wrVal = typeof wr === 'number' ? wr.toFixed(1)+'%' : (wr||'—');
+  return `<div class="stat-card">
+    <div class="stat-card-hdr">
       ${icon}
-      <span style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name}</span>
+      <span class="stat-card-name">${name}</span>
+      <span class="stat-card-bets">${bets}b</span>
     </div>
-    <div style="font-size:20px;font-weight:700;color:${plColor};font-variant-numeric:tabular-nums;line-height:1.15;margin-bottom:6px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fmtPL(pl)}</div>
-    <div style="font-size:10px;font-family:'JetBrains Mono',monospace;display:flex;flex-direction:column;gap:2px;flex:1">
-      <div style="white-space:nowrap">ROI &nbsp;<span style="color:${roiColor}">${roiStr}</span></div>
-      <div style="white-space:nowrap">Turnover &nbsp;<span style="color:var(--text2)">${fmtR(turnover)}</span></div>
-      <div style="white-space:nowrap">${bets}b${extra?` &nbsp;<span style="color:var(--text3)">${extra}</span>`:''}</div>
+    <div class="stat-card-pl" style="color:${plColor}">${fmtPL(pl)}</div>
+    <div class="stat-card-footer">
+      <div class="stat-card-col">
+        <span class="stat-card-lbl">ROI</span>
+        <span class="stat-card-val" style="color:${roiColor}">${roiStr}</span>
+      </div>
+      <div class="stat-card-col">
+        <span class="stat-card-lbl">Turnover</span>
+        <span class="stat-card-val">${fmtR(turnover)}</span>
+      </div>
+      <div class="stat-card-col">
+        <span class="stat-card-lbl">WR</span>
+        <span class="stat-card-val">${wrVal}</span>
+      </div>
     </div>
   </div>`;
 }

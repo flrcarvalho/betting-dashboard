@@ -10,7 +10,7 @@ function renderSport(rows){
     const roi=d.s>0?(d.l/d.s*100):0;
     const wr=d.t>0?(d.w/d.t*100):0;
     const iconHtml=`<span class="sport-emoji" style="font-size:16px">${sportEmoji(sport)}</span>`;
-    return mkOneStatCard(iconHtml, sport, d.l, roi, d.s, d.n, `WR ${wr.toFixed(0)}%`);
+    return mkOneStatCard(iconHtml, sport, d.l, roi, d.s, d.n, wr);
   });
   mkStatCards(sportCards, 'sportKpiCards');
 
@@ -52,7 +52,7 @@ function renderCasa(rows){
       ? `<img src="${iconSrc}" style="width:18px;height:18px;border-radius:3px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">`
       : `<span style="width:18px;height:18px;background:var(--bg5);border-radius:3px;display:inline-block;flex-shrink:0"></span>`;
     const wr=d.t>0?(d.w/d.t*100):0;
-    return mkOneStatCard(iconHtml, casa, d.l, roi, d.s, d.n, `WR ${wr.toFixed(0)}%`);
+    return mkOneStatCard(iconHtml, casa, d.l, roi, d.s, d.n, wr);
   });
   mkStatCards(casaCards, 'casaKpiCards');
 
@@ -102,7 +102,7 @@ function renderTipsters(){
       const initials=t.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
       const hue=Math.abs(t.split('').reduce((a,c)=>a+c.charCodeAt(0),0))%360;
       const iconHtml=`<div style="width:20px;height:20px;border-radius:50%;background:hsl(${hue},55%,38%);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>`;
-      return mkOneStatCard(iconHtml, t, d.l, roi, d.s, d.n, `WR ${wr.toFixed(0)}%`);
+      return mkOneStatCard(iconHtml, t, d.l, roi, d.s, d.n, wr);
     });
     mkStatCards(tipCards, 'tipsterKpiCards');
   }
