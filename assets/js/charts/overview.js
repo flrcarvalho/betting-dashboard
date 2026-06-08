@@ -41,7 +41,7 @@ function renderKPI(rows){
     {l:'Turnover',v:fmtR(stake),c:'neu',s:'volume apostado'},
     {l:'ROI',v:(roi>=0?'+':'')+roi.toFixed(2)+'%',c:roi>=0?'pos':'neg',s:n+' apostas'},
     {l:'Odd Média Pond.',v:calcAvgOdd(rows).toFixed(2),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
-    {l:'Win Rate',v:wr.toFixed(1)+'%',c:wr>=50?'pos':'neg',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`},
+    {l:'Win Rate',v:wr.toFixed(1)+'%',c:'neu',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`},
   ];
   const divider=`<div style="grid-column:1/-1;height:1px;background:var(--border);margin:2px 0;opacity:.6"></div>`;
   document.getElementById('kpiGrid').innerHTML=

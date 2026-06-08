@@ -36,7 +36,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const mAvgStake = mN>0 ? mTurnover/mN : 0;
   const plColor = mPL>=0?'var(--green)':'var(--red)';
   const roiColor = mROI>=0?'var(--green)':'var(--red)';
-  const wrColor = mWR>=50?'var(--green)':'var(--red)';
+  const wrColor = 'var(--ink-soft)';
 
   // Calendar grid
   const firstDay = new Date(parseInt(yr), parseInt(mo)-1, 1);
@@ -149,7 +149,7 @@ function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
     mkK('Apostas',n.toLocaleString('pt-BR'),'neu',betsBreak,true),
   ].join('');
   const row2=[
-    mkK('Win Rate',wr.toFixed(1)+'%',wr>=50?'pos':'neg',settled+' encerradas'),
+    mkK('Win Rate',wr.toFixed(1)+'%','neu',settled+' encerradas'),
     mkK('Odd Média Pond.',avgOdd.toFixed(2),'neu','Σ(odd×stake)/Σ(stake)'),
     mkK('Stake Média',fmtR(avgStake),'neu','por aposta'),
     mkK(contextLabel,contextVal,'neu',contextSub),
