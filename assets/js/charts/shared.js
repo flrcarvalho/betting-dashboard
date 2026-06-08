@@ -18,18 +18,31 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     dayMap[d].pl+=r.lucro; dayMap[d].n++;
   });
 
-  // Month summary
+  // Month stats
   const mRows = allDados.filter(r=>r.data.slice(0,7)===cur);
   const mPL = mRows.reduce((a,r)=>a+r.lucro,0);
   const mN = mRows.length;
+  const mTurnover = mRows.reduce((a,r)=>a+(r.stake||0),0);
+  const mROI = mTurnover>0 ? mPL/mTurnover*100 : 0;
+  const mSettled = mRows.filter(r=>r.resultado!=='V');
+  const mWins = mSettled.filter(r=>['W','HW'].includes(r.resultado)).length;
+  const mWR = mSettled.length>0 ? mWins/mSettled.length*100 : 0;
+  const mWCount = mRows.filter(r=>r.resultado==='W').length;
+  const mHWCount = mRows.filter(r=>r.resultado==='HW').length;
+  const mLCount = mRows.filter(r=>r.resultado==='L').length;
+  const mHLCount = mRows.filter(r=>r.resultado==='HL').length;
+  const mSumOddStake = mRows.reduce((a,r)=>a+((r.odd||0)*(r.stake||0)),0);
+  const mAvgOdd = mTurnover>0 ? mSumOddStake/mTurnover : 0;
+  const mAvgStake = mN>0 ? mTurnover/mN : 0;
   const plColor = mPL>=0?'var(--green)':'var(--red)';
+  const roiColor = mROI>=0?'var(--green)':'var(--red)';
+  const wrColor = mWR>=50?'var(--green)':'var(--red)';
 
   // Calendar grid
   const firstDay = new Date(parseInt(yr), parseInt(mo)-1, 1);
   const lastDay = new Date(parseInt(yr), parseInt(mo), 0);
   const daysInMonth = lastDay.getDate();
-  // 0=Sun, adjust to start on Mon
-  let startDow = firstDay.getDay(); // 0=Sun
+  let startDow = firstDay.getDay();
   startDow = (startDow + 6) % 7; // 0=Mon
 
   const cellStyle=(d)=>{
@@ -38,9 +51,9 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     if(!data) return {bg:'var(--bg4)',border:'var(--border)',clr:'var(--text3)',pl:null,n:0};
     const pl=data.pl;
     let bg,border,clr='#fff';
-    if(pl>5000)      {bg='#2BC07E';border='rgba(43,192,126,.5)';}
-    else if(pl>1000) {bg='#00a876';border='rgba(0,168,118,.5)';}
-    else if(pl>=0)   {bg='#4db896';border='rgba(77,184,150,.5)';}
+    if(pl>5000)       {bg='#2BC07E';border='rgba(43,192,126,.5)';}
+    else if(pl>1000)  {bg='#00a876';border='rgba(0,168,118,.5)';}
+    else if(pl>=0)    {bg='#4db896';border='rgba(77,184,150,.5)';}
     else if(pl>=-1000){bg='#ff8a94';border='rgba(255,138,148,.5)';}
     else if(pl>=-5000){bg='#E5524B';border='rgba(229,82,75,.5)';}
     else              {bg='#cc1a2a';border='rgba(204,26,42,.5)';}
@@ -48,27 +61,25 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   };
 
   const compact = opts.compact;
-  const cellH = compact ? '52px' : '68px';
-  const cellFS = compact ? '12px' : '14px';
+  const cellH = compact ? '58px' : '76px';
+  const cellFS = compact ? '13px' : '15px';
   const subFS = compact ? '9px' : '10px';
 
   const DAYS_SHORT = ['S','T','Q','Q','S','S','D'];
 
   let cells = '';
-  // Blank cells before first day
-  for(let i=0;i<startDow;i++) cells+=`<div style="background:var(--bg2);border-radius:6px;opacity:.3"></div>`;
-  // Day cells
+  for(let i=0;i<startDow;i++) cells+=`<div style="background:var(--bg2);border-radius:8px;opacity:.3"></div>`;
   const today = new Date();
   for(let d=1;d<=daysInMonth;d++){
     const s=cellStyle(d);
     const key=`${yr}-${mo}-${String(d).padStart(2,'0')}`;
     const isToday=(today.getFullYear()===parseInt(yr)&&today.getMonth()===parseInt(mo)-1&&today.getDate()===d);
     const todayBorder=isToday?'2px solid var(--blue)':'1px solid '+s.border;
-    const plTxt=s.pl!=null?`<div style="font-weight:700;font-size:${cellFS};color:${s.clr};font-variant-numeric:tabular-nums;line-height:1.1">${s.pl>=0?'+':''}${fmtK(s.pl)}</div>`:'';
-    const nTxt=s.n>0?`<div style="font-size:${subFS};color:${s.clr};opacity:.7;line-height:1">${s.n}b</div>`:'';
-    cells+=`<div style="background:${s.bg};border:${todayBorder};border-radius:6px;padding:4px 5px;cursor:${s.n?'pointer':'default'};display:flex;flex-direction:column;justify-content:space-between;min-height:${cellH};position:relative;transition:opacity .1s" ${s.n?`onclick="if(window._calHeatCb)window._calHeatCb('${key}')" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"`:''}>
+    const plTxt=s.pl!=null?`<div style="font-weight:700;font-size:${cellFS};color:${s.clr};font-variant-numeric:tabular-nums;text-align:right;line-height:1.15;font-family:'JetBrains Mono',monospace">${s.pl>=0?'+':''}${fmtK(s.pl)}</div>`:'';
+    const nTxt=s.n>0?`<div style="font-size:${subFS};color:${s.clr};opacity:.7;text-align:right;line-height:1;font-family:'JetBrains Mono',monospace">${s.n}b</div>`:'';
+    cells+=`<div style="background:${s.bg};border:${todayBorder};border-radius:8px;padding:5px 6px;cursor:${s.n?'pointer':'default'};display:flex;flex-direction:column;justify-content:space-between;min-height:${cellH};position:relative;transition:opacity .1s" ${s.n?`onclick="if(window._calHeatCb)window._calHeatCb('${key}')" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"`:''}>
       <div style="font-size:${subFS};color:${s.pl!=null?s.clr:'var(--text3)'};font-family:'JetBrains Mono',monospace;font-weight:${isToday?700:500}">${d}</div>
-      <div>${plTxt}${nTxt}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">${plTxt}${nTxt}</div>
     </div>`;
   }
 
@@ -84,16 +95,29 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     </div>
   `:'<div style="font-size:15px;font-weight:700;color:var(--text)">' + moLabel + '</div>';
 
-  const summaryHTML=`<div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap">
-    <div style="font-size:${compact?'20px':'24px'};font-weight:700;color:${plColor};font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace">${fmtPL(mPL)}</div>
-    <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${mN} apostas</div>
+  // Mini-cards row
+  const mkMini=(label,val,valColor,sub)=>`<div class="kpi" style="padding:.6rem .75rem">
+    <div class="kpi-label" style="font-size:9px">${label}</div>
+    <div class="kpi-val" style="font-size:${compact?'13px':'15px'};color:${valColor||'var(--text)'}">${val}</div>
+    ${sub?`<div class="kpi-sub" style="font-size:8px;line-height:1.3">${sub}</div>`:''}
   </div>`;
 
-  return`<div style="display:flex;flex-direction:column;gap:12px;height:100%">
+  const miniCardsHTML=mN>0?`
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:2px">
+      ${mkMini('P/L',fmtPL(mPL),plColor,'')}
+      ${mkMini('Turnover',fmtR(mTurnover),'var(--text)','')}
+      ${mkMini('ROI',(mROI>=0?'+':'')+mROI.toFixed(2)+'%',roiColor,'')}
+      ${mkMini('Apostas',mN,'var(--text)',`WR: <span style="color:${wrColor}">${mWR.toFixed(1)}%</span> · <span class="res-w">W:${mWCount}</span> <span class="res-hw">HW:${mHWCount}</span> <span class="res-l">L:${mLCount}</span> <span class="res-hl">HL:${mHLCount}</span>`)}
+      ${mkMini('Odd Média Pond.',mAvgOdd>0?mAvgOdd.toFixed(2):'—','var(--text)','')}
+      ${mkMini('Stake Média',mAvgStake>0?fmtR(mAvgStake):'—','var(--text)','')}
+    </div>
+  `:'';
+
+  return`<div style="display:flex;flex-direction:column;gap:10px;height:100%">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       ${navHTML}
-      ${summaryHTML}
     </div>
+    ${miniCardsHTML}
     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex:1">
       ${DAYS_SHORT.map(d=>`<div style="text-align:center;font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-weight:700;padding-bottom:2px">${d}</div>`).join('')}
       ${cells}

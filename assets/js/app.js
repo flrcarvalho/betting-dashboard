@@ -189,7 +189,7 @@ function showPage(id){
 function renderPage(id){
   _filterCache={};_lastPage=id;_lastPageSig=_pageSig(id);
   const rows=filtrarPagina(id);
-  if(id==='overview'){renderKPI(rows);renderBankroll(rows);renderROIMonthly(rows);renderOddsDist(rows);renderOvCusto();renderOvStreaks(rows);renderOvTipsters(rows);renderOvHeatmap();}
+  if(id==='overview'){renderKPI(rows);renderBankroll(rows);renderROIMonthly(rows);renderOddsDist(rows);renderOvCusto();renderOvStreaks(rows);renderOvHeatmap();}
   else if(id==='daily'||id==='consolidado'){renderConsolidado();}
   else if(id==='sports'){renderSport(rows);}
   else if(id==='casas'){renderCasa(rows);}
@@ -266,10 +266,9 @@ function buildHTML(){
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
         ${mkCard('ov_custo','Custo de Contas — Resumo','<div id="ovCustoContent"></div>')}
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem" id="ovHeatmapCard">
-          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Calendário — Resultados Diários</div>
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Calendário</div>
           <div id="ovHeatmapContent"></div>
         </div>
-        ${mkCard('ov_tipster_bar','Tipsters — P/L, Win Rate e ROI','<div class="chart-wrap" style="min-height:260px"><canvas id="chartOvTipsterBar" role="img" aria-label="Tipsters bar"></canvas></div>')}
       </div>
 
       <!-- CONSOLIDADO -->

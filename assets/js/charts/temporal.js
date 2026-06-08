@@ -188,7 +188,7 @@ function renderMensal(){
   window._calHeatCb=(day)=>{
     // Click a day: could show daily tooltip in future
   };
-  const heatmapHeroHTML=mkCard('mensal_hero_cal','Calendário — '+moLabel,
+  const heatmapHeroHTML=mkCard('mensal_hero_cal','Calendário',
     `<div style="min-height:360px" id="mensalCalWrap">
       ${mkCalendarHeatmap(selMonthVal,DADOS,{
         showNav:true,
