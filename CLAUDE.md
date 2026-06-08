@@ -123,6 +123,8 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`.
 - **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural (hardcoded).
 - **Card titles** (`.card-title`): `color: var(--accent-2)` — azul suave, não é preferência variável. A barra do `.card-hdr` usa `var(--accent)` (azul forte).
+- **Nav groups** (`.nav-group`): JetBrains Mono, uppercase, `letter-spacing: 0.18em`, `color: var(--ink-mute)` — padrão eyebrow da sidebar.
+- **Títulos de seção** (`.metric-title`, `.analise-popup-section-title`): `color: var(--accent-2)` — azul suave, sem barra lateral.
 - **Nav icons:** `stroke-width="1.6"`, cor `var(--ink-mute)`, ativo em `var(--accent)`.
 - **Tabelas** (`.tbl`): header em JetBrains Mono, zebra `rgba(255,255,255,0.015)`, hover azul. Cabeçalhos em pt-BR: "P/L" (nunca "Profit"), "Win Rate", "Turnover".
 - **Grid de fundo:** pseudo-elemento `body::before` com `position: fixed; z-index: 0; opacity: 0.55`. Grid via `linear-gradient + background-size: 44px 44px`, cor `--grid` (`rgba(255,255,255,0.05)` dark / `rgba(0,0,0,0.06)` light). `.app` tem `position: relative; z-index: 1` para ficar acima do grid.
