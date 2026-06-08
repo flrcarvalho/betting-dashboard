@@ -174,9 +174,33 @@ function mkCard(id,title,bodyHTML,extraHdrHTML=''){
 }
 
 // Nav
+const PAGE_META={
+  'overview':       ['Visão Geral',              'performance consolidada'],
+  'sports':         ['Esportes',                 'performance por modalidade esportiva'],
+  'casas':          ['Bookies',                  'performance e ROI por bookmaker'],
+  'apostas':        ['Apostas',                  'espelho completo da base de dados'],
+  'tipsters':       ['Tipsters',                 'análise comparativa e individual'],
+  'consolidado':    ['Consolidado',              'resumo anual e evolução mensal'],
+  'mensal':         ['Mensal',                   'análise detalhada do mês selecionado'],
+  'diario':         ['Diário',                   'análise detalhada do dia selecionado'],
+  'semana':         ['Semana',                   'análise da semana selecionada'],
+  'resultados_casa':['Por Casa',                 'performance por bookmaker'],
+  'parceiros':      ['Fornecedores & Parceiros', 'turnover, lucro e período por conta'],
+  'custos':         ['Custos de Contas',         'custo de aquisição por conta e fornecedor'],
+  'custos_tipster': ['Custo de Tipsters',        'assinaturas, serviços e pagamentos'],
+  'metrics':        ['Métricas',                 'base de conhecimento e valores atuais'],
+};
+function updateTopbarTitle(id){
+  const meta=PAGE_META[id]||[id,''];
+  const t=document.getElementById('topbarTitle');
+  const s=document.getElementById('topbarSub');
+  if(t)t.textContent=meta[0];
+  if(s)s.textContent=meta[1];
+}
 let _lastPage='',_lastPageSig='';
 function _pageSig(id){return JSON.stringify(gfs(id))+'|'+[...msGet('sp_'+id)].sort().join(',')+'|'+[...msGet('ca_'+id)].sort().join(',')+'|'+[...msGet('ti_'+id)].sort().join(',');}
 function showPage(id){
+  updateTopbarTitle(id);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
@@ -215,6 +239,10 @@ function buildHTML(){
 
   document.getElementById('root').innerHTML=`
   <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="topbarTitle">Visão Geral</div>
+      <div class="page-sub" id="topbarSub">performance consolidada</div>
+    </div>
     <div class="theme-toggle" onclick="toggleTheme()">
       <div class="tog-track"><div class="tog-thumb"></div></div>
       <span id="themeLabel">${document.documentElement.getAttribute('data-theme')==='dark'?'Claro':'Escuro'}</span>
@@ -257,7 +285,6 @@ function buildHTML(){
 
       <!-- VISÃO GERAL -->
       <div class="page" id="page-overview">
-        <div class="page-header"><div><div class="page-title">Visão Geral</div><div class="page-sub">performance consolidada</div></div></div>
         ${buildFilters('overview',sports,casas,tipsters)}
         <div class="kpi-grid" id="kpiGrid"></div>
         ${mkCard('bankroll','Resultado Geral','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>')}
@@ -273,21 +300,18 @@ function buildHTML(){
 
       <!-- CONSOLIDADO -->
       <div class="page" id="page-consolidado">
-        <div class="page-header"><div><div class="page-title">Consolidado</div><div class="page-sub">resumo anual e evolução mensal</div></div></div>
         ${buildFilters('consolidado',sports,casas)}
         <div id="consolidadoContent"></div>
       </div>
 
       <!-- DIÁRIO (legado, mantido para compatibilidade) -->
       <div class="page" id="page-daily" style="display:none">
-        <div class="page-header"><div><div class="page-title">Diário</div><div class="page-sub">evolução dia a dia por tipster</div></div></div>
         ${buildFilters('daily',sports,casas)}
         <div id="dailyContent"></div>
       </div>
 
       <!-- ESPORTES -->
       <div class="page" id="page-sports">
-        <div class="page-header"><div><div class="page-title">Esportes</div><div class="page-sub">performance por modalidade esportiva</div></div></div>
         ${buildFilters('sports',sports,casas)}
         ${mkCard('sport_kpi','Resumo por Esporte','<div id="sportKpiCards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.5rem"></div>')}
         ${mkCard('sport_chart','P/L por Esporte','<div id="sportTable"></div><div class="chart-wrap" style="min-height:300px;margin-top:.75rem"><canvas id="chartSport" role="img" aria-label="Esportes"></canvas></div>')}
@@ -295,7 +319,6 @@ function buildHTML(){
 
       <!-- CASAS DE APOSTAS -->
       <div class="page" id="page-casas">
-        <div class="page-header"><div><div class="page-title">Bookies</div><div class="page-sub">performance e ROI por bookmaker</div></div></div>
         ${buildFilters('casas',sports,casas)}
         ${mkCard('casa_kpi','Resumo por Casa','<div id="casaKpiCards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.5rem"></div>')}
         ${mkCard('casa_chart','ROI% por Casa — Barras Horizontais','<div id="casaTable"></div><div id="chartCasa" style="margin-top:.75rem"></div>')}
@@ -303,7 +326,6 @@ function buildHTML(){
 
       <!-- APOSTAS -->
       <div class="page" id="page-apostas">
-        <div class="page-header"><div><div class="page-title">Apostas</div><div class="page-sub">espelho completo da base de dados</div></div></div>
         ${buildFilters('apostas',sports,casas,tipsters)}
         <div id="apostasKPI" style="margin-bottom:1rem"></div>
         <!-- Filter + sort bar -->
@@ -326,14 +348,7 @@ function buildHTML(){
 
       <!-- TIPSTERS -->
       <div class="page" id="page-tipsters">
-        <div class="page-header">
-          <div><div class="page-title">Tipsters</div><div class="page-sub">análise comparativa e individual</div></div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <div class="filter-label">Tipster(s)</div>
-            ${buildMS('tipsters',tipsters,'Todos os tipsters','tipsters','renderTipsters')}
-          </div>
-        </div>
-        ${buildFilters('tipsters',sports,casas)}
+        ${buildFilters('tipsters',sports,casas,tipsters)}
         ${mkCard('tipster_kpi','Tipsters — Visão Geral','<div id="tipsterKpiCards"></div>')}
         ${mkCard('tipster_lines','P/L Acumulado por Tipster','<div class="chart-wrap" style="height:240px"><canvas id="chartTipsterLines" role="img" aria-label="Tipster lines"></canvas></div>')}
         ${mkCard('tipster_results','Resultados por Tipster','<div class="chart-wrap" id="chartTipsterResultsWrap" style="min-height:200px"><canvas id="chartTipsterResults" role="img" aria-label="Resultados tipster"></canvas></div>')}
@@ -344,7 +359,6 @@ function buildHTML(){
 
       <!-- RESULTADOS POR CASA -->
       <div class="page" id="page-resultados_casa">
-        <div class="page-header"><div><div class="page-title">Por Casa</div><div class="page-sub">performance por bookmaker</div></div></div>
         ${buildFilters('resultados_casa',sports,casas,tipsters)}
         <div class="kpi-grid" id="resultadosCasaKPI"></div>
         ${mkCard('res_casa_bars','ROI por Casa','<div id="resultadosCasaBars" style="padding:.25rem 0"></div>')}
@@ -353,7 +367,6 @@ function buildHTML(){
 
       <!-- FORNECEDORES & PARCEIROS -->
       <div class="page" id="page-parceiros">
-        <div class="page-header"><div><div class="page-title">Fornecedores & Parceiros</div><div class="page-sub">turnover, lucro e período por conta e fornecedor</div></div></div>
         ${buildFilters('parceiros',sports,casas)}
         ${mkCard('forn_custo_cards','Custo de Contas por Fornecedor','<div id="fornCustoCards"></div>')}
         <div class="row2">
@@ -366,7 +379,6 @@ function buildHTML(){
 
       <!-- CUSTOS DE CONTAS -->
       <div class="page" id="page-custos">
-        <div class="page-header"><div><div class="page-title">Custos de Contas</div><div class="page-sub">insira e gerencie o custo de aquisição por conta, casa e fornecedor</div></div></div>
         <div id="custosContent">
           ${mkCard('custos_table','Tabela de Custos por Casa × Fornecedor',`
             <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem;font-family:'Manrope',sans-serif">💡 Insira o custo de cada conta por fornecedor/casa. O total é calculado pelo nº de contas. Valores salvos permanentemente no navegador.</p>
@@ -376,31 +388,26 @@ function buildHTML(){
 
       <!-- MENSAL -->
       <div class="page" id="page-mensal">
-        <div class="page-header"><div><div class="page-title">Mensal</div><div class="page-sub">análise detalhada do mês selecionado</div></div></div>
         <div id="mensalContent"></div>
       </div>
 
       <!-- DIÁRIO (nova aba) -->
       <div class="page" id="page-diario">
-        <div class="page-header"><div><div class="page-title">Diário</div><div class="page-sub">análise detalhada do dia selecionado</div></div></div>
         <div id="diarioContent"></div>
       </div>
 
       <!-- SEMANA -->
       <div class="page" id="page-semana">
-        <div class="page-header"><div><div class="page-title">Semana</div><div class="page-sub">análise da semana selecionada (seg → dom)</div></div></div>
         <div id="semanaContent"></div>
       </div>
 
       <!-- CUSTO DE TIPSTERS -->
       <div class="page" id="page-custos_tipster">
-        <div class="page-header"><div><div class="page-title">Custo de Tipsters</div><div class="page-sub">assinaturas, serviços e pagamentos a tipsters</div></div></div>
         <div id="custoTipsterContent"></div>
       </div>
 
       <!-- MÉTRICAS -->
       <div class="page" id="page-metrics">
-        <div class="page-header"><div><div class="page-title">Métricas</div><div class="page-sub">base de conhecimento e valores atuais</div></div></div>
         ${buildFilters('metrics',sports,casas)}
         <div class="kpi-grid" id="metricsKPI"></div>
 

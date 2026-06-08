@@ -152,7 +152,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 5px;
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
 }
 .kpi-val {
   font-size: var(--text-2xl);

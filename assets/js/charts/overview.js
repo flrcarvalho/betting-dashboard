@@ -27,7 +27,7 @@ function renderKPI(rows){
     {l:'P/L Bruto',v:fmtPL(lucro),c:lucro>=0?'pos':'neg',s:'antes de custos',accent:''},
     {l:'Custo de Contas',v:costConta>0?fmtPL(-costConta):fmtR(0),c:costConta>0?'neg':'neu',s:'total aquisição',accent:''},
     {l:'Custo de Tipsters',v:costTipster>0?fmtPL(-costTipster):fmtR(0),c:costTipster>0?'neg':'neu',s:'assinaturas / serviços',accent:''},
-    {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'border-top:2px solid var(--green);'},
+    {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'background:rgba(46,139,255,0.08);border-color:rgba(46,139,255,.22);'},
   ];
   // ── Andar 2: Turnover → ROI → Odd Média → Win Rate ──────────────────────
   const row2=[
@@ -41,7 +41,7 @@ function renderKPI(rows){
     <div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`;
   const divider=`<div style="grid-column:1/-1;height:1px;background:var(--border);margin:2px 0;opacity:.6"></div>`;
   document.getElementById('kpiGrid').innerHTML=
-    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.5rem">${row1.map(k=>`<div class="kpi" style="position:relative;${k.accent||''}">${k.accent?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);border-radius:8px 8px 0 0;opacity:.7"></div>`:''}<div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`+
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.5rem">${row1.map(k=>`<div class="kpi" style="position:relative;${k.accent||''}">${k.accent?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;opacity:.8"></div>`:''}<div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`+
     `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">${row2.map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`;
 }
 
