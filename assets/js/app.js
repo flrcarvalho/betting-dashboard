@@ -526,7 +526,7 @@ window.deleteCG=function(idx){
 };
 
 async function loadData(){
-  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><img src="brand/fdc-logo-horizontal-dark.svg" alt="FDC Capital" style="width:676px;max-width:88vw;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div>`;
+  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><div class="loader-content"><img src="brand/fdc-logo-horizontal-dark.svg" alt="FDC Capital" style="width:676px;max-width:88vw;display:block;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div></div>`;
   // Fase 1: animação CSS 0→70% em 2s — contador JS sincronizado
   let _pctRAF;const _pctT0=Date.now();
   (function _tick(){const pEl=document.getElementById('loaderPct');if(!pEl)return;const t=Math.min((Date.now()-_pctT0)/90000,1);const e=1-Math.pow(1-t,3);pEl.textContent=Math.round(e*90)+'%';if(t<1)_pctRAF=requestAnimationFrame(_tick);})();
