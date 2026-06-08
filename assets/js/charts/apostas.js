@@ -95,15 +95,13 @@ function renderApostasVirt(){
     const resLabel=RES_LABELS[r.resultado]||r.resultado;
     const resClass=`bet-res-${r.resultado}`;
     const cardClass=`bet-card res-${r.resultado}`;
-    const casaIcon=casaImg(r.casa,13);
-    const svgIcon=sportEmoji(r.esporte);
     return`<div class="${cardClass}" style="height:${CARD_H}px">
       <div class="bet-card-main" style="min-width:0;overflow:hidden">
         <div class="bet-card-meta">
           <span class="bet-time">${dateStr}${hora?' · '+hora:''}</span>
-          <span class="bet-sport-tag">${svgIcon}<span style="color:var(--text3)">${r.esporte||''}</span></span>
+          <span class="bet-sport-tag">${mkSpChip(r.esporte)}<span style="color:var(--text3)">${r.esporte||''}</span></span>
           ${r.tipster?`<span class="bet-tipster">${r.tipster}</span>`:''}
-          <span class="bet-casa-pill">${casaIcon}<span>${r.casa||'—'}</span></span>
+          <span class="bet-casa-pill">${mkHouseChip(r.casa)}<span>${r.casa||'—'}</span></span>
           ${r.parceiro&&r.parceiro!=='—'?`<span style="font-size:9px;color:var(--text3);font-family:var(--font-sans)">${r.parceiro}</span>`:''}
         </div>
         <div class="bet-aposta">${r.aposta||'—'}</div>

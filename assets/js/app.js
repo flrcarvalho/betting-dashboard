@@ -60,22 +60,42 @@ function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return
 function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
 function gc(){return isDark()?'rgba(255,255,255,.05)':'rgba(0,0,0,.06)';}
 function tc(){return isDark()?'#505060':'#a0a0b8';}
-// Casa icon helpers
-function casaIconUrl(nome){
+// Favicon via Google S2 — para produção offline trocar por: assets/casas/NOME.png
+function favicon(domain){return`https://www.google.com/s2/favicons?domain=${domain}&sz=64`;}
+function _houseDomain(nome){
   if(!nome)return'';
-  // exact match first, then case-insensitive
-  if(CASA_ICONS[nome])return CASA_ICONS[nome];
-  const k=Object.keys(CASA_ICONS).find(k=>k.toLowerCase()===nome.toLowerCase());
-  return k?CASA_ICONS[k]:'';
+  if(HOUSE_DOMAIN[nome])return HOUSE_DOMAIN[nome];
+  const k=Object.keys(HOUSE_DOMAIN).find(k=>k.toLowerCase()===nome.toLowerCase());
+  return k?HOUSE_DOMAIN[k]:'';
 }
-function casaImg(nome,size=14){
-  const url=casaIconUrl(nome);
-  if(!url)return'';
-  return`<img src="${url}" width="${size}" height="${size}" style="border-radius:3px;vertical-align:middle;margin-right:4px;flex-shrink:0;image-rendering:crisp-edges" onerror="this.style.display='none'" loading="lazy">`;
+function mkSpChip(sport){
+  let key=SPORT_KEY[sport];
+  if(!key){const k=Object.keys(SPORT_KEY).find(k=>k.toLowerCase()===sport?.toLowerCase());key=k?SPORT_KEY[k]:null;}
+  return`<span class="sp-chip">${SPORT_EMOJI[key]||'🏅'}</span>`;
+}
+function mkHouseChip(nome){
+  if(!nome)return`<span class="house-chip chip-initial">?</span>`;
+  const domain=_houseDomain(nome);
+  if(domain){
+    const init=(nome[0]||'?').toUpperCase();
+    const esc=nome.replace(/"/g,'&quot;');
+    return`<span class="house-chip"><img src="${favicon(domain)}" alt="${esc}" onerror="this.outerHTML='<span class=\\"chip-initial\\">${init}</span>'" loading="lazy"></span>`;
+  }
+  return`<span class="house-chip chip-initial">${(nome[0]||'?').toUpperCase()}</span>`;
 }
 function casaCell(nome){
-  const img=casaImg(nome);
-  return img?`<span style="display:inline-flex;align-items:center;gap:0">${img}${nome||'—'}</span>`:(nome||'—');
+  return`<span style="display:inline-flex;align-items:center;gap:6px">${mkHouseChip(nome)}${nome||'—'}</span>`;
+}
+// Mantido para compatibilidade — use mkHouseChip para novas implementações
+function casaImg(nome,size=14){
+  const domain=_houseDomain(nome);
+  if(!domain)return'';
+  return`<img src="${favicon(domain)}" width="${size}" height="${size}" style="border-radius:3px;vertical-align:middle;margin-right:4px;flex-shrink:0" onerror="this.style.display='none'" loading="lazy">`;
+}
+function auditCasas(dados){
+  const known=new Set(Object.keys(HOUSE_DOMAIN).map(k=>k.toLowerCase()));
+  const reais=[...new Set(dados.map(r=>r.casa).filter(Boolean))];
+  reais.forEach(c=>{if(!known.has(c.toLowerCase()))console.warn(`[audit-casas] "${c}" — sem domínio em HOUSE_DOMAIN`);});
 }
 // ── Normalização de nomes (evita duplicatas como "Faz1Bet" vs "Faz1bet") ────
 function normalizeName(name){
@@ -628,6 +648,7 @@ async function loadData(){
     const json=await res.json();
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
     DADOS=normalizeDados(json.data);
+    auditCasas(DADOS);
   }catch(err){
     _fetchErr=err.message||'Falha na conexão';
     DADOS=[];

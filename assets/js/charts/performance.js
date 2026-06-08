@@ -9,8 +9,7 @@ function renderSport(rows){
   const sportCards = entsByTurnover.map(([sport,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0;
     const wr=d.t>0?(d.w/d.t*100):0;
-    const iconHtml=`<span class="sport-emoji" style="font-size:16px">${sportEmoji(sport)}</span>`;
-    return mkOneStatCard(iconHtml, sport, d.l, roi, d.s, d.n, wr);
+    return mkOneStatCard(mkSpChip(sport), sport, d.l, roi, d.s, d.n, wr);
   });
   mkStatCards(sportCards, 'sportKpiCards');
 
@@ -47,12 +46,8 @@ function renderCasa(rows){
   const casaByTurnover = [...ents].sort((a,b)=>b[1].s-a[1].s);
   const casaCards = casaByTurnover.map(([casa,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0;
-    const iconSrc=CASA_ICONS[casa]||'';
-    const iconHtml=iconSrc
-      ? `<img src="${iconSrc}" style="width:18px;height:18px;border-radius:3px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">`
-      : `<span style="width:18px;height:18px;background:var(--bg5);border-radius:3px;display:inline-block;flex-shrink:0"></span>`;
     const wr=d.t>0?(d.w/d.t*100):0;
-    return mkOneStatCard(iconHtml, casa, d.l, roi, d.s, d.n, wr);
+    return mkOneStatCard(mkHouseChip(casa), casa, d.l, roi, d.s, d.n, wr);
   });
   mkStatCards(casaCards, 'casaKpiCards');
 

@@ -39,11 +39,57 @@ const CASA_ICONS={
   'SportingBet':'https://www.google.com/s2/favicons?sz=128&domain=sportingbet.com',
   'Superbet':'https://www.google.com/s2/favicons?sz=128&domain=superbet.com',
 };
+// Mapa de domínios para chips de casa (favicon via favicon())
+// Para produção offline/nítida: substituir favicon() por assets/casas/NOME.png
+const HOUSE_DOMAIN={
+  '7K':'7k.bet.br',
+  'Bateu':'bateu.bet.br',
+  'Bet365':'bet365.com',
+  'Betano':'betano.com',
+  'Betao':'betao.bet.br',
+  'Betão':'betao.bet.br',
+  'Betboom':'betboom.bet.br',
+  'Faz1bet':'faz1.bet.br',
+  'Polymarket':'polymarket.com',
+  'Betboo':'betboo.com',
+  'Betbra':'betbra.bet.br',
+  'BETesporte':'betesporte.bet.br',
+  'Betfair':'betfair.com',
+  'Betfast':'betfast.bet.br',
+  'Betfusion':'betfusion.bet.br',
+  'BetMGM':'betmgm.com',
+  'Betnacional':'betnacional.com',
+  'Betpontobet':'betpontobet.bet.br',
+  'Bolsa de Aposta':'bolsadeaposta.bet.br',
+  'Casa de Apostas':'casadeapostas.com',
+  'Donald Bet':'donaldbet.bet.br',
+  'Esportes da Sorte':'esportesdasorte.com',
+  'Esportiva':'esportiva.bet.br',
+  'Estrela Bet':'estrelabet.com',
+  'Fulltbet':'fulltbet.bet.br',
+  'KTO':'kto.com',
+  'Lance de Sorte':'lancedesorte.bet.br',
+  'Liderbet':'liderbet.bet.br',
+  'MatchBook':'matchbook.com',
+  'MultiBet':'multi.bet.br',
+  'Novibet':'novibet.com',
+  'Pinnacle':'pinnacle.com',
+  'PixBet':'pixbet.com',
+  'Rei do Pitaco':'reidopitaco.com.br',
+  'SportingBet':'sportingbet.com',
+  'Superbet':'superbet.com',
+};
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MESES_CURTOS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const TC_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#E5524B','#34d399','#fbbf24','#60a5fa','#fb923c','#AEB7C2','#95A1B0','#1E7CF0','#fbbf24','#2BC07E','#2E8BFF'];
 
-// Sport emoji map
+// Mapa de emojis por chave de esporte — fallback universal: 🏅
+const SPORT_EMOJI={
+  futebol:'⚽', basquete:'🏀', tenis:'🎾', mma:'🥊', f1:'🏎️',
+  nfl:'🏈', nhl:'🏒', baseball:'⚾', volei:'🏐', handbol:'🤾',
+  dardos:'🎯', esports:'🎮', multiplos:'🔗', peixe:'🐟',
+  snooker:'🎱', golf:'⛳', rugby:'🏉',
+};
 // Sport SVG icons — minimal line style
 const SPORT_SVG={
   futebol:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.2"/><polygon points="8,4.5 9.8,6.2 9.2,8.4 6.8,8.4 6.2,6.2" stroke-width="1.2"/><line x1="8" y1="1.8" x2="8" y2="4.5"/><line x1="13.4" y1="5.2" x2="9.8" y2="6.2"/><line x1="11.6" y1="12.5" x2="9.2" y2="8.4"/><line x1="4.8" y1="12.5" x2="6.8" y2="8.4"/><line x1="2.6" y1="5.2" x2="6.2" y2="6.2"/></svg>`,
@@ -93,15 +139,17 @@ function sportSvg(nome,size=14){
   const svg=SPORT_SVG[key]||SPORT_SVG.outro;
   return`<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;flex-shrink:0;opacity:.75">${svg}</span>`;
 }
-// Keep sportEmoji as alias returning SVG (used in chart labels — fallback to short text)
 function sportEmoji(nome){
-  if(!nome)return'';
-  const SHORT={'futebol':'⚽','nba':'🏀','basquete':'🏀','tenis':'🎾','mma':'🥊','f1':'🏎️','nfl':'🏈','nhl':'🏒','baseball':'⚾','beisebol':'⚾','volei':'🏐','handbol':'🤾','handeball':'🤾','handball':'🤾','dardos':'🎯','esports':'🎮','e-sports':'🎮','cs':'🖱️','multiplos':'🔗','peixe':'🐟','snooker':'🎱','golf':'⛳','rugby':'🏉','outro':'•'};
-  let key=SPORT_KEY[nome];if(!key){const k=Object.keys(SPORT_KEY).find(k=>k.toLowerCase()===nome.toLowerCase());key=k?SPORT_KEY[k]:'outro';}
-  return SHORT[key]||'';
+  if(!nome)return'🏅';
+  let key=SPORT_KEY[nome];
+  if(!key){const k=Object.keys(SPORT_KEY).find(k=>k.toLowerCase()===nome.toLowerCase());key=k?SPORT_KEY[k]:null;}
+  return SPORT_EMOJI[key]||'🏅';
 }
 function sportCell(nome){
-  return`<span style="display:inline-flex;align-items:center;gap:5px"><span class="sport-emoji">${sportEmoji(nome)}</span>${nome||'—'}</span>`;
+  let key=SPORT_KEY[nome];
+  if(!key){const k=Object.keys(SPORT_KEY).find(k=>k.toLowerCase()===nome?.toLowerCase());key=k?SPORT_KEY[k]:null;}
+  const emoji=SPORT_EMOJI[key]||'🏅';
+  return`<span style="display:inline-flex;align-items:center;gap:6px"><span class="sp-chip">${emoji}</span>${nome||'—'}</span>`;
 }
 
 let DADOS=[], charts={};

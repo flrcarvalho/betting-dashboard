@@ -698,13 +698,9 @@
 .bet-casa-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 1px 7px;
-  border-radius: var(--radius-pill);
+  gap: 6px;
   font-size: 10px;
   font-weight: var(--weight-semibold);
-  background: var(--bg5);
-  border: 1px solid var(--border2);
   color: var(--text2);
   font-family: var(--font-mono);
   white-space: nowrap;
@@ -809,6 +805,20 @@
 
 /* ── Sport emoji chip — grayscale per brand rules ────────────────────────── */
 .sport-emoji { filter: grayscale(1); }
+
+/* ── Chips de Esporte e Casa — 24×24px, grayscale, token-only ───────────── */
+.sp-chip,
+.house-chip {
+  width: 24px; height: 24px; border-radius: 7px;
+  background: var(--fdc-steel); border: 1px solid var(--line);
+  display: grid; place-items: center; flex: none;
+  filter: grayscale(1);
+}
+.sp-chip { font-size: 14px; line-height: 1; }
+.house-chip { overflow: hidden; }
+.house-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Fallback: inicial da casa em mono quando favicon indisponível */
+.chip-initial { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); }
 
 .logo-dark  { display: block; }
 .logo-light { display: none; }
