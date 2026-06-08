@@ -124,8 +124,10 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural (hardcoded).
 - **Card titles** (`.card-title`): `color: var(--accent)` — sempre azul, não é preferência variável.
 - **Nav icons:** `stroke-width="1.6"`, cor `var(--ink-mute)`, ativo em `var(--accent)`.
-- **Tabelas** (`.tbl`): header em JetBrains Mono, zebra `rgba(255,255,255,0.015)`, hover azul.
+- **Tabelas** (`.tbl`): header em JetBrains Mono, zebra `rgba(255,255,255,0.015)`, hover azul. Cabeçalhos em pt-BR: "P/L" (nunca "Profit"), "Win Rate", "Turnover".
 - **Grid de fundo:** pseudo-elemento `body::before` com `position: fixed; z-index: 0; opacity: 0.55`. Grid via `linear-gradient + background-size: 44px 44px`, cor `--grid` (`rgba(255,255,255,0.05)` dark / `rgba(0,0,0,0.06)` light). `.app` tem `position: relative; z-index: 1` para ficar acima do grid.
+- **`.mono`**: alias de `.num` em `components.css` — `font-family: var(--font-mono); font-variant-numeric: tabular-nums`. Não força `text-align: right` (diferente de `.num`).
+- **`.sport-emoji`**: classe em `components.css` com `filter: grayscale(1)`. Todo emoji de esporte renderizado como HTML deve usar essa classe (em `sportCell` de `data.js` e nos cards de `performance.js`).
 
 ## Regras específicas
 
@@ -139,3 +141,6 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - Filtros são por página e independentes entre si (estado em `FS[page]`).
 - `fmtPL`: sinal colado sem espaço (`+R$`/`-R$`). `money-sign` em `0.78em` (R$ menor que o número).
 - Sidebar bottom: `#lastUpdate` é flexbox com `.pulse-dot` + `#lastUpdateText`.
+- **Win Rate (WR) é NEUTRO** — nunca usar `pos`/`neg` no WR. Verde/vermelho somente em P/L, ROI e badges de win/loss. Locais: `mkCalendarHeatmap` (shared.js), `mkKpiGrid` (shared.js), `renderKPI` (overview.js).
+- **Emoji de esporte**: sempre envolvido em `<span class="sport-emoji">` para aplicar `filter:grayscale(1)`. Fallback: `•` (ponto central) — nunca `?` ou `❓`. O glifo de múltiplas é `🔗` — `🎰` (cassino) é proibido pela marca.
+- **CSS sem hex hardcoded**: `.btn-export:hover` usa `filter: brightness(0.88)` (não hex). Toda cor deve vir de token CSS.
