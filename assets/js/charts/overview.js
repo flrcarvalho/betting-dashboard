@@ -25,8 +25,8 @@ function renderKPI(rows){
   // ── Andar 1: P/L Bruto → Custo Conta → Custo Tipster → P/L Líquido ────────
   const row1=[
     {l:'P/L Bruto',v:fmtPL(lucro),c:lucro>=0?'pos':'neg',s:'antes de custos',accent:''},
-    {l:'Custo de Contas',v:costConta>0?'- R$ '+fmt(costConta,0):'R$ 0',c:costConta>0?'neg':'neu',s:'total aquisição',accent:''},
-    {l:'Custo de Tipsters',v:costTipster>0?'- R$ '+fmt(costTipster,0):'R$ 0',c:costTipster>0?'neg':'neu',s:'assinaturas / serviços',accent:''},
+    {l:'Custo de Contas',v:costConta>0?fmtPL(-costConta):fmtR(0),c:costConta>0?'neg':'neu',s:'total aquisição',accent:''},
+    {l:'Custo de Tipsters',v:costTipster>0?fmtPL(-costTipster):fmtR(0),c:costTipster>0?'neg':'neu',s:'assinaturas / serviços',accent:''},
     {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'border-top:2px solid var(--green);'},
   ];
   // ── Andar 2: Turnover → ROI → Odd Média → Win Rate ──────────────────────
@@ -270,7 +270,7 @@ function renderOvStreaks(rows){
       <div class="kpi" style="border-color:var(--green)22">
         <div class="kpi-label" style="color:var(--green)">Sequência Positiva</div>
         <div class="kpi-val ${isPosCurrent?'pos':'neu'}">${isPosCurrent?posStreak:0} dias</div>
-        <div class="kpi-sub">${isPosCurrent?'+ '+fmtPL(posVal).replace('+ ',''):('última: '+posStreak+' dias  +'+fmtR(posVal))}</div>
+        <div class="kpi-sub">${isPosCurrent?fmtPL(posVal):('última: '+posStreak+' dias  +'+fmtR(posVal))}</div>
       </div>
       <div class="kpi" style="border-color:var(--red)22">
         <div class="kpi-label" style="color:var(--red)">Drawdown Atual</div>

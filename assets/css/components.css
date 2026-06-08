@@ -513,6 +513,8 @@
 
 .money.pos { color: var(--green); }
 .money.neg { color: var(--red); }
+.money.pos .money-sign { color: var(--green); }
+.money.neg .money-sign { color: var(--red); }
 
 /* ── Status badges ───────────────────────────────────────────────────────── */
 .badge {
