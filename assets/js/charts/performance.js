@@ -216,9 +216,9 @@ function renderResultadosCasa(){
   if(kpiEl)kpiEl.innerHTML=[
     {l:'P/L Total',v:fmtPL(totPL),c:totPL>=0?'pos':'neg',s:'Turnover: '+fmtR(totS)},
     {l:'ROI',v:(totROI>=0?'+':'')+totROI.toFixed(2)+'%',c:totROI>=0?'pos':'neg',s:rows.length+' apostas'},
-    {l:'Win Rate',v:totWR.toFixed(1)+'%',c:totWR>=50?'pos':'neg',s:`${ents.length} casas`},
+    {l:'Win Rate',v:totWR.toFixed(1)+'%',c:'neu',s:`${ents.length} casas`,bar:totWR},
     {l:'Odd Média Pond.',v:calcAvgOdd(rows).toFixed(2),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
-  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('');
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div>${k.bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,k.bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub">${k.s}</div></div>`).join('');
   // Gráfico barras ROI por casa
   const vals=ents.map(([,d])=>d.s>0?parseFloat((d.l/d.s*100).toFixed(2)):0);
   const maxAbs=Math.max(...vals.map(Math.abs),1);
