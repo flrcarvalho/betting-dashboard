@@ -796,4 +796,10 @@
 [data-theme="light"] .logo-dark  { display: none; }
 [data-theme="light"] .logo-light { display: block; }
 
+/* ── Win Rate bar ────────────────────────────────────────────────────────── */
+.wrc { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.wrc .t { width: 76px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.07); overflow: hidden; }
+[data-theme="light"] .wrc .t { background: rgba(0,0,0,.08); }
+.wrc .f { height: 100%; background: var(--accent-2); border-radius: 3px; }
+
 

@@ -57,7 +57,7 @@ function renderConsolidado(){
     ${tdR(fmtPL(totPL),`color:${tlc};font-weight:700`)}
     ${tdR(fmtR(totS))}
     ${tdR((totROI>=0?'+':'')+totROI.toFixed(2)+'%',`color:${trc};font-weight:700`)}
-    ${tdR(totWR.toFixed(1)+'%')}
+    ${tdR(mkWRC(totWR))}
     ${tdR(calcAvgOdd(rows).toFixed(2))}
     ${tdR(totN>0?fmtR(totS/totN):'—')}
   </tr>`;
@@ -79,7 +79,7 @@ function renderConsolidado(){
       ${tdR(fmtPL(d.pl),`color:${lc};font-weight:600`)}
       ${tdR(fmtR(turnover))}
       ${tdR((roiV>=0?'+':'')+roiV.toFixed(2)+'%',`color:${rc}`)}
-      ${tdR(wr.toFixed(1)+'%')}
+      ${tdR(mkWRC(wr))}
       ${tdR(avgOdd.toFixed(2))}
       ${tdR(fmtR(avgStake))}
     </tr>`;
@@ -326,7 +326,7 @@ function renderMensal(){
     `<div class="tbl-wrap"><table class="tbl" id="tblMensalTip">
       <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Odd Méd.<span class="sort-icon"></span></th></tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
+        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -427,7 +427,7 @@ function renderDiario(){
       <td style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
       <td>${fmtR(d.s)}</td>
       <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td>
-      <td>${wr2.toFixed(1)}%</td>
+      <td class="td-num">${mkWRC(wr2)}</td>
       <td>${avgOdd.toFixed(2)}</td></tr>`;
   }).join('');
   const tipLc=totPL>=0?'color:var(--green)':'color:var(--red)';
@@ -436,7 +436,7 @@ function renderDiario(){
     `<div class="tbl-wrap"><table class="tbl" id="tblDiarioTip">
       <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Odd Méd.<span class="sort-icon"></span></th></tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
+        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -699,7 +699,7 @@ function renderSemana(){
     return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td>
       <td><span style="font-size:9px;color:var(--text3)">${det}</span></td>
       <td style="${lc};font-weight:600">${fmtPL(d.pl)}</td><td>${fmtR(d.s)}</td>
-      <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td><td>${wr2.toFixed(1)}%</td></tr>`;
+      <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td><td class="td-num">${mkWRC(wr2)}</td></tr>`;
   }).join('');
   const tipLcW=totPL>=0?'color:var(--green)':'color:var(--red)';
   const tipRcW=roi>=0?'color:var(--green)':'color:var(--red)';
@@ -707,7 +707,7 @@ function renderSemana(){
     `<div class="tbl-wrap"><table class="tbl" id="tblSemanaTip">
       <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th></tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLcW};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRcW}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${wr.toFixed(1)}%</td></tr>
+        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLcW};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRcW}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td></tr>
         ${tipTableRows2}
       </tbody>
     </table></div>`);
