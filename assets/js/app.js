@@ -580,7 +580,6 @@ function buildHTML(){
     </div></main>
   </div>`;
 
-  document.getElementById('themeLabel').textContent=document.documentElement.getAttribute('data-theme')==='dark'?'Claro':'Escuro';
   showPage('overview');
 }
 
