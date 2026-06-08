@@ -70,7 +70,7 @@
   --hw-dim:     rgba(43, 192, 126, 0.12);
   --hl:         #E5524B;
   --hl-dim:     rgba(229, 82, 75, 0.12);
-  --grid:       rgba(255, 255, 255, 0.07);
+  --grid:       rgba(255, 255, 255, 0.05);
   --tick:       #5E6775;
   --sb-track:       var(--surface);
   --sb-thumb:       var(--fdc-steel);

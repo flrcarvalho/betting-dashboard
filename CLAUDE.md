@@ -124,7 +124,7 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 5 seções de prefer
 - **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural.
 - **Nav icons:** `stroke-width="1.6"`, cor `var(--ink-mute)`, ativo em `var(--accent)`.
 - **Tabelas** (`.tbl`): header em JetBrains Mono, zebra `rgba(255,255,255,0.015)`, hover azul.
-- **Grid de fundo:** `repeating-linear-gradient` 40px em `body`, usando `var(--grid)` (`rgba(255,255,255,0.07)` dark / `rgba(0,0,0,0.08)` light).
+- **Grid de fundo:** pseudo-elemento `body::before` com `position: fixed; z-index: 0; opacity: 0.55`. Grid via `linear-gradient + background-size: 44px 44px`, cor `--grid` (`rgba(255,255,255,0.05)` dark / `rgba(0,0,0,0.06)` light). `.app` tem `position: relative; z-index: 1` para ficar acima do grid.
 
 ## Regras específicas
 

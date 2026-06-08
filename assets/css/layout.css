@@ -5,13 +5,23 @@
 html, body {
   height: 100%;
   background: var(--bg);
-  background-image:
-    repeating-linear-gradient(0deg,  transparent 39px, var(--grid) 40px),
-    repeating-linear-gradient(90deg, transparent 39px, var(--grid) 40px);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.55;
 }
 
 /* ── Scrollbars ──────────────────────────────────────────────────────────── */
@@ -23,7 +33,7 @@ html, body {
 ::-webkit-scrollbar-corner { background: var(--sb-track); }
 
 /* ── App shell ───────────────────────────────────────────────────────────── */
-.app { display: flex; min-height: 100vh; }
+.app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────────── */
 .sidebar {
