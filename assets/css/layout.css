@@ -334,7 +334,7 @@ html, body {
   align-items: center;
   gap: 8px;
   margin-top: 18px;
-  padding-right: 18%;
+  padding-right: 14%;
 }
 .loader-pct {
   font-family: var(--font-mono);

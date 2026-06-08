@@ -310,7 +310,6 @@
   font-feature-settings: "tnum";
 }
 .money-sign {
-  color: var(--ink-soft);
   min-width: 2ch;
   text-align: right;
   flex-shrink: 0;
