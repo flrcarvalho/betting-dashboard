@@ -812,11 +812,15 @@
   width: 24px; height: 24px; border-radius: 7px;
   background: var(--fdc-steel); border: 1px solid var(--line);
   display: grid; place-items: center; flex: none;
-  filter: grayscale(1);
 }
-.sp-chip { font-size: 14px; line-height: 1; }
+.sp-chip { font-size: 14px; line-height: 1; filter: grayscale(1); }
 .house-chip { overflow: hidden; }
-.house-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* contrast(0.5) + brightness(1.25) levanta pixels pretos para ~#50,
+   normalizando logos com fundo escuro (Betboom, Pinnacle, BetMGM, KTO…) */
+.house-chip img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: grayscale(1) contrast(0.5) brightness(1.25);
+}
 /* Fallback: inicial da casa em mono quando favicon indisponível */
 .chip-initial { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); }
 
