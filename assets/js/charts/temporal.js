@@ -51,7 +51,7 @@ function renderConsolidado(){
   const totWR=totSettled>0?((totW+totHW)/totSettled*100):0;
   const totDetail=[totW?`W:${totW}`:'',totHW?`HW:${totHW}`:'',totL?`L:${totL}`:'',totHL?`HL:${totHL}`:'',totV?`V:${totV}`:''].filter(Boolean).join(' ');
   function tdR(content,extra=''){return`<td style="text-align:right;padding:3px 7px;white-space:nowrap;font-size:11px;${extra}">${content}</td>`;}
-  const totalAnnualRow=`<tr style="border-bottom:2px solid var(--border2);background:var(--bg4)">
+  const totalAnnualRow=`<tr class="total-row" style="border-bottom:2px solid var(--border2);background:var(--bg4)">
     <td style="font-weight:700;color:var(--text);padding:5px 8px;text-align:left;font-size:12px">Total</td>
     <td style="text-align:right;padding:5px 7px;font-size:11px;font-family:'JetBrains Mono',monospace"><span style="font-size:10px;color:var(--text3);margin-right:6px">${totDetail}</span><span style="font-size:13px;font-weight:700;color:var(--text)">${totN.toLocaleString('pt-BR')}</span></td>
     ${tdR(fmtPL(totPL),`color:${tlc};font-weight:700`)}
