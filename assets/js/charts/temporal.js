@@ -174,7 +174,7 @@ function renderMensal(){
   const cont=document.getElementById('mensalContent');if(!cont)return;
   if(!DADOS||!DADOS.length){cont.innerHTML='<p style="color:var(--text3);padding:2rem">Carregando dados...</p>';return;}
   const months=getAvailableMonths();
-  if(!months.length){cont.innerHTML='<p style="color:var(--text3);padding:2rem">Sem dados.</p>';return;}
+  if(!months.length){cont.innerHTML=mkEmpty('Sem dados no período');return;}
   // Get current selected month or default to latest
   const selMonth=window._mensalSelMonth||months[0];
   if(!months.includes(window._mensalSelMonth))window._mensalSelMonth=months[0];
@@ -200,7 +200,7 @@ function renderMensal(){
     </div>`);
 
   const rows=DADOS.filter(r=>r.data.slice(0,7)===selMonthVal);
-  if(!rows.length){cont.innerHTML=heatmapHeroHTML+'<p style="color:var(--text3);padding:1rem">Sem apostas neste mês.</p>';return;}
+  if(!rows.length){cont.innerHTML=heatmapHeroHTML+mkEmpty('Sem apostas neste mês');return;}
 
   const allTipsters=[...new Set(rows.map(r=>r.tipster).filter(Boolean))].sort();
   const days=[...new Set(rows.map(r=>r.data.slice(0,10)))].sort();
@@ -366,7 +366,7 @@ function getAvailableDays(){
 function renderDiario(){
   const cont=document.getElementById('diarioContent');if(!cont)return;
   const days=getAvailableDays();
-  if(!days.length){cont.innerHTML='<p style="color:var(--text3);padding:2rem">Sem dados.</p>';return;}
+  if(!days.length){cont.innerHTML=mkEmpty('Sem dados no período');return;}
   if(!window._diarioSelDay||!days.includes(window._diarioSelDay))window._diarioSelDay=days[0];
   const selDay=window._diarioSelDay;
   const [yr,mo,dy]=selDay.split('-');
@@ -387,7 +387,7 @@ function renderDiario(){
   </div>`;
 
   const rows=DADOS.filter(r=>r.data.slice(0,10)===selDay);
-  if(!rows.length){cont.innerHTML=selectorHTML+'<p style="color:var(--text3);padding:1rem">Sem apostas neste dia.</p>';return;}
+  if(!rows.length){cont.innerHTML=selectorHTML+mkEmpty('Sem apostas neste dia');return;}
 
   const allTipsters=[...new Set(rows.map(r=>r.tipster).filter(Boolean))].sort();
   const totPL=rows.reduce((a,r)=>a+r.lucro,0);
@@ -555,7 +555,7 @@ function getAvailableWeeks(){
 function renderSemana(){
   const cont=document.getElementById('semanaContent');if(!cont)return;
   const weeks=getAvailableWeeks();
-  if(!weeks.length){cont.innerHTML='<p style="color:var(--text3);padding:2rem">Sem dados.</p>';return;}
+  if(!weeks.length){cont.innerHTML=mkEmpty('Sem dados no período');return;}
   if(!window._semanaSelWeek||!weeks.includes(window._semanaSelWeek))window._semanaSelWeek=weeks[0];
   const selWeek=window._semanaSelWeek;
   // End of week = Sunday
@@ -582,7 +582,7 @@ function renderSemana(){
   </div>`;
 
   const rows=DADOS.filter(r=>{const d=r.data.slice(0,10);return d>=selWeek&&d<=endStr;});
-  if(!rows.length){cont.innerHTML=selectorHTML+'<p style="color:var(--text3);padding:1rem">Sem apostas nesta semana.</p>';return;}
+  if(!rows.length){cont.innerHTML=selectorHTML+mkEmpty('Sem apostas nesta semana');return;}
 
   const allTipsters=[...new Set(rows.map(r=>r.tipster).filter(Boolean))].sort();
   const weekDays=[];{const d=new Date(selWeek+'T12:00:00');for(let i=0;i<7;i++){weekDays.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}}

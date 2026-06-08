@@ -5,7 +5,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   // opts: {showNav, onPrev, onNext, onSelect, compact}
   opts = opts || {};
   const months = [...new Set(allDados.map(r=>r.data.slice(0,7)))].sort().reverse();
-  if(!months.length) return '<p style="color:var(--text3);padding:1rem">Sem dados.</p>';
+  if(!months.length) return mkEmpty('Sem dados de apostas');
   const cur = selMonth || months[0];
   const [yr, mo] = cur.split('-');
   const moLabel = MESES[parseInt(mo)-1] + ' ' + yr;
@@ -167,6 +167,12 @@ function toggleBlock(key){
   else{body.classList.remove('open');if(tog)tog.style.transform='';}
 }
 
+// Estado vazio reutilizável (ícone neutro + mensagem mono)
+function mkEmpty(msg){
+  const icon=`<svg class="empty-state-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>`;
+  return `<div class="empty-state">${icon}<p class="empty-state-msg">${msg||'Nenhuma aposta no período'}</p></div>`;
+}
+
 // Win Rate bar component (número + barra azul proporcional)
 function mkWRC(wr){
   const pct=Math.min(100,Math.max(0,wr));
@@ -193,6 +199,7 @@ function buildSummaryTable(tableId,label,ents,isCasa=false){
 function mkStatCards(items, containerId){
   const el = document.getElementById(containerId);
   if(!el) return;
+  if(!items.length){el.style.display='block';el.innerHTML=mkEmpty();return;}
   // Single flat grid — 6 equal columns always — browser handles wrapping
   // Placeholder divs on last row keep all cards the same size
   const COLS = 6;

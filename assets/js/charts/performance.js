@@ -236,7 +236,7 @@ function renderResultadosCasa(){
     </div>`;
   }).join('');
   const barEl=document.getElementById('resultadosCasaBars');
-  if(barEl)barEl.innerHTML=barRows||'<div style="color:var(--text3);font-size:12px;padding:1rem">Sem dados</div>';
+  if(barEl)barEl.innerHTML=barRows||mkEmpty('Sem dados para este período');
   // Tabela detalhada
   const tblRows=ents.map(([c,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?((d.w+d.hw)/d.t*100):0;

@@ -180,7 +180,7 @@ function renderHeatmap(rows){
 // ── Overview Heatmap Calendar ─────────────────────────────────────────────────
 function renderOvHeatmap(){
   const cont=document.getElementById('ovHeatmapContent');if(!cont)return;
-  if(!DADOS||!DADOS.length){cont.innerHTML='<p style="color:var(--text3)">Sem dados.</p>';return;}
+  if(!DADOS||!DADOS.length){cont.innerHTML=mkEmpty('Sem dados carregados');return;}
   if(!window._ovHeatMonth){
     const months=[...new Set(DADOS.map(r=>r.data.slice(0,7)))].sort().reverse();
     window._ovHeatMonth=months[0]||'';
