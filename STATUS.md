@@ -9,7 +9,16 @@
 - T-5: 4 KPIs agregados da carteira no topo da aba (P/L Carteira com sparkline + destaque azul, ROI Ponderado, Tipsters Positivos, Turnover Total) — reagem aos filtros, computed em renderTipsters()
 
 ## Falta
-- T-6.2: conteúdo do drill-down (gráficos, análise mensal, breakdown por esporte/casa)
+- T-6.3: filtro de período próprio do popup (opcional)
+- T-6.4: export (opcional)
+
+## T-6.2 — Conteúdo do popup (feito, commit 2483c76)
+- Fix de posicionamento: overlay flex + modal max-height:85vh + overflow-y:auto (scroll interno)
+- KPIs: P/L · ROI · Turnover · Win Rate no topo do popup
+- Gráfico de linha P/L acumulado (tipsterDrillLine) renderizado APÓS overlay.display='flex'
+- Gráfico de barras de resultados W/HW/HL/L/V (tipsterDrillBar)
+- Análise Mensal: _tipMonthTbody(rows) — helper reaproveitado em renderTipsters() e no popup
+- Breakdown Por Casa (_tipBreakdownTbl + casaCell) e Por Esporte (sportEmoji)
 
 ## T-6.1 — Casca do popup (feito)
 - `#tipsterDrillOverlay` / `#tipsterDrillModal` injetados em `buildHTML()` (app.js)
