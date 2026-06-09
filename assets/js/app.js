@@ -592,6 +592,20 @@ function buildHTML(){
       </div>
 
     </div></main>
+
+    <!-- Tipster drill-down popup (T-6) -->
+    <div class="analise-popup-overlay" id="tipsterDrillOverlay" onclick="closeTipsterDrill(event)">
+      <div class="analise-popup-modal" id="tipsterDrillModal" onclick="event.stopPropagation()">
+        <div class="analise-popup-hdr">
+          <div style="flex:1">
+            <div id="tipsterDrillName" style="font-weight:700;font-size:17px;color:var(--ink)"></div>
+            <div style="font-size:10px;color:var(--ink-mute);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.12em;margin-top:2px">drill-down individual</div>
+          </div>
+          <button onclick="closeTipsterDrill()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);color:var(--ink-soft);border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0">✕</button>
+        </div>
+        <div id="tipsterDrillBody" class="analise-popup-section"></div>
+      </div>
+    </div>
   </div>`;
 
   showPage('overview');

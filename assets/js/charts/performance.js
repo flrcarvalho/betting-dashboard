@@ -111,7 +111,7 @@ function _mkTipCard(name,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
   const wrStr=wr.toFixed(1).replace('.',',')+'%';
   const wrPct=Math.min(wr,100).toFixed(1);
   const esc=name.replace(/"/g,'&quot;');
-  return`<div class="tcard">`
+  return`<div class="tcard" data-name="${esc}">`
     +`<div class="tcard__top"><span class="nametag"><span class="nametag__nm" title="${esc}">${name}</span></span><span class="tcard__vol"><b>${betsStr}</b>apostas</span></div>`
     +`<div class="tcard__hero"><span class="tcard__pl ${plCls}"><span class="tcard__cur">${plSign} R$</span>${plAmt}</span><div class="tcard__roi"><span class="tcard__roi-lbl">ROI</span><span class="tcard__roi-val ${roiCls}">${roiStr}</span></div></div>`
     +sparkSVG
@@ -137,12 +137,44 @@ function _renderTipCards(){
     const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
     return _mkTipCard(t,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_tipsterDays[t]||{},_tipsterAllDays),avgStake,avgOdd);
   }).join('');
+  el.onclick=function(e){const card=e.target.closest('.tcard');if(card&&card.dataset.name)openTipsterDrill(card.dataset.name);};
   document.querySelectorAll('#tipsterSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
   const dirBtn=document.getElementById('tipsterDir');
   if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
 }
 window.tipsterSortBy=function(k){_tipsterSort.k=k;_tipsterSort.dir=-1;_renderTipCards();};
 window.tipsterSortDir=function(){_tipsterSort.dir*=-1;_renderTipCards();};
+
+// ── T-6: drill-down popup ────────────────────────────────────────────────────
+let _drillEscHandler=null;
+
+function openTipsterDrill(nome){
+  const overlay=document.getElementById('tipsterDrillOverlay');
+  if(!overlay)return;
+  const nameEl=document.getElementById('tipsterDrillName');
+  if(nameEl)nameEl.textContent=nome;
+  const body=document.getElementById('tipsterDrillBody');
+  if(body){
+    const drillRows=filtrarPagina('tipsters').filter(r=>r.tipster===nome);
+    body.innerHTML=`<div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-mute);padding:.5rem 0">`
+      +`${drillRows.length.toLocaleString('pt-BR')} apostas no período &mdash; conteúdo detalhado na próxima etapa.</div>`;
+  }
+  overlay.style.display='block';
+  document.body.style.overflow='hidden';
+  if(_drillEscHandler)document.removeEventListener('keydown',_drillEscHandler);
+  _drillEscHandler=function(e){if(e.key==='Escape')closeTipsterDrill();};
+  document.addEventListener('keydown',_drillEscHandler);
+}
+window.openTipsterDrill=openTipsterDrill;
+
+function closeTipsterDrill(e){
+  if(e&&e.target!==document.getElementById('tipsterDrillOverlay'))return;
+  const overlay=document.getElementById('tipsterDrillOverlay');
+  if(overlay)overlay.style.display='none';
+  document.body.style.overflow='';
+  if(_drillEscHandler){document.removeEventListener('keydown',_drillEscHandler);_drillEscHandler=null;}
+}
+window.closeTipsterDrill=closeTipsterDrill;
 
 // Tipsters
 function renderTipsters(){

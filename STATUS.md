@@ -9,7 +9,15 @@
 - T-5: 4 KPIs agregados da carteira no topo da aba (P/L Carteira com sparkline + destaque azul, ROI Ponderado, Tipsters Positivos, Turnover Total) — reagem aos filtros, computed em renderTipsters()
 
 ## Falta
-- T-6: drill-down individual do tipster
+- T-6.2: conteúdo do drill-down (gráficos, análise mensal, breakdown por esporte/casa)
+
+## T-6.1 — Casca do popup (feito)
+- `#tipsterDrillOverlay` / `#tipsterDrillModal` injetados em `buildHTML()` (app.js)
+- Reaproveita 100% classes `.analise-popup-*` já existentes em components.css — zero CSS novo
+- `openTipsterDrill(nome)` / `closeTipsterDrill()` em performance.js
+- 3 formas de fechar: botão ✕, clique no overlay, tecla Esc (listener sem acúmulo)
+- `.tcard` ganhou `cursor: pointer`; `data-name` em cada card; event delegation em `#tipsterKpiCards`
+- `drillRows` calculado e exibido no placeholder (contagem de apostas no período)
 
 ## Mapa de arquitetura (aba Tipsters)
 - Cards: renderTipsters em performance.js (_mkTipCard / _renderTipCards)
