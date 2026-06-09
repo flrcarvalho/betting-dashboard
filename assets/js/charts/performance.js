@@ -333,6 +333,23 @@ function openTipsterDrill(nome){
   _drillPeriodSt={qd:0,qt:''};
   _updateDrillChips();
 
+  // Meta: N apostas · jan-jun 2026 · atualizado há X min
+  const metaEl=document.getElementById('tipsterDrillMeta');
+  if(metaEl){
+    const n=_drillBaseRows.length.toLocaleString('pt-BR');
+    const months=[...new Set(_drillBaseRows.map(r=>r.data.slice(0,7)))].sort();
+    let rangeStr='';
+    if(months.length>0){
+      const [y0,m0]=months[0].split('-');
+      const [y1,m1]=months[months.length-1].split('-');
+      if(y0===y1)rangeStr=m0===m1?MESES_CURTOS[parseInt(m0)-1]+' '+y0:MESES_CURTOS[parseInt(m0)-1]+'-'+MESES_CURTOS[parseInt(m1)-1]+' '+y0;
+      else rangeStr=MESES_CURTOS[parseInt(m0)-1]+'/'+y0.slice(2)+'-'+MESES_CURTOS[parseInt(m1)-1]+'/'+y1.slice(2);
+    }
+    const agoMin=Math.round((Date.now()-(window._dataLoadMs||Date.now()))/60000);
+    const agoTxt=agoMin<1?'agora':'há '+agoMin+' min';
+    metaEl.textContent=n+' apostas'+(rangeStr?' · '+rangeStr:'')+' · atualizado '+agoTxt;
+  }
+
   overlay.style.display='flex';
   document.body.style.overflow='hidden';
   const modal=document.getElementById('tipsterDrillModal');
