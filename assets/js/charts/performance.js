@@ -156,6 +156,52 @@ function renderTipsters(){
     _tipsterEnts=Object.entries(tipMap);
     _tipsterDays=tipDays;
     _tipsterAllDays=[...new Set(baseRows.map(r=>r.data.slice(0,10)))].sort();
+    // T-5: Portfolio KPIs
+    {
+      const kpiRows=baseRows.filter(r=>activeT.includes(r.tipster));
+      const portPL=kpiRows.reduce((a,r)=>a+r.lucro,0);
+      const portROI=calcROI(kpiRows);
+      const portStake=kpiRows.reduce((a,r)=>a+r.stake,0);
+      const portN=kpiRows.length;
+      const posCount=_tipsterEnts.filter(([,d])=>d.l>0).length;
+      const negCount=_tipsterEnts.filter(([,d])=>d.l<0).length;
+      const totalT=_tipsterEnts.length;
+      // Sparkline acumulado diário do conjunto
+      const portDayMap={};
+      kpiRows.forEach(r=>{const dk=r.data.slice(0,10);portDayMap[dk]=(portDayMap[dk]||0)+r.lucro;});
+      const portDays=Object.keys(portDayMap).sort();
+      let pCum=0;const portVals=portDays.map(d=>{pCum+=portDayMap[d];return parseFloat(pCum.toFixed(2));});
+      const portSpark=portVals.length>=2?mkSparkline(portVals,96,26):'';
+      const plCls=portPL>=0?'pos':'neg';
+      const roiCls=portROI>=0?'pos':'neg';
+      const roiStr=(portROI>=0?'+':'')+portROI.toFixed(2)+'%';
+      const el=document.getElementById('tipsterPortfolioKPIs');
+      if(el){
+        el.innerHTML=
+          `<div class="kpi" style="position:relative;background:rgba(46,139,255,0.08);border-color:rgba(46,139,255,.22)">`+
+            `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;opacity:.8"></div>`+
+            `<div class="kpi-label"><span class="kpi-pipe"></span> P/L Carteira</div>`+
+            `<div class="kpi-val ${plCls}">${fmtPL(portPL)}</div>`+
+            `<div class="kpi-sub">resultado do conjunto</div>`+
+            (portSpark?`<div class="kpi-sparkline">${portSpark}</div>`:'')+
+          `</div>`+
+          `<div class="kpi">`+
+            `<div class="kpi-label"><span class="kpi-pipe"></span> ROI Ponderado</div>`+
+            `<div class="kpi-val ${roiCls}">${roiStr}</div>`+
+            `<div class="kpi-sub">Σ(P/L) / Σ(turnover)</div>`+
+          `</div>`+
+          `<div class="kpi">`+
+            `<div class="kpi-label"><span class="kpi-pipe"></span> Tipsters Positivos</div>`+
+            `<div class="kpi-val neu">${posCount} / ${totalT}</div>`+
+            `<div class="kpi-sub">▲ ${posCount} · ▼ ${negCount} no vermelho</div>`+
+          `</div>`+
+          `<div class="kpi">`+
+            `<div class="kpi-label"><span class="kpi-pipe"></span> Turnover Total</div>`+
+            `<div class="kpi-val neu">${fmtR(portStake)}</div>`+
+            `<div class="kpi-sub">${portN.toLocaleString('pt-BR')} apostas</div>`+
+          `</div>`;
+      }
+    }
     _renderTipCards();
   }
 
