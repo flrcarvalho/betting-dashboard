@@ -8,8 +8,17 @@
 - Ordenação segmentada P/L·ROI·Turnover·WR·Volume + inverter, estado persistido
 - T-5: 4 KPIs agregados da carteira no topo da aba (P/L Carteira com sparkline + destaque azul, ROI Ponderado, Tipsters Positivos, Turnover Total) — reagem aos filtros, computed em renderTipsters()
 
-## Falta
-- T-6.4: export (opcional)
+## T-6 COMPLETO — todas as etapas concluídas
+
+## T-6.4 — Ajustes finais + logo + export imagem (feito)
+- Removido gráfico "Resultados" (barras W/HW/HL/L/V) do popup — canvas tipsterDrillBar eliminado
+- Turnover KPI: fmtR(s) → fmtK(s) — remove tamanho 0.76em do "R$", deixa todos os 4 KPIs visuamente iguais
+- P/L Acumulado: degradê azul sob a linha (createLinearGradient rgba(46,139,255,.16)→0, fill:true) — igual ao Resultado Geral
+- Breakdown Por Esporte: sportEmoji() → mkSpChip() — emoji em grayscale, padrão de marca
+- Logo FDC horizontal dark (brand/fdc-logo-horizontal-dark.svg) no header do popup; SVG pré-convertido a data URL antes do html2canvas
+- Botão ⎘ "Copiar como imagem": html2canvas scale:2, ignoreElements com .no-export (botão ✕, botão ⎘, barra de chips); fallback download PNG; feedback ✓/⬇
+- html2canvas 1.4.1 via CDN adicionado ao index.html
+- .no-export aplicado: botão ✕, botão ⎘, #tipsterDrillPeriodBar
 
 ## T-6.3 — Filtro de período + ajuste de posição do popup (feito)
 - Posição: `.analise-popup-overlay` mudou `align-items: flex-start` → `center` (components.css); scrollTop=0 ao abrir

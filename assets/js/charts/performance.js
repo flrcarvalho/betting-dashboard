@@ -200,17 +200,13 @@ function renderTipsterDrill(rows){
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">`+
         `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}">${fmtPL(pl)}</div><div class="kpi-sub">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
         `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub">Σ(P/L)/Σ(turnover)</div></div>`+
-        `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu">${fmtR(s)}</div><div class="kpi-sub">stake total</div></div>`+
+        `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu">${fmtK(s)}</div><div class="kpi-sub">stake total</div></div>`+
         `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu">${wr.toFixed(1)}%</div><div class="kpi-sub">Odd Média: ${avgOdd.toFixed(2)}</div></div>`+
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">P/L Acumulado</div>`+
       `<div class="chart-wrap" style="height:180px"><canvas id="tipsterDrillLine"></canvas></div>`+
-    `</div>`+
-    `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Resultados</div>`+
-      `<div class="chart-wrap" id="tipsterDrillBarWrap" style="height:64px"><canvas id="tipsterDrillBar"></canvas></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
@@ -222,7 +218,7 @@ function renderTipsterDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Esporte</div>`+
-      `<div class="tbl-wrap">${_tipBreakdownTbl(rows,'esporte',e=>sportEmoji(e)+' '+e)}</div>`+
+      `<div class="tbl-wrap">${_tipBreakdownTbl(rows,'esporte',e=>mkSpChip(e)+' '+e)}</div>`+
     `</div>`;
 
   // Gráfico de linha — P/L acumulado
@@ -234,19 +230,10 @@ function renderTipsterDrill(rows){
     const lbl=days.filter((_,i)=>i%step===0||i===days.length-1).map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
     let cum=0;
     const lineData=days.map(d=>{cum+=dayMap[d];return parseFloat(cum.toFixed(2));}).filter((_,i)=>i%step===0||i===days.length-1);
-    mkChart('tipsterDrillLine',{type:'line',data:{labels:lbl,datasets:[{label:nome,data:lineData,borderColor:'#2E8BFF',backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>'R$'+Math.round(v)},grid:{color:gc()},border:{display:false}}}}});
+    mkChart('tipsterDrillLine',{type:'line',data:{labels:lbl,datasets:[{label:nome,data:lineData,borderColor:'#2E8BFF',backgroundColor:(ctx)=>{const c=ctx.chart,{ctx:cx,chartArea:ca}=c;if(!ca)return'rgba(46,139,255,0)';const g=cx.createLinearGradient(0,ca.top,0,ca.bottom);g.addColorStop(0,'rgba(46,139,255,.16)');g.addColorStop(1,'rgba(46,139,255,0)');return g;},fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>'R$'+Math.round(v)},grid:{color:gc()},border:{display:false}}}}});
   }
 
-  // Gráfico de barras — distribuição de resultados
-  const rm={W:0,HW:0,L:0,HL:0,V:0};
-  rows.forEach(r=>{if(rm[r.resultado]!==undefined)rm[r.resultado]++;});
-  mkChart('tipsterDrillBar',{type:'bar',data:{labels:[''],datasets:[
-    {label:'W', data:[rm.W], backgroundColor:'rgba(0,214,143,.8)',borderRadius:2,stack:'s'},
-    {label:'HW',data:[rm.HW],backgroundColor:'rgba(52,211,153,.7)',borderRadius:2,stack:'s'},
-    {label:'HL',data:[rm.HL],backgroundColor:'rgba(248,113,113,.7)',borderRadius:2,stack:'s'},
-    {label:'L', data:[rm.L], backgroundColor:'rgba(240,80,110,.8)',borderRadius:2,stack:'s'},
-    {label:'V', data:[rm.V], backgroundColor:'rgba(128,128,160,.4)',borderRadius:2,stack:'s'},
-  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{color:tc(),font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw}}},scales:{x:{stacked:true,ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false}},y:{stacked:true,display:false}}}});
+
 }
 
 function openTipsterDrill(nome){
@@ -292,6 +279,43 @@ function closeTipsterDrill(e){
   if(_drillEscHandler){document.removeEventListener('keydown',_drillEscHandler);_drillEscHandler=null;}
 }
 window.closeTipsterDrill=closeTipsterDrill;
+window.exportDrill=async function(){
+  const modal=document.getElementById('tipsterDrillModal');
+  if(!modal||typeof html2canvas==='undefined')return;
+  const btn=modal.querySelector('.export-drill-btn');
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  const logoEl=modal.querySelector('.drill-brand-logo');
+  let origSrc=null;
+  if(logoEl){
+    origSrc=logoEl.getAttribute('src');
+    try{const r=await fetch(origSrc);const svg=await r.text();logoEl.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));}catch(e){}
+  }
+  const prevMaxH=modal.style.maxHeight;modal.style.maxHeight='none';
+  const prevOv=modal.style.overflowY;modal.style.overflowY='visible';
+  try{
+    const canvas=await html2canvas(modal,{scale:2,useCORS:true,allowTaint:true,
+      ignoreElements:el=>el.classList&&el.classList.contains('no-export')});
+    modal.style.maxHeight=prevMaxH;modal.style.overflowY=prevOv;
+    if(logoEl&&origSrc)logoEl.src=origSrc;
+    canvas.toBlob(async blob=>{
+      try{
+        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        if(btn){btn.textContent='✓';setTimeout(()=>{btn.disabled=false;btn.textContent='⎘';},2000);}
+      }catch(e){
+        const a=document.createElement('a');
+        a.href=canvas.toDataURL('image/png');
+        a.download='tipster-'+((_drillBaseName||'drill').replace(/\s+/g,'_'))+'.png';
+        a.click();
+        if(btn){btn.textContent='⬇';setTimeout(()=>{btn.disabled=false;btn.textContent='⎘';},2000);}
+      }
+    },'image/png');
+  }catch(e){
+    modal.style.maxHeight=prevMaxH;modal.style.overflowY=prevOv;
+    if(logoEl&&origSrc)logoEl.src=origSrc;
+    if(btn){btn.disabled=false;btn.textContent='⎘';}
+    console.error('exportDrill error:',e);
+  }
+};
 
 // ── Helpers extraídos para reuso no popup ───────────────────────────────────
 function _tipMonthTbody(rows){
@@ -409,7 +433,7 @@ function renderTipsters(){
   const allDays=[...new Set(baseRows.map(r=>r.data.slice(0,10)))].sort();
   const step=Math.max(1,Math.floor(allDays.length/20));
   const lbl=allDays.filter((_,i)=>i%step===0||i===allDays.length-1).map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
-  const datasets=activeT.slice(0,15).map((t,i)=>{let cum=0;const data=allDays.map(d=>{cum+=byTDay[t]?.[d]||0;return parseFloat(cum.toFixed(2));}).filter((_,i)=>i%step===0||i===allDays.length-1);return{label:t,data,borderColor:TC_COLORS[i%TC_COLORS.length],backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:2};});
+  const datasets=activeT.slice(0,15).map((t,i)=>{let cum=0;const data=allDays.map(d=>{cum+=byTDay[t]?.[d]||0;return parseFloat(cum.toFixed(2));}).filter((_,i)=>i%step===0||i===allDays.length-1);return{label:t,data,borderColor:TC_COLORS[i%TC_COLORS.length],backgroundColor:(ctx)=>{const c=ctx.chart,{ctx:cx,chartArea:ca}=c;if(!ca)return'rgba(46,139,255,0)';const g=cx.createLinearGradient(0,ca.top,0,ca.bottom);g.addColorStop(0,'rgba(46,139,255,.16)');g.addColorStop(1,'rgba(46,139,255,0)');return g;},fill:true,tension:.4,pointRadius:0,borderWidth:2};});
   mkChart('chartTipsterLines',{type:'line',data:{labels:lbl,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{color:tc(),font:{size:10},boxWidth:10,padding:12}}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>'R$'+Math.round(v)},grid:{color:gc()},border:{display:false}}}}});
 
   // ── Resultados por Tipster (stacked horizontal) ──
