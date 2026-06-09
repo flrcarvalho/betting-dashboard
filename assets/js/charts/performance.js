@@ -1,4 +1,4 @@
-// ── performance.js — Esportes, Casas, Tipsters, Resultados por Casa ──────────────
+﻿// ── performance.js — Esportes, Casas, Tipsters, Resultados por Casa ──────────────
 
 function renderSport(rows){
   const map={};rows.forEach(r=>{if(!map[r.esporte])map[r.esporte]={l:0,s:0,n:0,w:0,t:0};map[r.esporte].l+=r.lucro;map[r.esporte].s+=r.stake;map[r.esporte].n++;if(r.resultado!=='V'){map[r.esporte].t++;if(['W','HW'].includes(r.resultado))map[r.esporte].w++;}});
@@ -147,68 +147,87 @@ window.tipsterSortDir=function(){_tipsterSort.dir*=-1;_renderTipCards();};
 
 // ── T-6: drill-down popup ────────────────────────────────────────────────────
 let _drillEscHandler=null;
+let _drillBaseName=null,_drillBaseRows=[],_drillPeriodSt={qd:0,qt:''};
 
-function openTipsterDrill(nome){
-  const overlay=document.getElementById('tipsterDrillOverlay');
-  if(!overlay)return;
-  const nameEl=document.getElementById('tipsterDrillName');
-  if(nameEl)nameEl.textContent=nome;
+function _sliceDrillRows(){
+  const st=_drillPeriodSt;
+  if(!st.qd&&!st.qt)return _drillBaseRows;
+  const today=new Date().toISOString().slice(0,10);
+  let df='',dt='';
+  if(st.qt==='hoje'){df=dt=today;}
+  else if(st.qt==='wtd'){df=_wtdStart();dt=today;}
+  else if(st.qt==='mtd'){df=_mtdStart();dt=today;}
+  else if(st.qt==='ytd'){df=new Date().getFullYear()+'-01-01';dt=today;}
+  else if(st.qd>0){df=new Date(Date.now()-st.qd*864e5).toISOString().slice(0,10);}
+  return _drillBaseRows.filter(r=>{
+    if(df&&r.data<df)return false;
+    if(dt&&r.data>dt)return false;
+    return true;
+  });
+}
 
-  const drillRows=filtrarPagina('tipsters').filter(r=>r.tipster===nome);
+function _updateDrillChips(){
+  const st=_drillPeriodSt;
+  const bar=document.getElementById('tipsterDrillPeriodBar');
+  if(!bar)return;
+  bar.querySelectorAll('.qbtn').forEach(b=>{
+    let a=false;
+    if(b.dataset.all)a=(st.qd===0&&!st.qt);
+    else if(b.dataset.days)a=(st.qd===parseInt(b.dataset.days));
+    else if(b.dataset.qt)a=(st.qt===b.dataset.qt);
+    b.classList.toggle('active',a);
+  });
+}
 
-  // KPI summary
-  const pl=drillRows.reduce((a,r)=>a+r.lucro,0);
-  const s=drillRows.reduce((a,r)=>a+r.stake,0);
+function renderTipsterDrill(rows){
+  const nome=_drillBaseName;
+  const pl=rows.reduce((a,r)=>a+r.lucro,0);
+  const s=rows.reduce((a,r)=>a+r.stake,0);
   const roi=s>0?pl/s*100:0;
-  const settled=drillRows.filter(r=>r.resultado!=='V');
+  const settled=rows.filter(r=>r.resultado!=='V');
   const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;
   const wr=settled.length>0?wins/settled.length*100:0;
-  const wt=drillRows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.odd*r.stake:a,0);
-  const stk=drillRows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.stake:a,0);
+  const wt=rows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.odd*r.stake:a,0);
+  const stk=rows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.stake:a,0);
   const avgOdd=stk>0?wt/stk:0;
   const plCls=pl>=0?'pos':'neg';
   const roiCls=roi>=0?'pos':'neg';
 
   const body=document.getElementById('tipsterDrillBody');
-  if(body){
-    body.innerHTML=
-      `<div class="analise-popup-section">`+
-        `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">`+
-          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}">${fmtPL(pl)}</div><div class="kpi-sub">${drillRows.length.toLocaleString('pt-BR')} apostas</div></div>`+
-          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub">Σ(P/L)/Σ(turnover)</div></div>`+
-          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu">${fmtR(s)}</div><div class="kpi-sub">stake total</div></div>`+
-          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu">${wr.toFixed(1)}%</div><div class="kpi-sub">Odd Média: ${avgOdd.toFixed(2)}</div></div>`+
-        `</div>`+
+  if(!body)return;
+  body.innerHTML=
+    `<div class="analise-popup-section">`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">`+
+        `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}">${fmtPL(pl)}</div><div class="kpi-sub">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
+        `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub">Σ(P/L)/Σ(turnover)</div></div>`+
+        `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu">${fmtR(s)}</div><div class="kpi-sub">stake total</div></div>`+
+        `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu">${wr.toFixed(1)}%</div><div class="kpi-sub">Odd Média: ${avgOdd.toFixed(2)}</div></div>`+
       `</div>`+
-      `<div class="analise-popup-section">`+
-        `<div class="analise-popup-section-title">P/L Acumulado</div>`+
-        `<div class="chart-wrap" style="height:180px"><canvas id="tipsterDrillLine"></canvas></div>`+
-      `</div>`+
-      `<div class="analise-popup-section">`+
-        `<div class="analise-popup-section-title">Resultados</div>`+
-        `<div class="chart-wrap" id="tipsterDrillBarWrap" style="height:64px"><canvas id="tipsterDrillBar"></canvas></div>`+
-      `</div>`+
-      `<div class="analise-popup-section">`+
-        `<div class="analise-popup-section-title">Análise Mensal</div>`+
-        `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th>Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(drillRows)}</tbody></table></div>`+
-      `</div>`+
-      `<div class="analise-popup-section">`+
-        `<div class="analise-popup-section-title">Por Casa</div>`+
-        `<div class="tbl-wrap">${_tipBreakdownTbl(drillRows,'casa',casaCell)}</div>`+
-      `</div>`+
-      `<div class="analise-popup-section">`+
-        `<div class="analise-popup-section-title">Por Esporte</div>`+
-        `<div class="tbl-wrap">${_tipBreakdownTbl(drillRows,'esporte',e=>sportEmoji(e)+' '+e)}</div>`+
-      `</div>`;
-  }
-
-  // Exibe o overlay ANTES de chamar mkChart (canvas precisa de dimensões)
-  overlay.style.display='flex';
-  document.body.style.overflow='hidden';
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">P/L Acumulado</div>`+
+      `<div class="chart-wrap" style="height:180px"><canvas id="tipsterDrillLine"></canvas></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Resultados</div>`+
+      `<div class="chart-wrap" id="tipsterDrillBarWrap" style="height:64px"><canvas id="tipsterDrillBar"></canvas></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Análise Mensal</div>`+
+      `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th>Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Por Casa</div>`+
+      `<div class="tbl-wrap">${_tipBreakdownTbl(rows,'casa',casaCell)}</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Por Esporte</div>`+
+      `<div class="tbl-wrap">${_tipBreakdownTbl(rows,'esporte',e=>sportEmoji(e)+' '+e)}</div>`+
+    `</div>`;
 
   // Gráfico de linha — P/L acumulado
   const dayMap={};
-  drillRows.forEach(r=>{const dk=r.data.slice(0,10);dayMap[dk]=(dayMap[dk]||0)+r.lucro;});
+  rows.forEach(r=>{const dk=r.data.slice(0,10);dayMap[dk]=(dayMap[dk]||0)+r.lucro;});
   const days=Object.keys(dayMap).sort();
   if(days.length>=2){
     const step=Math.max(1,Math.floor(days.length/20));
@@ -220,7 +239,7 @@ function openTipsterDrill(nome){
 
   // Gráfico de barras — distribuição de resultados
   const rm={W:0,HW:0,L:0,HL:0,V:0};
-  drillRows.forEach(r=>{if(rm[r.resultado]!==undefined)rm[r.resultado]++;});
+  rows.forEach(r=>{if(rm[r.resultado]!==undefined)rm[r.resultado]++;});
   mkChart('tipsterDrillBar',{type:'bar',data:{labels:[''],datasets:[
     {label:'W', data:[rm.W], backgroundColor:'rgba(0,214,143,.8)',borderRadius:2,stack:'s'},
     {label:'HW',data:[rm.HW],backgroundColor:'rgba(52,211,153,.7)',borderRadius:2,stack:'s'},
@@ -228,12 +247,42 @@ function openTipsterDrill(nome){
     {label:'L', data:[rm.L], backgroundColor:'rgba(240,80,110,.8)',borderRadius:2,stack:'s'},
     {label:'V', data:[rm.V], backgroundColor:'rgba(128,128,160,.4)',borderRadius:2,stack:'s'},
   ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{color:tc(),font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw}}},scales:{x:{stacked:true,ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false}},y:{stacked:true,display:false}}}});
+}
+
+function openTipsterDrill(nome){
+  const overlay=document.getElementById('tipsterDrillOverlay');
+  if(!overlay)return;
+  const nameEl=document.getElementById('tipsterDrillName');
+  if(nameEl)nameEl.textContent=nome;
+
+  // Base: respeita esporte/casa mas ignora período global
+  const sp=msGet('sp_tipsters'),ca=msGet('ca_tipsters');
+  _drillBaseName=nome;
+  _drillBaseRows=DADOS.filter(r=>{
+    if(r.tipster!==nome)return false;
+    if(sp.size>0&&!sp.has(r.esporte))return false;
+    if(ca.size>0&&!ca.has(r.casa))return false;
+    return true;
+  });
+  _drillPeriodSt={qd:0,qt:''};
+  _updateDrillChips();
+
+  overlay.style.display='flex';
+  document.body.style.overflow='hidden';
+  const modal=document.getElementById('tipsterDrillModal');
+  if(modal)modal.scrollTop=0;
+
+  renderTipsterDrill(_sliceDrillRows());
 
   if(_drillEscHandler)document.removeEventListener('keydown',_drillEscHandler);
   _drillEscHandler=function(e){if(e.key==='Escape')closeTipsterDrill();};
   document.addEventListener('keydown',_drillEscHandler);
 }
 window.openTipsterDrill=openTipsterDrill;
+
+window.setDrillQuick=function(days){_drillPeriodSt={qd:days,qt:''};_updateDrillChips();renderTipsterDrill(_sliceDrillRows());};
+window.setDrillType=function(qt){_drillPeriodSt={qd:0,qt:qt};_updateDrillChips();renderTipsterDrill(_sliceDrillRows());};
+window.setDrillAll=function(){_drillPeriodSt={qd:0,qt:''};_updateDrillChips();renderTipsterDrill(_sliceDrillRows());};
 
 function closeTipsterDrill(e){
   if(e&&e.target!==document.getElementById('tipsterDrillOverlay'))return;

@@ -603,6 +603,16 @@ function buildHTML(){
           </div>
           <button onclick="closeTipsterDrill()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);color:var(--ink-soft);border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0">✕</button>
         </div>
+        <div id="tipsterDrillPeriodBar" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+          <button class="qbtn" data-qt="hoje" onclick="setDrillType('hoje')">Hoje</button>
+          <button class="qbtn" data-qt="wtd" onclick="setDrillType('wtd')">WTD</button>
+          <button class="qbtn" data-qt="mtd" onclick="setDrillType('mtd')">MTD</button>
+          <button class="qbtn" data-qt="ytd" onclick="setDrillType('ytd')">YTD</button>
+          <button class="qbtn" data-days="7" onclick="setDrillQuick(7)">7d</button>
+          <button class="qbtn" data-days="30" onclick="setDrillQuick(30)">30d</button>
+          <button class="qbtn" data-days="90" onclick="setDrillQuick(90)">90d</button>
+          <button class="qbtn" data-all="1" onclick="setDrillAll()">Tudo</button>
+        </div>
         <div id="tipsterDrillBody"></div>
       </div>
     </div>

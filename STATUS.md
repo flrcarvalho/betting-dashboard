@@ -9,8 +9,16 @@
 - T-5: 4 KPIs agregados da carteira no topo da aba (P/L Carteira com sparkline + destaque azul, ROI Ponderado, Tipsters Positivos, Turnover Total) — reagem aos filtros, computed em renderTipsters()
 
 ## Falta
-- T-6.3: filtro de período próprio do popup (opcional)
 - T-6.4: export (opcional)
+
+## T-6.3 — Filtro de período + ajuste de posição do popup (feito)
+- Posição: `.analise-popup-overlay` mudou `align-items: flex-start` → `center` (components.css); scrollTop=0 ao abrir
+- Barra de chips no modal: Hoje · WTD · MTD · YTD · 7d · 30d · 90d · Tudo (`#tipsterDrillPeriodBar` em app.js), reutiliza `.qbtn`
+- Base do popup = todas as apostas do tipster respeitando esporte/casa, mas SEM herdar data global
+- Refactor: `renderTipsterDrill(rows)` — função única que redesenha KPIs + charts + tabelas a partir das rows recebidas
+- `_sliceDrillRows()` aplica período sobre `_drillBaseRows`; `_updateDrillChips()` atualiza ativo visualmente
+- `window.setDrillQuick(days)`, `window.setDrillType(qt)`, `window.setDrillAll()` — callbacks dos chips
+- `openTipsterDrill` refatorada: computa base sem data, reseta período para Tudo, chama `renderTipsterDrill`
 
 ## T-6.2 — Conteúdo do popup (feito, commit 2483c76)
 - Fix de posicionamento: overlay flex + modal max-height:85vh + overflow-y:auto (scroll interno)
