@@ -125,7 +125,7 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **Sparkline** (`mkSparkline` em `shared.js`): SVG inline, linha `--ink-soft`, ponto final `--accent`. Ultimos 90 dias de P/L acumulado.
 - **Calendário** (`mkCalendarHeatmap` em `shared.js`): opacidade proporcional ao P/L do mês (0.15–0.93). Mini-cards acima do grid.
 - **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`.
-- **Card headers** (`.card-hdr`): `border-left: 3px solid var(--accent)` — tick azul estrutural (hardcoded).
+- **Card headers** (`.card-hdr`): sem `border-left`. O título (`.card-title`) mantém `color: var(--accent-2)` (azul). **KPI labels** (`.kpi-label`) usam `<span class="kpi-pipe">|</span>` antes do texto — estilizado com `color: var(--accent)` via `.kpi-pipe` em `components.css`.
 - **Card titles** (`.card-title`): `color: var(--accent-2)` — azul suave, não é preferência variável. A barra do `.card-hdr` usa `var(--accent)` (azul forte).
 - **Nav groups** (`.nav-group`): JetBrains Mono, uppercase, `letter-spacing: 0.18em`, `color: var(--ink-mute)` — padrão eyebrow da sidebar.
 - **Títulos de seção** (`.metric-title`, `.analise-popup-section-title`): `color: var(--accent-2)` — azul suave, sem barra lateral.
