@@ -1,20 +1,24 @@
 # STATUS — Aba Tipsters
 
-## Estado atual: T-1 a T-6 concluídos. Proxima sessao: verificar no navegador.
+## Estado atual: T-6.5 CONCLUÍDO. T-6 FECHADO.
 
-## Proximo passo
-Abrir index.html no navegador (versão publicada) e verificar:
-1. Aba Tipsters abre com cards ordenados por P/L decrescente (maior primeiro)
-2. Clicar num card abre o popup centralizado, com barra de chips de período
-3. Chips Hoje/WTD/MTD/YTD/7d/30d/90d/Tudo re-renderizam o popup sem afetar a página
-4. Gráfico P/L Acumulado tem gradiente azul sob a linha
-5. Breakdown Por Esporte usa chips com grayscale
-6. Botão ⎘ copia PNG pro clipboard (ou baixa como fallback)
-7. Logo FDC aparece no header do popup
+## Próximo passo
+Abrir index.html no navegador e verificar T-6.5:
+1. Gráfico "Resultado Geral" no popup: linha azul acumulada + área + barras dia+/dia− + eixo duplo
+2. KPIs do topo (P/L · ROI · Turnover · Win Rate): subtítulos alinhados na mesma linha de base
+3. Painel "Sequências & Topo Histórico": 4 KPIs igual ao da Visão Geral, scoped ao tipster
+4. Tabelas (Análise Mensal, Por Casa, Por Esporte): headers centrados, números à direita
+5. Header: logo 50% maior (height 33, opacity 1), nome do tipster dentro da .nametag
+6. Export PNG: favicons de casa aparecem (blob URLs), sp-chips em grayscale
 
-## Feito nesta sessao (2026-06-09)
-- T-6.3: filtro de periodo proprio no popup (chips), centralizacao do overlay, renderTipsterDrill(rows) refatorado
-- T-6.4: removido grafico Resultados, gradiente P/L, mkSpChip para esportes, logo FDC no header, botao export imagem (html2canvas), sort default P/L decrescente
+## T-6.5 — Fechamento do drill-down (feito, 2026-06-09)
+- Gráfico: substituído P/L Acumulado (linha simples) por clone exato do "Resultado Geral" (linha + área + barras dia+/dia− + eixo duplo), height 220px
+- KPIs simetria: todos os 4 com `display:flex;flex-direction:column` + subtítulo `margin-top:auto` (pinado na base); Turnover: fmtK → fmtR (HTML consistente)
+- Painel Sequências & Topo Histórico: novo painel no popup, lógica idêntica ao renderOvStreaks, scoped a drillRows
+- Tabelas: classe `.drill-tbl` em components.css (`.drill-tbl .tbl th { text-align:center }` + `td:not(:first-child) { text-align:right }`); aplicada nas 3 tabelas do popup
+- Header — logo: height 22→33, opacity .9→1 (50% maior e nítido)
+- Header — nome: `id="tipsterDrillName"` agora dentro de `.nametag > .nametag__nm` (box steel igual aos cards)
+- Export PNG: removido `allowTaint:true` (conflitava com useCORS); favicons de casa convertidos para blob URLs (fetch → createObjectURL) antes do html2canvas; filtro grayscale(1) aplicado inline em `.sp-chip` antes da captura e removido depois; função `_restore()` centraliza cleanup
 
 ## T-6 COMPLETO — todas as etapas concluídas
 

@@ -597,10 +597,10 @@ function buildHTML(){
     <div class="analise-popup-overlay" id="tipsterDrillOverlay" onclick="closeTipsterDrill(event)">
       <div class="analise-popup-modal" id="tipsterDrillModal" onclick="event.stopPropagation()">
         <div class="analise-popup-hdr">
-          <img src="brand/fdc-logo-horizontal-dark.svg" height="22" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;opacity:.9" crossorigin="anonymous">
-          <div style="flex:1;min-width:0">
-            <div id="tipsterDrillName" style="font-weight:700;font-size:17px;color:var(--ink)"></div>
-            <div style="font-size:10px;color:var(--ink-mute);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.12em;margin-top:2px">drill-down individual</div>
+          <img src="brand/fdc-logo-horizontal-dark.svg" height="33" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;opacity:1" crossorigin="anonymous">
+          <div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;overflow:hidden">
+            <span class="nametag" style="flex-shrink:1;min-width:0"><span id="tipsterDrillName" class="nametag__nm" style="font-size:15px"></span></span>
+            <span style="font-size:10px;color:var(--ink-mute);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;flex-shrink:0">drill-down</span>
           </div>
           <button class="no-export export-drill-btn" onclick="exportDrill()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);color:var(--ink-soft);border-radius:6px;cursor:pointer;font-size:13px;flex-shrink:0" title="Copiar como imagem">⎘</button>
           <button class="no-export" onclick="closeTipsterDrill()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);color:var(--ink-soft);border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0">✕</button>

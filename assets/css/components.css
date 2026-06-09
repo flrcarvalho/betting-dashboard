@@ -516,6 +516,10 @@
   pointer-events: none;
 }
 
+/* ── Drill popup tables (T-6.5) — headers centrados, números à direita ─── */
+.drill-tbl .tbl th { text-align: center; }
+.drill-tbl .tbl td:not(:first-child) { text-align: right; }
+
 /* ── Calendar heatmap cell ───────────────────────────────────────────────── */
 .cal-cell {
   min-height: 56px;
