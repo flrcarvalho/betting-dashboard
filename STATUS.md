@@ -2,7 +2,7 @@
 
 ## Feito e verificado (commit 7124328 — etapas T-1 a T-4; T-5 pendente verificação no navegador)
 - Card .tcard com .nametag steel (nome completo, sem avatar colorido)
-- P/L hero + badge ROI ao lado; rodapé Turnover/WR com mini-barra
+- P/L hero + badge ROI ao lado; rodapé 4 colunas: Turnover · Stake Média · Odd Média (Ponderada) · Win Rate com mini-barra
 - Grid responsivo 3/2/1 colunas
 - Sparkline SVG real via _tipSparkSVG (acumulação diária de P/L) — VERIFICADA no navegador (JDF cai, Arrudex sobe)
 - Ordenação segmentada P/L·ROI·Turnover·WR·Volume + inverter, estado persistido
