@@ -77,7 +77,7 @@ function renderCasa(rows){
 
 // ── tcard helpers (T-1) ─────────────────────────────────────────────────────
 let _tipsterEnts=null,_tipsterDays=null,_tipsterAllDays=null;
-let _tipsterSort={k:'pl',dir:-1};
+let _tipsterSort={k:'pl',dir:1};
 
 function _tipSparkSVG(dayMap,allDays){
   let cum=0;
