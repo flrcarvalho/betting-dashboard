@@ -155,9 +155,14 @@
   font-family: var(--font-mono);
 }
 .kpi-pipe {
-  color: var(--accent);
-  margin-right: 5px;
-  font-weight: 400;
+  display: inline-block;
+  width: 3px;
+  height: 0.85em;
+  background: var(--accent);
+  border-radius: 1px;
+  margin-right: 8px;
+  vertical-align: text-bottom;
+  flex-shrink: 0;
 }
 .kpi-val {
   font-size: var(--text-2xl);
@@ -322,7 +327,7 @@
   min-width: 2ch;
   text-align: right;
   flex-shrink: 0;
-  font-size: 0.78em;
+  font-size: 0.76em;
   vertical-align: baseline;
 }
 .money-val {
@@ -524,8 +529,8 @@
 
 .money.pos { color: var(--green); }
 .money.neg { color: var(--red); }
-.money.pos .money-sign { color: var(--green); }
-.money.neg .money-sign { color: var(--red); }
+.money.pos .money-sign { color: var(--ink-soft); }
+.money.neg .money-sign { color: var(--ink-soft); }
 
 /* ── Status badges ───────────────────────────────────────────────────────── */
 .badge {

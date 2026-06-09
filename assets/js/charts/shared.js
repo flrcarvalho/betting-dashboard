@@ -141,7 +141,7 @@ function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
   const avgOdd=calcAvgOdd(rows);
   const avgStake=n>0?stake/n:0;
   const betsBreak=[W?`<span class="res-w">W:${W}</span>`:'',HW?`<span class="res-hw">HW:${HW}</span>`:'',L?`<span class="res-l">L:${L}</span>`:'',HL?`<span class="res-hl">HL:${HL}</span>`:'',V?`<span class="res-v">V:${V}</span>`:''].filter(Boolean).join(' ');
-  const mkK=(l,v,c,s,subFlex,bar)=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe">|</span> ${l}</div><div class="kpi-val ${c}">${v}</div>${bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub"${subFlex?' style="display:flex;flex-wrap:wrap;gap:2px 5px"':''}>${s}</div></div>`;
+  const mkK=(l,v,c,s,subFlex,bar)=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${l}</div><div class="kpi-val ${c}">${v}</div>${bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub"${subFlex?' style="display:flex;flex-wrap:wrap;gap:2px 5px"':''}>${s}</div></div>`;
   const row1=[
     mkK(plLabel,fmtPL(pl),pl>=0?'pos':'neg','Turnover: '+fmtR(stake)),
     mkK('Turnover',fmtR(stake),'neu',n+' apostas'),
