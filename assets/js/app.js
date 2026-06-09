@@ -71,7 +71,7 @@ function _houseDomain(nome){
 function mkSpChip(sport){
   let key=SPORT_KEY[sport];
   if(!key){const k=Object.keys(SPORT_KEY).find(k=>k.toLowerCase()===sport?.toLowerCase());key=k?SPORT_KEY[k]:null;}
-  return`<span class="sp-chip">${SPORT_EMOJI[key]||'🏅'}</span>`;
+  return`<span class="sp-chip" style="filter:grayscale(1)">${SPORT_EMOJI[key]||'🏅'}</span>`;
 }
 // Fallback de favicon: substitui img por inicial mono quando imagem falha
 document.addEventListener('error',e=>{
@@ -87,7 +87,7 @@ function mkHouseChip(nome){
   if(domain){
     const init=(nome[0]||'?').toUpperCase();
     const esc=nome.replace(/"/g,'&quot;');
-    return`<span class="house-chip" data-initial="${init}"><img src="${favicon(domain)}" alt="${esc}" loading="lazy"></span>`;
+    return`<span class="house-chip" data-initial="${init}"><img src="${favicon(domain)}" alt="${esc}"></span>`;
   }
   return`<span class="house-chip chip-initial">${(nome[0]||'?').toUpperCase()}</span>`;
 }

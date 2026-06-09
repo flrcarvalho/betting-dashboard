@@ -365,7 +365,8 @@ window.exportDrill=async function(){
   const modal=document.getElementById('tipsterDrillModal');
   if(!modal||typeof html2canvas==='undefined')return;
   const btn=modal.querySelector('.export-drill-btn');
-  if(btn){btn.disabled=true;btn.textContent='...';}
+  const btnOrig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='…';}
 
   // Converte logo FDC para data URL (same-origin para html2canvas)
   const logoEl=modal.querySelector('.drill-brand-logo');
@@ -412,18 +413,18 @@ window.exportDrill=async function(){
     canvas.toBlob(async blob=>{
       try{
         await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-        if(btn){btn.textContent='✓';setTimeout(()=>{btn.disabled=false;btn.textContent='⎘';},2000);}
+        if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
       }catch(e){
         const a=document.createElement('a');
         a.href=canvas.toDataURL('image/png');
         a.download='tipster-'+((_drillBaseName||'drill').replace(/\s+/g,'_'))+'.png';
         a.click();
-        if(btn){btn.textContent='⬇';setTimeout(()=>{btn.disabled=false;btn.textContent='⎘';},2000);}
+        if(btn){btn.innerHTML='⬇';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
       }
     },'image/png');
   }catch(e){
     _restore();
-    if(btn){btn.disabled=false;btn.textContent='⎘';}
+    if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}
     console.error('exportDrill error:',e);
   }
 };
