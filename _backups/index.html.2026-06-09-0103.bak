@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FDC Capital — Betting Dashboard</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="brand/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="brand/favicon-16.png">
+  <link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
+  <link rel="manifest" href="brand/site.webmanifest">
+  <meta name="theme-color" content="#0A0D12">
+
+  <!-- Manrope + JetBrains Mono (Google Fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+
+  <!-- Aparência init: aplica preferências antes do render para evitar flash -->
+  <script>
+    (function() {
+      var defaults={titlePage:'gradient',titlePanel:'blue',kpiStyle:'azul',density:'compact',theme:'dark'};
+      var a=defaults;
+      try{var s=localStorage.getItem('aparencia_v1');if(s)a=Object.assign({},defaults,JSON.parse(s));}catch(e){}
+      // legacy fallback
+      if(!localStorage.getItem('aparencia_v1')){var t=localStorage.getItem('theme');if(t)a.theme=t;}
+      var h=document.documentElement;
+      h.setAttribute('data-theme',a.theme);
+      if(a.density==='compact')h.setAttribute('data-density','compact');
+      if(a.titlePage==='blue')h.classList.add('t-page-blue');
+      else if(a.titlePage==='gradient')h.classList.add('t-page-gradient');
+      if(a.titlePanel==='accent2')h.classList.add('panel-title-accent2');
+      else if(a.titlePanel==='blue')h.classList.add('panel-title-blue');
+      if(a.kpiStyle==='azul')h.classList.add('kpi-azul');
+    })();
+  </script>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
+<!-- html2canvas (export popup) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+
+<!-- App — ordem de carregamento respeitada com defer -->
+<script src="assets/js/data.js"              defer></script>
+<script src="assets/js/filters.js"           defer></script>
+<script src="assets/js/charts/shared.js"     defer></script>
+<script src="assets/js/charts/gestao.js"     defer></script>
+<script src="assets/js/charts/overview.js"   defer></script>
+<script src="assets/js/charts/temporal.js"   defer></script>
+<script src="assets/js/charts/performance.js" defer></script>
+<script src="assets/js/charts/apostas.js"    defer></script>
+<script src="assets/js/app.js"               defer></script>
+
+</body>
+</html>
