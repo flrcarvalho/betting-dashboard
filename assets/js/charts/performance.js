@@ -228,12 +228,40 @@ function renderTipsterDrill(rows){
       `<div class="chart-wrap" style="height:220px"><canvas id="tipsterDrillLine"></canvas></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Sequências &amp; Topo Histórico</div>`+
-      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">`+
-        `<div class="kpi" style="border-color:var(--green)22"><div class="kpi-label" style="color:var(--green)">Sequência Positiva</div><div class="kpi-val ${isPosCurrent?'pos':'neu'}">${isPosCurrent?posStreak:0} dias</div><div class="kpi-sub">${isPosCurrent?fmtPL(posVal):('última: '+posStreak+' dias')}</div></div>`+
-        `<div class="kpi" style="border-color:var(--red)22"><div class="kpi-label" style="color:var(--red)">Drawdown Atual</div><div class="kpi-val ${isNegCurrent?'neg':'neu'}">${isNegCurrent?negStreak:0} dias</div><div class="kpi-sub">${isNegCurrent?fmtPL(negVal):('último: '+negStreak+' dias')}</div></div>`+
-        `<div class="kpi" style="border-color:var(--amber)22"><div class="kpi-label" style="color:var(--amber)">Topo Histórico</div><div class="kpi-val pos">${fmtPL(peakVal)}</div><div class="kpi-sub">atingido em ${peakDateFmt}</div></div>`+
-        `<div class="kpi"><div class="kpi-label">Distância do Topo</div><div class="kpi-val ${cumS<peakVal?'neg':'pos'}">${cumS<peakVal?fmtPL(cumS-peakVal):fmtPL(0)}</div><div class="kpi-sub">P/L atual: ${fmtPL(cumS)}</div></div>`+
+      `<div class="analise-popup-section-title" style="border-left:3px solid var(--accent);padding-left:8px">Sequências &amp; Topo Histórico</div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
+        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Sequência Positiva</div>`+
+          `<div class="kpi-val ${isPosCurrent?'pos':'neu'}" style="font-size:var(--text-xl)">${isPosCurrent?posStreak:0} dias</div>`+
+          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
+            `<span class="kpi-sub">melhor: ${posStreak} dias</span>`+
+            `<span class="kpi-sub">${posStreak?fmtPL(posVal):fmtR(0)}</span>`+
+          `</div>`+
+        `</div>`+
+        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual</div>`+
+          `<div class="kpi-val ${isNegCurrent?'neg':'neu'}" style="font-size:var(--text-xl)">${isNegCurrent?negStreak:0} dias</div>`+
+          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
+            `<span class="kpi-sub">pior: ${negStreak} dias</span>`+
+            `<span class="kpi-sub">${negStreak?fmtPL(negVal):fmtR(0)}</span>`+
+          `</div>`+
+        `</div>`+
+        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico</div>`+
+          `<div class="kpi-val pos">${fmtPL(peakVal)}</div>`+
+          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
+            `<span class="kpi-sub">atingido em ${peakDateFmt}</span>`+
+            `<span class="kpi-sub" style="color:var(--pos)">pico</span>`+
+          `</div>`+
+        `</div>`+
+        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Distância do Topo</div>`+
+          `<div class="kpi-val ${cumS<peakVal?'neg':'pos'}">${cumS<peakVal?fmtPL(cumS-peakVal):fmtPL(0)}</div>`+
+          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
+            `<span class="kpi-sub">do pico · ${peakDateFmt}</span>`+
+            `<span class="kpi-sub" style="${cumS<peakVal?'color:var(--neg)':''}">${peakVal>0?(((cumS-peakVal)/peakVal*100).toFixed(1)+'%'):'—'}</span>`+
+          `</div>`+
+        `</div>`+
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+

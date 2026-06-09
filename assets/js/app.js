@@ -597,7 +597,7 @@ function buildHTML(){
     <div class="analise-popup-overlay" id="tipsterDrillOverlay" onclick="closeTipsterDrill(event)">
       <div class="analise-popup-modal" id="tipsterDrillModal" onclick="event.stopPropagation()">
         <div class="analise-popup-hdr">
-          <img src="brand/fdc-logo-horizontal-dark.svg" height="33" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;opacity:1" crossorigin="anonymous">
+          <img src="brand/fdc-logo-horizontal-dark.svg" height="66" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;opacity:1" crossorigin="anonymous">
           <div style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;overflow:hidden">
             <span class="nametag" style="flex-shrink:1;min-width:0"><span id="tipsterDrillName" class="nametag__nm" style="font-size:15px"></span></span>
             <span style="font-size:10px;color:var(--ink-mute);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;flex-shrink:0">drill-down</span>
