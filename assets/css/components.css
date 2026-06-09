@@ -829,7 +829,7 @@
 .house-chip {
   width: 24px; height: 24px; border-radius: 7px;
   background: var(--fdc-steel); border: 1px solid var(--line);
-  display: grid; place-items: center; flex: none;
+  display: inline-grid; place-items: center; flex: none;
 }
 .sp-chip { font-size: 14px; line-height: 1; filter: grayscale(1); }
 .house-chip { overflow: hidden; }
