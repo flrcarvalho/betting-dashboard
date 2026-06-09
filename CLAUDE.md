@@ -123,8 +123,8 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **KPI labels** (`.kpi-label`): JetBrains Mono — tudo que é dado usa mono, não sans.
 - **P/L Líquido:** realce azul `rgba(46,139,255,.08)` + borda azul + sparkline de 90d. Os demais ficam neutros (a menos que `kpi-azul` esteja ativo no painel Aparência).
 - **Sparkline** (`mkSparkline` em `shared.js`): SVG inline, linha `--ink-soft`, ponto final `--accent`. Ultimos 90 dias de P/L acumulado.
-- **Calendário** (`mkCalendarHeatmap` em `shared.js`): opacidade proporcional ao P/L do mês (0.15–0.93). Mini-cards acima do grid.
-- **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`. Legenda em `position:'bottom'`, `align:'center'`, cor `#AEB7C2` (platina legível). Eixo X oculto (`display:false`) — datas acessíveis via tooltip.
+- **Calendário** (`mkCalendarHeatmap` em `shared.js`): opacidade proporcional ao P/L do mês (0.15–0.93). Mini-cards acima do grid. O título inline do `ovHeatmapCard` em `app.js` usa `color:var(--accent-2)` (nunca `--text2`).
+- **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`. Legenda em `position:'bottom'`, `align:'center'`, eixo X oculto (`display:false`). `generateLabels` deve incluir `fontColor` em cada item (Chart.js v4 não herda `labels.color` em callbacks customizados) — usar `isDark()?'#AEB7C2':'#666E7A'`.
 - **Card headers** (`.card-hdr`): sem `border-left`. O título (`.card-title`) mantém `color: var(--accent-2)` (azul).
 - **Card titles** (`.card-title`): `color: var(--accent-2)` — azul suave, sem barra lateral na caixa.
 - **KPI labels** (`.kpi-label`): precedidos por `<span class="kpi-pipe"></span>` (span vazio). A barra é gerada puramente via CSS: `.kpi-pipe { display:inline-block; width:3px; height:0.85em; background:var(--accent); border-radius:1px; vertical-align:text-bottom }`. Gerados em `renderKPI` (overview.js) e `mkKpiGrid` (shared.js).
