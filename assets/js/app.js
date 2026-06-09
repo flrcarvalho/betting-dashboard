@@ -603,7 +603,7 @@ function buildHTML(){
           </div>
           <button onclick="closeTipsterDrill()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);color:var(--ink-soft);border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0">✕</button>
         </div>
-        <div id="tipsterDrillBody" class="analise-popup-section"></div>
+        <div id="tipsterDrillBody"></div>
       </div>
     </div>
   </div>`;

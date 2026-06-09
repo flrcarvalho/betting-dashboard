@@ -153,14 +153,82 @@ function openTipsterDrill(nome){
   if(!overlay)return;
   const nameEl=document.getElementById('tipsterDrillName');
   if(nameEl)nameEl.textContent=nome;
+
+  const drillRows=filtrarPagina('tipsters').filter(r=>r.tipster===nome);
+
+  // KPI summary
+  const pl=drillRows.reduce((a,r)=>a+r.lucro,0);
+  const s=drillRows.reduce((a,r)=>a+r.stake,0);
+  const roi=s>0?pl/s*100:0;
+  const settled=drillRows.filter(r=>r.resultado!=='V');
+  const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;
+  const wr=settled.length>0?wins/settled.length*100:0;
+  const wt=drillRows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.odd*r.stake:a,0);
+  const stk=drillRows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.stake:a,0);
+  const avgOdd=stk>0?wt/stk:0;
+  const plCls=pl>=0?'pos':'neg';
+  const roiCls=roi>=0?'pos':'neg';
+
   const body=document.getElementById('tipsterDrillBody');
   if(body){
-    const drillRows=filtrarPagina('tipsters').filter(r=>r.tipster===nome);
-    body.innerHTML=`<div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-mute);padding:.5rem 0">`
-      +`${drillRows.length.toLocaleString('pt-BR')} apostas no período &mdash; conteúdo detalhado na próxima etapa.</div>`;
+    body.innerHTML=
+      `<div class="analise-popup-section">`+
+        `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">`+
+          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}">${fmtPL(pl)}</div><div class="kpi-sub">${drillRows.length.toLocaleString('pt-BR')} apostas</div></div>`+
+          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub">Σ(P/L)/Σ(turnover)</div></div>`+
+          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu">${fmtR(s)}</div><div class="kpi-sub">stake total</div></div>`+
+          `<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu">${wr.toFixed(1)}%</div><div class="kpi-sub">Odd Média: ${avgOdd.toFixed(2)}</div></div>`+
+        `</div>`+
+      `</div>`+
+      `<div class="analise-popup-section">`+
+        `<div class="analise-popup-section-title">P/L Acumulado</div>`+
+        `<div class="chart-wrap" style="height:180px"><canvas id="tipsterDrillLine"></canvas></div>`+
+      `</div>`+
+      `<div class="analise-popup-section">`+
+        `<div class="analise-popup-section-title">Resultados</div>`+
+        `<div class="chart-wrap" id="tipsterDrillBarWrap" style="height:64px"><canvas id="tipsterDrillBar"></canvas></div>`+
+      `</div>`+
+      `<div class="analise-popup-section">`+
+        `<div class="analise-popup-section-title">Análise Mensal</div>`+
+        `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th>Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(drillRows)}</tbody></table></div>`+
+      `</div>`+
+      `<div class="analise-popup-section">`+
+        `<div class="analise-popup-section-title">Por Casa</div>`+
+        `<div class="tbl-wrap">${_tipBreakdownTbl(drillRows,'casa',casaCell)}</div>`+
+      `</div>`+
+      `<div class="analise-popup-section">`+
+        `<div class="analise-popup-section-title">Por Esporte</div>`+
+        `<div class="tbl-wrap">${_tipBreakdownTbl(drillRows,'esporte',e=>sportEmoji(e)+' '+e)}</div>`+
+      `</div>`;
   }
-  overlay.style.display='block';
+
+  // Exibe o overlay ANTES de chamar mkChart (canvas precisa de dimensões)
+  overlay.style.display='flex';
   document.body.style.overflow='hidden';
+
+  // Gráfico de linha — P/L acumulado
+  const dayMap={};
+  drillRows.forEach(r=>{const dk=r.data.slice(0,10);dayMap[dk]=(dayMap[dk]||0)+r.lucro;});
+  const days=Object.keys(dayMap).sort();
+  if(days.length>=2){
+    const step=Math.max(1,Math.floor(days.length/20));
+    const lbl=days.filter((_,i)=>i%step===0||i===days.length-1).map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
+    let cum=0;
+    const lineData=days.map(d=>{cum+=dayMap[d];return parseFloat(cum.toFixed(2));}).filter((_,i)=>i%step===0||i===days.length-1);
+    mkChart('tipsterDrillLine',{type:'line',data:{labels:lbl,datasets:[{label:nome,data:lineData,borderColor:'#2E8BFF',backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>'R$'+Math.round(v)},grid:{color:gc()},border:{display:false}}}}});
+  }
+
+  // Gráfico de barras — distribuição de resultados
+  const rm={W:0,HW:0,L:0,HL:0,V:0};
+  drillRows.forEach(r=>{if(rm[r.resultado]!==undefined)rm[r.resultado]++;});
+  mkChart('tipsterDrillBar',{type:'bar',data:{labels:[''],datasets:[
+    {label:'W', data:[rm.W], backgroundColor:'rgba(0,214,143,.8)',borderRadius:2,stack:'s'},
+    {label:'HW',data:[rm.HW],backgroundColor:'rgba(52,211,153,.7)',borderRadius:2,stack:'s'},
+    {label:'HL',data:[rm.HL],backgroundColor:'rgba(248,113,113,.7)',borderRadius:2,stack:'s'},
+    {label:'L', data:[rm.L], backgroundColor:'rgba(240,80,110,.8)',borderRadius:2,stack:'s'},
+    {label:'V', data:[rm.V], backgroundColor:'rgba(128,128,160,.4)',borderRadius:2,stack:'s'},
+  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{color:tc(),font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw}}},scales:{x:{stacked:true,ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false}},y:{stacked:true,display:false}}}});
+
   if(_drillEscHandler)document.removeEventListener('keydown',_drillEscHandler);
   _drillEscHandler=function(e){if(e.key==='Escape')closeTipsterDrill();};
   document.addEventListener('keydown',_drillEscHandler);
@@ -175,6 +243,46 @@ function closeTipsterDrill(e){
   if(_drillEscHandler){document.removeEventListener('keydown',_drillEscHandler);_drillEscHandler=null;}
 }
 window.closeTipsterDrill=closeTipsterDrill;
+
+// ── Helpers extraídos para reuso no popup ───────────────────────────────────
+function _tipMonthTbody(rows){
+  const byM={};
+  rows.forEach(r=>{const d=new Date(r.data+'T12:00:00'),k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byM[k])byM[k]={bets:0,pl:0,s:0,w:0,t:0,wt:0,stk:0,ano:d.getFullYear(),mes:d.getMonth()};byM[k].bets++;byM[k].pl+=r.lucro;byM[k].s+=r.stake;if(r.resultado!=='V'){byM[k].t++;if(['W','HW'].includes(r.resultado))byM[k].w++;}if(r.odd>0&&r.stake>0){byM[k].wt+=r.odd*r.stake;byM[k].stk+=r.stake;}});
+  let totPL=0,totS=0,totB=0,totW=0,totT=0;
+  const mHTML=Object.keys(byM).sort().map(k=>{
+    const v=byM[k];const roi=v.s>0?(v.pl/v.s*100):0,wr=v.t>0?(v.w/v.t*100):0;
+    const avgOdd=v.stk>0?v.wt/v.stk:0,avgStake=v.bets>0?v.s/v.bets:0;
+    totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
+    const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
+    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    return`<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPL(v.pl)}</td><td>${fmtR(v.s)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(avgStake)}</td><td>${avgOdd.toFixed(2)}</td></tr>`;
+  }).join('');
+  const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
+  const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';
+  return mHTML+`<tr class="total-row"><td>Total</td><td>${totB}</td><td style="${tc2}">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${rc2}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td><td class="td-num">${mkWRC(tWr)}</td><td>${totB>0?fmtR(totS/totB):'—'}</td><td>—</td></tr>`;
+}
+
+function _tipBreakdownTbl(rows,dimKey,labelFn){
+  const map={};
+  rows.forEach(r=>{
+    const k=r[dimKey];if(!k)return;
+    if(!map[k])map[k]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+    map[k].l+=r.lucro;map[k].s+=r.stake;map[k].n++;
+    if(r.resultado!=='V'){map[k].t++;if(['W','HW'].includes(r.resultado))map[k].w++;}
+    if(r.odd>0&&r.stake>0){map[k].wt+=r.odd*r.stake;map[k].stk+=r.stake;}
+  });
+  const ents=Object.entries(map).sort((a,b)=>b[1].l-a[1].l);
+  if(!ents.length)return mkEmpty('Sem dados no período');
+  const tRows=ents.map(([k,d])=>{
+    const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
+    const avgOdd=d.stk>0?d.wt/d.stk:0;
+    const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
+    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    return`<tr><td>${labelFn(k)}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td></tr>`;
+  }).join('');
+  const th=dimKey==='casa'?'Casa':'Esporte';
+  return`<table class="tbl"><thead><tr><th>${th}</th><th>Bets</th><th>Win Rate%</th><th>Turnover</th><th>P/L</th><th>ROI</th><th>Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
+}
 
 // Tipsters
 function renderTipsters(){
@@ -313,20 +421,7 @@ function renderTipsters(){
   setTimeout(()=>makeSortable('tblTipCasa',[2,4,5,6,7]),100);
   const singleT=selT.size===1?[...selT][0]:'all';
   const trows=singleT==='all'?baseRows:baseRows.filter(r=>r.tipster===singleT);
-  const byM={};
-  trows.forEach(r=>{const d=new Date(r.data+'T12:00:00'),k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byM[k])byM[k]={bets:0,pl:0,s:0,w:0,t:0,wt:0,stk:0,ano:d.getFullYear(),mes:d.getMonth()};byM[k].bets++;byM[k].pl+=r.lucro;byM[k].s+=r.stake;if(r.resultado!=='V'){byM[k].t++;if(['W','HW'].includes(r.resultado))byM[k].w++;}if(r.odd>0&&r.stake>0){byM[k].wt+=r.odd*r.stake;byM[k].stk+=r.stake;}});
-  let totPL=0,totS=0,totB=0,totW=0,totT=0;
-  const mHTML=Object.keys(byM).sort().map(k=>{
-    const v=byM[k];const roi=v.s>0?(v.pl/v.s*100):0,wr=v.t>0?(v.w/v.t*100):0;
-    const avgOdd=v.stk>0?v.wt/v.stk:0,avgStake=v.bets>0?v.s/v.bets:0;
-    totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
-    const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPL(v.pl)}</td><td>${fmtR(v.s)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(avgStake)}</td><td>${avgOdd.toFixed(2)}</td></tr>`;
-  }).join('');
-  const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
-  const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  document.querySelector('#tipsterMonthTable tbody').innerHTML=mHTML+`<tr class="total-row"><td>Total</td><td>${totB}</td><td style="${tc2}">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${rc2}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td><td class="td-num">${mkWRC(tWr)}</td><td>${totB>0?fmtR(totS/totB):'—'}</td><td>—</td></tr>`;
+  document.querySelector('#tipsterMonthTable tbody').innerHTML=_tipMonthTbody(trows);
   setTimeout(()=>makeSortable('tipsterMonthTable',[1,2,3,4,5,6,7]),100);
 }
 
