@@ -210,17 +210,20 @@ function renderTipsterDrill(rows){
   const body=document.getElementById('tipsterDrillBody');
   if(!body)return;
 
-  // KPIs — todos com flex-column para alinhar subtítulo na mesma linha de base
+  // KPIs — 5 cards simétricos (1 row, repeat 5, font-xl para caber)
+  const avgStake=rows.length?s/rows.length:0;
   const kS='display:flex;flex-direction:column';
   const sbS='margin-top:auto;padding-top:6px';
+  const vS='font-size:var(--text-xl)';
 
   body.innerHTML=
     `<div class="analise-popup-section">`+
-      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:stretch">`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu">${fmtR(s)}</div><div class="kpi-sub" style="${sbS}">stake total</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu">${wr.toFixed(1)}%</div><div class="kpi-sub" style="${sbS}">Odd Média: ${avgOdd.toFixed(2)}</div></div>`+
+      `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:stretch">`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média Pond.</div><div class="kpi-val neu" style="${vS}">${avgOdd.toFixed(2)}</div><div class="kpi-sub" style="${sbS}">ponderada por stake</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${wr.toFixed(1)}%</div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
@@ -332,23 +335,6 @@ function openTipsterDrill(nome){
   });
   _drillPeriodSt={qd:0,qt:''};
   _updateDrillChips();
-
-  // Meta: N apostas · jan-jun 2026 · atualizado há X min
-  const metaEl=document.getElementById('tipsterDrillMeta');
-  if(metaEl){
-    const n=_drillBaseRows.length.toLocaleString('pt-BR');
-    const months=[...new Set(_drillBaseRows.map(r=>r.data.slice(0,7)))].sort();
-    let rangeStr='';
-    if(months.length>0){
-      const [y0,m0]=months[0].split('-');
-      const [y1,m1]=months[months.length-1].split('-');
-      if(y0===y1)rangeStr=m0===m1?MESES_CURTOS[parseInt(m0)-1]+' '+y0:MESES_CURTOS[parseInt(m0)-1]+'-'+MESES_CURTOS[parseInt(m1)-1]+' '+y0;
-      else rangeStr=MESES_CURTOS[parseInt(m0)-1]+'/'+y0.slice(2)+'-'+MESES_CURTOS[parseInt(m1)-1]+'/'+y1.slice(2);
-    }
-    const agoMin=Math.round((Date.now()-(window._dataLoadMs||Date.now()))/60000);
-    const agoTxt=agoMin<1?'agora':'há '+agoMin+' min';
-    metaEl.textContent=n+' apostas'+(rangeStr?' · '+rangeStr:'')+' · atualizado '+agoTxt;
-  }
 
   overlay.style.display='flex';
   document.body.style.overflow='hidden';

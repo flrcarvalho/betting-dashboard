@@ -596,17 +596,12 @@ function buildHTML(){
     <!-- Tipster drill-down popup (T-6) -->
     <div class="analise-popup-overlay" id="tipsterDrillOverlay" onclick="closeTipsterDrill(event)">
       <div class="analise-popup-modal" id="tipsterDrillModal" onclick="event.stopPropagation()">
-        <div class="analise-popup-hdr" style="gap:16px;align-items:center">
-          <img src="brand/fdc-logo-horizontal-dark.svg" height="28" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;opacity:1" crossorigin="anonymous">
-          <button class="no-export" onclick="closeTipsterDrill()" style="display:flex;align-items:center;gap:4px;background:var(--fdc-steel);border:1px solid var(--line);border-radius:100px;padding:5px 12px;font-size:12px;font-family:var(--font-sans);color:var(--ink-soft);cursor:pointer;white-space:nowrap;flex-shrink:0">‹ Tipsters</button>
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-              <span id="tipsterDrillName" style="font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--ink);font-family:var(--font-sans);line-height:1"></span>
-              <span style="background:rgba(46,139,255,.08);border:1px solid rgba(46,139,255,.35);border-radius:100px;padding:2px 8px;font-size:9px;font-family:var(--font-mono);letter-spacing:.1em;color:var(--accent-2);text-transform:uppercase;flex-shrink:0">DRILL-DOWN</span>
-            </div>
-            <div id="tipsterDrillMeta" style="font-size:11px;font-family:var(--font-mono);color:var(--ink-mute);letter-spacing:.02em"></div>
-          </div>
-          <button class="no-export export-drill-btn" onclick="exportDrill()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--line);color:var(--ink-soft);border-radius:6px;cursor:pointer;font-size:13px;flex-shrink:0" title="Copiar como imagem">⎘</button>
+        <div class="analise-popup-hdr" style="gap:12px;align-items:center">
+          <img src="brand/fdc-logo-horizontal-dark.svg" height="48" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;filter:brightness(1.15)" crossorigin="anonymous">
+          <span id="tipsterDrillName" class="nametag" style="font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-family:var(--font-sans);flex-shrink:0"></span>
+          <div style="flex:1"></div>
+          <button class="no-export export-drill-btn" onclick="exportDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--accent-2);border-radius:8px;cursor:pointer;flex-shrink:0" title="Copiar como imagem"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="1" width="9" height="10" rx="2"/><rect x="1" y="4" width="9" height="10" rx="2"/></svg></button>
+          <button class="no-export" onclick="closeTipsterDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;font-size:15px;flex-shrink:0" title="Fechar">✕</button>
         </div>
         <div id="tipsterDrillPeriodBar" class="no-export" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
           <button class="qbtn" data-qt="hoje" onclick="setDrillType('hoje')">Hoje</button>
