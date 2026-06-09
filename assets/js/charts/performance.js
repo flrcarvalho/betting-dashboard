@@ -97,13 +97,15 @@ function _tipSparkSVG(dayMap,allDays){
     +`</svg>`;
 }
 
-function _mkTipCard(name,pl,roi,stake,wr,bets,sparkSVG){
+function _mkTipCard(name,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
   const plSign=pl>=0?'+':'−';
   const plCls=pl>=0?'pos':'neg';
   const roiSign=roi>=0?'+':'';
   const roiCls=roi>=0?'pos':'neg';
   const plAmt=Math.abs(pl).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const stakeInt=Math.round(stake).toLocaleString('pt-BR');
+  const avgStakeStr=Math.round(avgStake||0).toLocaleString('pt-BR');
+  const avgOddStr=(avgOdd||0).toFixed(2).replace('.',',');
   const betsStr=bets.toLocaleString('pt-BR');
   const roiStr=roiSign+roi.toFixed(1).replace('.',',')+'%';
   const wrStr=wr.toFixed(1).replace('.',',')+'%';
@@ -113,7 +115,12 @@ function _mkTipCard(name,pl,roi,stake,wr,bets,sparkSVG){
     +`<div class="tcard__top"><span class="nametag"><span class="nametag__nm" title="${esc}">${name}</span></span><span class="tcard__vol"><b>${betsStr}</b>apostas</span></div>`
     +`<div class="tcard__hero"><span class="tcard__pl ${plCls}"><span class="tcard__cur">${plSign} R$</span>${plAmt}</span><div class="tcard__roi"><span class="tcard__roi-lbl">ROI</span><span class="tcard__roi-val ${roiCls}">${roiStr}</span></div></div>`
     +sparkSVG
-    +`<div class="tcard__foot"><div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div><div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div></div>`
+    +`<div class="tcard__foot">`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Stake Média</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${avgStakeStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div>`
+    +`</div>`
     +`</div>`;
 }
 
@@ -127,7 +134,8 @@ function _renderTipCards(){
   const sorted=[..._tipsterEnts].sort((a,b)=>dir*(fn(b)-fn(a)));
   el.innerHTML=sorted.map(([t,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
-    return _mkTipCard(t,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_tipsterDays[t]||{},_tipsterAllDays));
+    const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
+    return _mkTipCard(t,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_tipsterDays[t]||{},_tipsterAllDays),avgStake,avgOdd);
   }).join('');
   document.querySelectorAll('#tipsterSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
   const dirBtn=document.getElementById('tipsterDir');
@@ -146,9 +154,10 @@ function renderTipsters(){
   {
     const tipMap={},tipDays={};
     baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{
-      if(!tipMap[r.tipster])tipMap[r.tipster]={l:0,s:0,n:0,w:0,t:0};
+      if(!tipMap[r.tipster])tipMap[r.tipster]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
       tipMap[r.tipster].l+=r.lucro;tipMap[r.tipster].s+=r.stake;tipMap[r.tipster].n++;
       if(r.resultado!=='V'){tipMap[r.tipster].t++;if(['W','HW'].includes(r.resultado))tipMap[r.tipster].w++;}
+      if(r.odd>0&&r.stake>0){tipMap[r.tipster].wt+=r.odd*r.stake;tipMap[r.tipster].stk+=r.stake;}
       const dk=r.data.slice(0,10);
       if(!tipDays[r.tipster])tipDays[r.tipster]={};
       tipDays[r.tipster][dk]=(tipDays[r.tipster][dk]||0)+r.lucro;
