@@ -1,23 +1,39 @@
 # STATUS — Aba Tipsters
 
-## Estado atual: T-6.5 CONCLUÍDO. T-6 FECHADO.
+## Estado atual: T-6 FECHADO. Próxima sessão: verificar no navegador.
 
 ## Próximo passo
-Abrir index.html no navegador e verificar T-6.5:
-1. Gráfico "Resultado Geral" no popup: linha azul acumulada + área + barras dia+/dia− + eixo duplo
-2. KPIs do topo (P/L · ROI · Turnover · Win Rate): subtítulos alinhados na mesma linha de base
-3. Painel "Sequências & Topo Histórico": 4 KPIs igual ao da Visão Geral, scoped ao tipster
-4. Tabelas (Análise Mensal, Por Casa, Por Esporte): headers centrados, números à direita
-5. Header: logo 50% maior (height 33, opacity 1), nome do tipster dentro da .nametag
-6. Export PNG: favicons de casa aparecem (blob URLs), sp-chips em grayscale
+Abrir index.html no navegador (versão publicada) e verificar:
+1. Cabeçalho: logo 28px, botão `‹ Tipsters`, nome 22px bold, badge DRILL-DOWN, linha meta
+2. Linha meta: "N apostas · jan-jun 2026 · atualizado há X min"
+3. Gráfico "Resultado Geral": linha acumulada + área + barras dia+/dia− + eixo duplo
+4. KPIs topo: subtítulos alinhados na mesma linha de base
+5. Painel Sequências: 4 cards assimétricos (kpi-pipe + footer 2-col)
+6. Tabelas: headers centrados, números à direita
+7. Export PNG: favicons aparecem, sp-chips em grayscale
+
+## T-6.5+ — Ajustes pós-fechamento (feito, 2026-06-09)
+- Cards Sequências redesenhados: kpi-pipe no label (sem cor especial), footer 2-col justify-content:space-between
+  - Streaks (dias): font-size var(--text-xl) 22px — menor que valores monetários (assimetria visual)
+  - Footer streaks: "melhor/pior: N dias" + P/L do período
+  - Footer Topo: data + badge "pico" verde
+  - Footer Distância: "do pico · data" + percentual abaixo do pico
+  - Título da seção com border-left: 3px azul (pipe visual)
+- Cabeçalho reformulado (modelo topbar):
+  - Logo: height 66→28px (mesmo tamanho do topbar)
+  - Botão `‹ Tipsters`: pill steel, substitui ✕ como fechamento principal
+  - Nome: texto 22px bold direto (sem .nametag box)
+  - Badge DRILL-DOWN: pill com borda azul + texto mono caps
+  - Linha meta: N apostas · range de meses · "atualizado há X min"
+  - `window._dataLoadMs` armazenado em loadData para calcular tempo relativo
+  - `#tipsterDrillMeta` populado em openTipsterDrill (performance.js)
 
 ## T-6.5 — Fechamento do drill-down (feito, 2026-06-09)
-- Gráfico: substituído P/L Acumulado (linha simples) por clone exato do "Resultado Geral" (linha + área + barras dia+/dia− + eixo duplo), height 220px
-- KPIs simetria: todos os 4 com `display:flex;flex-direction:column` + subtítulo `margin-top:auto` (pinado na base); Turnover: fmtK → fmtR (HTML consistente)
-- Painel Sequências & Topo Histórico: novo painel no popup, lógica idêntica ao renderOvStreaks, scoped a drillRows
-- Tabelas: classe `.drill-tbl` em components.css (`.drill-tbl .tbl th { text-align:center }` + `td:not(:first-child) { text-align:right }`); aplicada nas 3 tabelas do popup
-- Header — logo: height 22→33, opacity .9→1 (50% maior e nítido)
-- Header — nome: `id="tipsterDrillName"` agora dentro de `.nametag > .nametag__nm` (box steel igual aos cards)
+- Gráfico: substituído P/L Acumulado (linha simples) por clone do "Resultado Geral" (linha + área + barras dia+/dia− + eixo duplo), height 220px
+- KPIs simetria: todos os 4 com flex-column + subtítulo margin-top:auto; Turnover: fmtK → fmtR
+- Painel Sequências & Topo Histórico: novo painel, lógica idêntica ao renderOvStreaks, scoped a drillRows
+- Tabelas: classe .drill-tbl (th centrado + td:not(:first-child) direita); aplicada nas 3 tabelas
+- Export PNG: removido allowTaint; favicons via fetch+createObjectURL; grayscale inline em .sp-chip; _restore() centraliza cleanup
 - Export PNG: removido `allowTaint:true` (conflitava com useCORS); favicons de casa convertidos para blob URLs (fetch → createObjectURL) antes do html2canvas; filtro grayscale(1) aplicado inline em `.sp-chip` antes da captura e removido depois; função `_restore()` centraliza cleanup
 
 ## T-6 COMPLETO — todas as etapas concluídas

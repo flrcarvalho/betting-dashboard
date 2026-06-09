@@ -37,13 +37,18 @@ assets/js/
                           + _tipsterEnts, _tipsterDays, _tipsterAllDays, _tipsterSort (estado sort)
                           + window.tipsterSortBy(k), window.tipsterSortDir() (callbacks sort bar)
                           + openTipsterDrill(nome), closeTipsterDrill() (T-6 — popup drill-down)
+                          + renderTipsterDrill(rows) — redesenha KPIs + gráfico + sequências + tabelas
+                          + _sliceDrillRows(), _updateDrillChips() — período do popup
+                          + window.setDrillQuick(days), setDrillType(qt), setDrillAll() — chips período
                           + _tipMonthTbody(rows) — tbody HTML de análise mensal (reusado em popup)
                           + _tipBreakdownTbl(rows, dimKey, labelFn) — tabela por casa/esporte (popup)
+                          + window.exportDrill() — captura PNG com favicons via blob URL + grayscale
     apostas.js          → renderApostas, renderApostasVirt, apostasSort, apostasFilter
   app.js                → buildHTML(), loadData(), renderPage(), PAGE_META, updateTopbarTitle(),
                           showPage(), APARENCIA/applyAparencia()/setAparencia(), utilitários de UI
                           favicon(domain), mkSpChip(sport), mkHouseChip(nome), casaCell(),
                           auditCasas(dados)
+                          window._dataLoadMs — timestamp do último loadData (usado em #tipsterDrillMeta)
 brand/                  → logos e favicons FDC Capital
 ```
 
@@ -146,8 +151,13 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **`.empty-state`** (`mkEmpty(msg)` em `shared.js`): estado vazio reutilizável — ícone inbox SVG neutro + mensagem JetBrains Mono. Usar em toda view/tabela que pode ficar sem dados no período selecionado.
 - **`.stat-card-*`**: classes CSS para os cards de resumo por entidade (esporte/casa). Rodapé em 3 colunas — ROI (colorido) · Turnover (neutro) · WR (neutro) — com `border-right` como divisória. P/L é o elemento hero do card. Callers: `renderSport`, `renderCasa` em `performance.js`. **`renderTipsters` migrou para `.tcard` (T-1).**
 - **`.tcard` / `.nametag`** (`components.css`, T-1): card redesenhado para a aba Tipsters. Estrutura: `.tcard__top` (`.nametag` steel neutro + volume), `.tcard__hero` (P/L 22px + badge ROI), `.tcard__spark` (sparkline SVG real via `_tipSparkSVG`), `.tcard__foot` (4 colunas: Turnover · Stake Média · Odd Média Pond. · Win Rate com mini-barra `--ink-mute`). Odd Média Pond. = `Σ(odd×stake)/Σ(stake)` — acumulada em `tipMap[t].wt` e `tipMap[t].stk` no loop de `renderTipsters`. Grid 3 colunas (`.tcard-grid`); sort segmentado por `.tcard-seg` (P/L · ROI · Turnover · Win Rate · Volume). Sort state em `_tipsterSort` module-level — persiste entre re-renders de filtro. Win Rate sempre neutro (`--ink-mute`). `R$` sinal: `.tcard__cur` com `color: var(--ink-soft)` mesmo dentro de `.tcard__pl.pos/.neg`. Cada card tem `data-name` com o nome do tipster; clique abre `openTipsterDrill(name)` via event delegation no container `#tipsterKpiCards`.
-- **Popup drill-down de tipster** (`#tipsterDrillOverlay` / `#tipsterDrillModal`, T-6): overlay usa classes `.analise-popup-overlay` + `.analise-popup-modal` já existentes — zero CSS novo. `openTipsterDrill` faz `overlay.style.display='flex'` (não `'block'`) para ativar o centramento flex. `mkChart` para `tipsterDrillLine` e `tipsterDrillBar` chamados APÓS `display='flex'` (canvas precisa de dimensões). Fecha por botão ✕, clique no overlay (com `stopPropagation()` no modal) e Esc. `.analise-popup-modal` tem `max-height:85vh; overflow-y:auto` para scroll interno — não criar modal novo para outros drill-downs, reusar o mesmo padrão.
-- **`.analise-popup-overlay`** (posicionamento correto): `align-items:flex-start; justify-content:center` são propriedades flex declaradas na regra CSS, mas só ativam quando o JS faz `display='flex'`. `.analise-popup-modal` tem `max-height:85vh; overflow-y:auto; width:100%`. NÃO usar `display='block'` no overlay — usar `display='flex'`.
+- **Popup drill-down de tipster** (`#tipsterDrillOverlay` / `#tipsterDrillModal`, T-6): overlay usa classes `.analise-popup-overlay` + `.analise-popup-modal` já existentes. `openTipsterDrill` faz `overlay.style.display='flex'` (não `'block'`). Canvas `tipsterDrillLine` criado APÓS `display='flex'`. Fecha por `‹ Tipsters`, clique no overlay e Esc. `.analise-popup-modal` tem `max-height:85vh; overflow-y:auto` — não criar modal novo, reusar padrão.
+- **`.analise-popup-overlay`** (posicionamento): NÃO usar `display='block'` — usar `display='flex'`. `.analise-popup-modal` tem `max-height:85vh; overflow-y:auto; width:100%`.
+- **Cabeçalho do popup drill-down** (T-6.5+): logo 28px (mesmo nível do topbar) + botão `‹ Tipsters` (pill steel, fecha o popup) + nome 22px bold + badge DRILL-DOWN (pill borda azul) + `#tipsterDrillMeta` (linha mono muted: "N apostas · jan-jun 2026 · atualizado há X min"). O `#tipsterDrillMeta` é populado em `openTipsterDrill` usando `window._dataLoadMs` (armazenado em `loadData`) e `MESES_CURTOS` para o range de meses.
+- **Gráfico do popup drill-down** (`tipsterDrillLine`, T-6.5): clone exato do `renderBankroll` — `type:'bar'` com dataset line (P/L acumulado, eixo y1) + dataset bar (P/L diário pos/neg, eixo y). Eixo X oculto (`display:false`). Legend bottom com `generateLabels` customizado (inclui `fontColor`). Altura 220px.
+- **Painel Sequências no popup** (T-6.5): cards assimétricos em grid 4 colunas. Streaks (dias): `font-size:var(--text-xl)` 22px. Monetários (topo/distância): `.kpi-val` padrão 28px. Footer 2-col com `justify-content:space-between`: streaks mostram "melhor/pior: N dias" + P/L; Topo mostra data + badge "pico"; Distância mostra "do pico · data" + percentual. Labels com `.kpi-pipe` (sem cor especial). Título da seção com `border-left:3px solid var(--accent);padding-left:8px`.
+- **`.drill-tbl`** (`components.css`, T-6.5): wrapper class para tabelas do popup. `.drill-tbl .tbl th { text-align:center }` + `.drill-tbl .tbl td:not(:first-child) { text-align:right }`. Primeira coluna (entidade/mês) fica com `style="text-align:left"` inline no `th`.
+- **`exportDrill`** (T-6.5): NÃO usar `allowTaint:true` (conflita com useCORS). Antes do html2canvas: converte favicons de `.house-chip img` para blob URLs via `fetch+createObjectURL` (same-origin); aplica `filter:grayscale(1)` inline em `.sp-chip`. Função `_restore()` desfaz tudo após a captura (revoga blob URLs, remove filtros inline).
 
 ## Regras específicas
 
