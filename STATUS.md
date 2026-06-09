@@ -1,16 +1,14 @@
 # STATUS — Aba Tipsters
 
-## Estado atual: T-6 FECHADO. Próxima sessão: verificar no navegador.
+## Estado atual: T-6 FECHADO + refactor de export concluído (2026-06-09)
 
 ## Próximo passo
-Abrir index.html no navegador (versão publicada) e verificar:
-1. Cabeçalho: logo 28px, botão `‹ Tipsters`, nome 22px bold, badge DRILL-DOWN, linha meta
-2. Linha meta: "N apostas · jan-jun 2026 · atualizado há X min"
-3. Gráfico "Resultado Geral": linha acumulada + área + barras dia+/dia− + eixo duplo
-4. KPIs topo: subtítulos alinhados na mesma linha de base
-5. Painel Sequências: 4 cards assimétricos (kpi-pipe + footer 2-col)
-6. Tabelas: headers centrados, números à direita
-7. Export PNG: favicons aparecem, sp-chips em grayscale
+Verificar no navegador (versão publicada) após cache propagar:
+1. Header popup: logo + .nametag + botao copiar (clipboard) + botao salvar (seta) + X
+2. Botao copiar: copia para clipboard, mostra OK ou X — sem fallback download
+3. Botao salvar: abre dialogo de download direto — sem tentativa de clipboard
+4. Tabela "Por Esporte": chips + nome na mesma linha (inline-flex via sportCell)
+5. Tabela "Por Casa": favicons carregados sem lazy loading
 
 ## T-6.5+ — Ajustes pós-fechamento (feito, 2026-06-09)
 - Cards Sequências redesenhados: kpi-pipe no label (sem cor especial), footer 2-col justify-content:space-between

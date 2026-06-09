@@ -42,11 +42,13 @@ assets/js/
                           + window.setDrillQuick(days), setDrillType(qt), setDrillAll() — chips período
                           + _tipMonthTbody(rows) — tbody HTML de análise mensal (reusado em popup)
                           + _tipBreakdownTbl(rows, dimKey, labelFn) — tabela por casa/esporte (popup)
-                          + window.exportDrill() — captura PNG com favicons via blob URL + grayscale
+                          + _buildDrillCanvas(modal) — async; prepara DOM + html2canvas + _restore(); retorna {canvas}
+                          + window.copyDrill() — só clipboard.write(); mostra X se falhar (sem fallback)
+                          + window.saveDrill() — só download via blob URL; sem tentativa de clipboard
     apostas.js          → renderApostas, renderApostasVirt, apostasSort, apostasFilter
   app.js                → buildHTML(), loadData(), renderPage(), PAGE_META, updateTopbarTitle(),
                           showPage(), APARENCIA/applyAparencia()/setAparencia(), utilitários de UI
-                          favicon(domain), mkSpChip(sport), mkHouseChip(nome), casaCell(),
+                          favicon(domain), mkSpChip(sport), mkHouseChip(nome), casaCell(), sportCell(),
                           auditCasas(dados)
                           window._dataLoadMs — timestamp do último loadData (usado em #tipsterDrillMeta)
 brand/                  → logos e favicons FDC Capital
@@ -157,7 +159,7 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **Gráfico do popup drill-down** (`tipsterDrillLine`, T-6.5): clone exato do `renderBankroll` — `type:'bar'` com dataset line (P/L acumulado, eixo y1) + dataset bar (P/L diário pos/neg, eixo y). Eixo X oculto (`display:false`). Legend bottom com `generateLabels` customizado (inclui `fontColor`). Altura 220px.
 - **Painel Sequências no popup** (T-6.5): cards assimétricos em grid 4 colunas. Streaks (dias): `font-size:var(--text-xl)` 22px. Monetários (topo/distância): `.kpi-val` padrão 28px. Footer 2-col com `justify-content:space-between`: streaks mostram "melhor/pior: N dias" + P/L; Topo mostra data + badge "pico"; Distância mostra "do pico · data" + percentual. Labels com `.kpi-pipe` (sem cor especial). Título da seção com `border-left:3px solid var(--accent);padding-left:8px`.
 - **`.drill-tbl`** (`components.css`, T-6.5): wrapper class para tabelas do popup. `.drill-tbl .tbl th { text-align:center }` + `.drill-tbl .tbl td:not(:first-child) { text-align:right }`. Primeira coluna (entidade/mês) fica com `style="text-align:left"` inline no `th`.
-- **`exportDrill`** (T-6.5): NÃO usar `allowTaint:true` (conflita com useCORS). Antes do html2canvas: converte favicons de `.house-chip img` para blob URLs via `fetch+createObjectURL` (same-origin); aplica `filter:grayscale(1)` inline em `.sp-chip`. Função `_restore()` desfaz tudo após a captura (revoga blob URLs, remove filtros inline).
+- **`_buildDrillCanvas` / `copyDrill` / `saveDrill`** (T-6.5+): NÃO usar `allowTaint:true` (conflita com useCORS). `_buildDrillCanvas` centraliza prep: logo → data URL, favicons de `.house-chip img` → blob URLs (fetch+createObjectURL), `filter:grayscale(1)` inline em `.sp-chip`, modal `maxHeight:none; overflowY:visible`; chama html2canvas e executa `_restore()` antes de retornar `{canvas}`. `copyDrill`: só `navigator.clipboard.write()`; mostra ✗ se falhar, sem fallback download. `saveDrill`: só download via `URL.createObjectURL(blob)`; sem tentativa de clipboard. Header do popup tem dois botões separados: `.copy-drill-btn` e `.save-drill-btn`.
 
 ## Regras específicas
 
