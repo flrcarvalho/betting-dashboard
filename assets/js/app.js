@@ -94,6 +94,9 @@ function mkHouseChip(nome){
 function casaCell(nome){
   return`<span style="display:inline-flex;align-items:center;gap:6px">${mkHouseChip(nome)}${nome||'—'}</span>`;
 }
+function sportCell(esporte){
+  return`<span style="display:inline-flex;align-items:center;gap:6px">${mkSpChip(esporte)}${esporte||'—'}</span>`;
+}
 // Mantido para compatibilidade — use mkHouseChip para novas implementações
 function casaImg(nome,size=14){
   const domain=_houseDomain(nome);
@@ -600,7 +603,8 @@ function buildHTML(){
           <img src="brand/fdc-logo-horizontal-dark.svg" height="48" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;filter:brightness(1.15)" crossorigin="anonymous">
           <span id="tipsterDrillName" class="nametag" style="font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-family:var(--font-sans);flex-shrink:0"></span>
           <div style="flex:1"></div>
-          <button class="no-export export-drill-btn" onclick="exportDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--accent-2);border-radius:8px;cursor:pointer;flex-shrink:0" title="Copiar como imagem"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="1" width="9" height="10" rx="2"/><rect x="1" y="4" width="9" height="10" rx="2"/></svg></button>
+          <button class="no-export copy-drill-btn" onclick="copyDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--accent-2);border-radius:8px;cursor:pointer;flex-shrink:0" title="Copiar como imagem"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="1" width="9" height="10" rx="2"/><rect x="1" y="4" width="9" height="10" rx="2"/></svg></button>
+          <button class="no-export save-drill-btn" onclick="saveDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;flex-shrink:0" title="Baixar PNG"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2v8"/><path d="M4.5 7l3 3 3-3"/><path d="M2 13h11"/></svg></button>
           <button class="no-export" onclick="closeTipsterDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;font-size:15px;flex-shrink:0" title="Fechar">✕</button>
         </div>
         <div id="tipsterDrillPeriodBar" class="no-export" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">

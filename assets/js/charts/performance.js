@@ -277,7 +277,7 @@ function renderTipsterDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Esporte</div>`+
-      `<div class="tbl-wrap drill-tbl">${_tipBreakdownTbl(rows,'esporte',e=>mkSpChip(e)+' '+e)}</div>`+
+      `<div class="tbl-wrap drill-tbl">${_tipBreakdownTbl(rows,'esporte',sportCell)}</div>`+
     `</div>`;
 
   // Gráfico Resultado Geral — clone do renderBankroll, scoped ao tipster
@@ -361,72 +361,75 @@ function closeTipsterDrill(e){
   if(_drillEscHandler){document.removeEventListener('keydown',_drillEscHandler);_drillEscHandler=null;}
 }
 window.closeTipsterDrill=closeTipsterDrill;
-window.exportDrill=async function(){
-  const modal=document.getElementById('tipsterDrillModal');
-  if(!modal||typeof html2canvas==='undefined')return;
-  const btn=modal.querySelector('.export-drill-btn');
-  const btnOrig=btn?btn.innerHTML:null;
-  if(btn){btn.disabled=true;btn.innerHTML='…';}
-
-  // Converte logo FDC para data URL (same-origin para html2canvas)
+// Prepara o modal para captura com html2canvas; retorna {canvas} ou {canvas:null} em erro
+async function _buildDrillCanvas(modal){
   const logoEl=modal.querySelector('.drill-brand-logo');
   let origLogoSrc=null;
   if(logoEl){
     origLogoSrc=logoEl.getAttribute('src');
     try{const r=await fetch(origLogoSrc);const svg=await r.text();logoEl.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));}catch(e){}
   }
-
-  // Converte favicons de casas para blob URLs (evita canvas tainted por cross-origin)
   const houseImgs=[...modal.querySelectorAll('.house-chip img')];
   const origHouseSrcs=houseImgs.map(img=>img.getAttribute('src'));
   for(const img of houseImgs){
-    try{
-      const res=await fetch(img.src);
-      const blob=await res.blob();
-      const objUrl=URL.createObjectURL(blob);
-      img.dataset._objUrl=objUrl;
-      img.src=objUrl;
-    }catch(e){/* mantém src original se fetch falhar */}
+    try{const res=await fetch(img.src);const blob=await res.blob();const objUrl=URL.createObjectURL(blob);img.dataset._objUrl=objUrl;img.src=objUrl;}catch(e){}
   }
-
-  // Aplica grayscale inline nos sp-chips (html2canvas pode não ler filter CSS)
   const spChips=[...modal.querySelectorAll('.sp-chip')];
   spChips.forEach(el=>el.style.setProperty('filter','grayscale(1)','important'));
-
   const prevMaxH=modal.style.maxHeight;modal.style.maxHeight='none';
   const prevOv=modal.style.overflowY;modal.style.overflowY='visible';
-
   const _restore=()=>{
     modal.style.maxHeight=prevMaxH;modal.style.overflowY=prevOv;
     if(logoEl&&origLogoSrc)logoEl.src=origLogoSrc;
-    houseImgs.forEach((img,i)=>{
-      if(img.dataset._objUrl){URL.revokeObjectURL(img.dataset._objUrl);delete img.dataset._objUrl;}
-      img.src=origHouseSrcs[i];
-    });
+    houseImgs.forEach((img,i)=>{if(img.dataset._objUrl){URL.revokeObjectURL(img.dataset._objUrl);delete img.dataset._objUrl;}img.src=origHouseSrcs[i];});
     spChips.forEach(el=>el.style.removeProperty('filter'));
   };
-
   try{
     const canvas=await html2canvas(modal,{scale:2,useCORS:true,
       ignoreElements:el=>el.classList&&el.classList.contains('no-export')});
     _restore();
-    canvas.toBlob(async blob=>{
-      try{
-        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-        if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
-      }catch(e){
-        const a=document.createElement('a');
-        a.href=canvas.toDataURL('image/png');
-        a.download='tipster-'+((_drillBaseName||'drill').replace(/\s+/g,'_'))+'.png';
-        a.click();
-        if(btn){btn.innerHTML='⬇';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
-      }
-    },'image/png');
+    return{canvas};
   }catch(e){
     _restore();
-    if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}
-    console.error('exportDrill error:',e);
+    console.error('_buildDrillCanvas error:',e);
+    return{canvas:null};
   }
+}
+
+window.copyDrill=async function(){
+  const modal=document.getElementById('tipsterDrillModal');
+  if(!modal||typeof html2canvas==='undefined')return;
+  const btn=modal.querySelector('.copy-drill-btn');
+  const btnOrig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const{canvas}=await _buildDrillCanvas(modal);
+  if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  canvas.toBlob(async blob=>{
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
+    }catch(e){
+      if(btn){btn.innerHTML='✗';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},1500);}
+      console.error('copyDrill clipboard error:',e);
+    }
+  },'image/png');
+};
+
+window.saveDrill=async function(){
+  const modal=document.getElementById('tipsterDrillModal');
+  if(!modal||typeof html2canvas==='undefined')return;
+  const btn=modal.querySelector('.save-drill-btn');
+  const btnOrig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const{canvas}=await _buildDrillCanvas(modal);
+  if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=Object.assign(document.createElement('a'),{href:url,download:'tipster-'+((_drillBaseName||'drill').replace(/\s+/g,'_'))+'.png'});
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
+  },'image/png');
 };
 
 // ── Helpers extraídos para reuso no popup ───────────────────────────────────
