@@ -76,11 +76,11 @@ function renderBankroll(rows){
     plugins:{
       legend:{display:true,position:'bottom',align:'center',
         labels:{color:isDark()?'#AEB7C2':'#666E7A',font:{family:'JetBrains Mono, monospace',size:11},boxWidth:12,padding:16,
-          generateLabels:()=>[
-            {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0},
-            {text:'Dia positivo', strokeStyle:'rgba(43,192,126,.8)',fillStyle:'rgba(43,192,126,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1},
-            {text:'Dia negativo', strokeStyle:'rgba(229,82,75,.8)',fillStyle:'rgba(229,82,75,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1}
-          ]}},
+          generateLabels:()=>{const lc=isDark()?'#AEB7C2':'#666E7A';return[
+            {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0,fontColor:lc},
+            {text:'Dia positivo', strokeStyle:'rgba(43,192,126,.8)',fillStyle:'rgba(43,192,126,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1,fontColor:lc},
+            {text:'Dia negativo', strokeStyle:'rgba(229,82,75,.8)',fillStyle:'rgba(229,82,75,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1,fontColor:lc}
+          ];}}},
       tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
     scales:{
       x:{display:false},
