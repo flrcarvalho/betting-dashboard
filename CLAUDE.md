@@ -124,9 +124,10 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **P/L Líquido:** realce azul `rgba(46,139,255,.08)` + borda azul + sparkline de 90d. Os demais ficam neutros (a menos que `kpi-azul` esteja ativo no painel Aparência).
 - **Sparkline** (`mkSparkline` em `shared.js`): SVG inline, linha `--ink-soft`, ponto final `--accent`. Ultimos 90 dias de P/L acumulado.
 - **Calendário** (`mkCalendarHeatmap` em `shared.js`): opacidade proporcional ao P/L do mês (0.15–0.93). Mini-cards acima do grid.
-- **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`.
-- **Card headers** (`.card-hdr`): sem `border-left`. O título (`.card-title`) mantém `color: var(--accent-2)` (azul). **KPI labels** (`.kpi-label`) usam `<span class="kpi-pipe">|</span>` antes do texto — estilizado com `color: var(--accent)` via `.kpi-pipe` em `components.css`.
-- **Card titles** (`.card-title`): `color: var(--accent-2)` — azul suave, não é preferência variável. A barra do `.card-hdr` usa `var(--accent)` (azul forte).
+- **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`. Legenda em `position:'bottom'`, `align:'center'`, cor `#AEB7C2` (platina legível). Eixo X oculto (`display:false`) — datas acessíveis via tooltip.
+- **Card headers** (`.card-hdr`): sem `border-left`. O título (`.card-title`) mantém `color: var(--accent-2)` (azul).
+- **Card titles** (`.card-title`): `color: var(--accent-2)` — azul suave, sem barra lateral na caixa.
+- **KPI labels** (`.kpi-label`): precedidos por `<span class="kpi-pipe"></span>` (span vazio). A barra é gerada puramente via CSS: `.kpi-pipe { display:inline-block; width:3px; height:0.85em; background:var(--accent); border-radius:1px; vertical-align:text-bottom }`. Gerados em `renderKPI` (overview.js) e `mkKpiGrid` (shared.js).
 - **Nav groups** (`.nav-group`): JetBrains Mono, uppercase, `letter-spacing: 0.18em`, `color: var(--ink-mute)` — padrão eyebrow da sidebar.
 - **Títulos de seção** (`.metric-title`, `.analise-popup-section-title`): `color: var(--accent-2)` — azul suave, sem barra lateral.
 - **Nav icons:** `stroke-width="1.6"`, cor `var(--ink-mute)`, ativo em `var(--accent)`.
@@ -149,7 +150,7 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - `dashboard.html` é versão legada; não editar, serve como referência histórica.
 - Custos de contas e custos de tipsters são persistidos em `localStorage` (não no Apps Script).
 - Filtros são por página e independentes entre si (estado em `FS[page]`).
-- `fmtPL`: sinal colado sem espaço (`+R$`/`-R$`). `money-sign` em `0.78em` (R$ menor que o número).
+- `fmtPL`: sinal colado sem espaço (`+R$`/`-R$`). `.money-sign` em `0.76em`, cor `var(--ink-soft)` (neutro) — a cor pos/neg fica exclusiva do `.money-val` (número).
 - Sidebar bottom: `#lastUpdate` é flexbox com `.pulse-dot` + `#lastUpdateText`.
 - **Win Rate (WR) é NEUTRO** — nunca usar `pos`/`neg` no WR. Verde/vermelho somente em P/L, ROI e badges de win/loss. Locais: `mkCalendarHeatmap` (shared.js), `mkKpiGrid` (shared.js), `renderKPI` (overview.js).
 - **Chips de esporte e casa**: usar `mkSpChip(sport)` e `mkHouseChip(nome)` — nunca construir chips à mão. Fallback de esporte: `🏅` (nunca `•`, nunca `?`). Fallback de casa sem domínio em `HOUSE_DOMAIN`: inicial mono via `.chip-initial`. O glifo de múltiplas é `🔗` — `🎰` (cassino) é proibido pela marca.
