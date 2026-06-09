@@ -75,31 +75,88 @@ function renderCasa(rows){
   if(wrap){wrap.innerHTML=`<div style="padding:.25rem 0">${rows2}</div>`;}
 }
 
+// ── tcard helpers (T-1) ─────────────────────────────────────────────────────
+let _tipsterEnts=null,_tipsterDays=null,_tipsterAllDays=null;
+let _tipsterSort={k:'pl',dir:-1};
+
+function _tipSparkSVG(dayMap,allDays){
+  let cum=0;
+  const vals=allDays.map(d=>{cum+=(dayMap[d]||0);return cum;});
+  if(vals.length<2)return'<svg class="tcard__spark" viewBox="0 0 240 30" preserveAspectRatio="none"></svg>';
+  const min=Math.min(...vals),max=Math.max(...vals),rng=max-min||1;
+  const W=240,H=30,pad=2;
+  const ptStr=vals.map((v,i)=>{
+    const x=pad+(i/(vals.length-1))*(W-pad*2);
+    const y=H-pad-((v-min)/rng)*(H-pad*2);
+    return x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+  const last=ptStr.split(' ').pop().split(',');
+  return`<svg class="tcard__spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`
+    +`<polyline points="${ptStr}" fill="none" stroke="var(--ink-mute)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity="0.75" vector-effect="non-scaling-stroke"/>`
+    +`<circle cx="${last[0]}" cy="${last[1]}" r="2.6" fill="var(--accent)" vector-effect="non-scaling-stroke"/>`
+    +`</svg>`;
+}
+
+function _mkTipCard(name,pl,roi,stake,wr,bets,sparkSVG){
+  const plSign=pl>=0?'+':'−';
+  const plCls=pl>=0?'pos':'neg';
+  const roiSign=roi>=0?'+':'';
+  const roiCls=roi>=0?'pos':'neg';
+  const plAmt=Math.abs(pl).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const stakeInt=Math.round(stake).toLocaleString('pt-BR');
+  const betsStr=bets.toLocaleString('pt-BR');
+  const roiStr=roiSign+roi.toFixed(1).replace('.',',')+'%';
+  const wrStr=wr.toFixed(1).replace('.',',')+'%';
+  const wrPct=Math.min(wr,100).toFixed(1);
+  const esc=name.replace(/"/g,'&quot;');
+  return`<div class="tcard">`
+    +`<div class="tcard__top"><span class="nametag"><span class="nametag__nm" title="${esc}">${name}</span></span><span class="tcard__vol"><b>${betsStr}</b>apostas</span></div>`
+    +`<div class="tcard__hero"><span class="tcard__pl ${plCls}"><span class="tcard__cur">${plSign} R$</span>${plAmt}</span><div class="tcard__roi"><span class="tcard__roi-lbl">ROI</span><span class="tcard__roi-val ${roiCls}">${roiStr}</span></div></div>`
+    +sparkSVG
+    +`<div class="tcard__foot"><div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div><div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div></div>`
+    +`</div>`;
+}
+
+function _renderTipCards(){
+  const el=document.getElementById('tipsterKpiCards');
+  if(!el||!_tipsterEnts)return;
+  if(!_tipsterEnts.length){el.innerHTML=mkEmpty('Nenhum tipster no período');return;}
+  const {k,dir}=_tipsterSort;
+  const fns={pl:([,d])=>d.l,roi:([,d])=>d.s>0?d.l/d.s*100:0,to:([,d])=>d.s,wr:([,d])=>d.t>0?d.w/d.t*100:0,vol:([,d])=>d.n};
+  const fn=fns[k]||fns.pl;
+  const sorted=[..._tipsterEnts].sort((a,b)=>dir*(fn(b)-fn(a)));
+  el.innerHTML=sorted.map(([t,d])=>{
+    const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
+    return _mkTipCard(t,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_tipsterDays[t]||{},_tipsterAllDays));
+  }).join('');
+  document.querySelectorAll('#tipsterSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
+  const dirBtn=document.getElementById('tipsterDir');
+  if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
+}
+window.tipsterSortBy=function(k){_tipsterSort.k=k;_tipsterSort.dir=-1;_renderTipCards();};
+window.tipsterSortDir=function(){_tipsterSort.dir*=-1;_renderTipCards();};
+
 // Tipsters
 function renderTipsters(){
   const selT=msGet('tipsters');
   const baseRows=filtrarPagina('tipsters');
   const allT=[...new Set(DADOS.map(r=>r.tipster).filter(Boolean))].sort();
   const activeT=selT.size>0?[...selT]:allT;
-  // Tipster KPI cards (sorted by turnover, 6/row)
+  // Tipster KPI cards — .tcard design (T-1)
   {
-    const tipMap={};
+    const tipMap={},tipDays={};
     baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{
-      if(!tipMap[r.tipster])tipMap[r.tipster]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+      if(!tipMap[r.tipster])tipMap[r.tipster]={l:0,s:0,n:0,w:0,t:0};
       tipMap[r.tipster].l+=r.lucro;tipMap[r.tipster].s+=r.stake;tipMap[r.tipster].n++;
       if(r.resultado!=='V'){tipMap[r.tipster].t++;if(['W','HW'].includes(r.resultado))tipMap[r.tipster].w++;}
-      if(r.odd>0&&r.stake>0){tipMap[r.tipster].wt+=r.odd*r.stake;tipMap[r.tipster].stk+=r.stake;}
+      const dk=r.data.slice(0,10);
+      if(!tipDays[r.tipster])tipDays[r.tipster]={};
+      tipDays[r.tipster][dk]=(tipDays[r.tipster][dk]||0)+r.lucro;
     });
-    const tipEntsK=Object.entries(tipMap).sort((a,b)=>b[1].s-a[1].s);
-    const tipCards=tipEntsK.map(([t,d])=>{
-      const roi=d.s>0?(d.l/d.s*100):0;
-      const wr=d.t>0?(d.w/d.t*100):0;
-      const initials=t.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
-      const hue=Math.abs(t.split('').reduce((a,c)=>a+c.charCodeAt(0),0))%360;
-      const iconHtml=`<div style="width:20px;height:20px;border-radius:50%;background:hsl(${hue},55%,38%);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>`;
-      return mkOneStatCard(iconHtml, t, d.l, roi, d.s, d.n, wr);
-    });
-    mkStatCards(tipCards, 'tipsterKpiCards');
+    _tipsterEnts=Object.entries(tipMap);
+    _tipsterDays=tipDays;
+    _tipsterAllDays=[...new Set(baseRows.map(r=>r.data.slice(0,10)))].sort();
+    _renderTipCards();
   }
 
   // Comparison chart
