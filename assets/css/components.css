@@ -261,6 +261,27 @@
   position: sticky;
   top: 0;
 }
+/* Header Modelo A: alinhamento por tipo + 2 linhas (rotulo + unidade) */
+.tbl th { vertical-align: middle; }
+.tbl th.th-l { text-align: left; }
+.tbl th.th-c { text-align: center; }
+.tbl th.th-r { text-align: right; }
+.tbl td.td-c { text-align: center; }
+
+.tbl th .th-k { display: block; line-height: 1; }
+.tbl th .th-u {
+  display: block;
+  margin-top: 4px;
+  line-height: 1;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: none;
+  color: var(--text3);
+  opacity: .85;
+}
+.tbl th .th-k .sort-icon { margin-left: 5px; }
+
 .tbl th:hover { color: var(--text); }
 .tbl th .sort-icon {
   display: inline-flex;
