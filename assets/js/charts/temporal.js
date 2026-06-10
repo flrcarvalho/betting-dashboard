@@ -50,16 +50,15 @@ function renderConsolidado(){
   const totSettled=totW+totHW+totL+totHL;
   const totWR=totSettled>0?((totW+totHW)/totSettled*100):0;
   const totDetail=[totW?`W:${totW}`:'',totHW?`HW:${totHW}`:'',totL?`L:${totL}`:'',totHL?`HL:${totHL}`:'',totV?`V:${totV}`:''].filter(Boolean).join(' ');
-  function tdR(content,extra=''){return`<td style="text-align:right;padding:3px 7px;white-space:nowrap;font-size:11px;${extra}">${content}</td>`;}
   const totalAnnualRow=`<tr class="total-row" style="border-bottom:2px solid var(--border2);background:var(--bg4)">
-    <td style="font-weight:700;color:var(--text);padding:5px 8px;text-align:left;font-size:12px">Total</td>
-    <td style="text-align:right;padding:5px 7px;font-size:11px;font-family:'JetBrains Mono',monospace"><span style="font-size:10px;color:var(--text3);margin-right:6px">${totDetail}</span><span style="font-size:13px;font-weight:700;color:var(--text)">${totN.toLocaleString('pt-BR')}</span></td>
-    ${tdR(fmtPL(totPL),`color:${tlc};font-weight:700`)}
-    ${tdR(fmtR(totS))}
-    ${tdR((totROI>=0?'+':'')+totROI.toFixed(2)+'%',`color:${trc};font-weight:700`)}
-    ${tdR(mkWRC(totWR))}
-    ${tdR(calcAvgOdd(rows).toFixed(2))}
-    ${tdR(totN>0?fmtR(totS/totN):'—')}
+    <td style="font-weight:700;color:var(--text)">Total</td>
+    <td class="td-c"><span style="font-size:10px;color:var(--text3);margin-right:6px">${totDetail}</span><span style="font-size:13px;font-weight:700;color:var(--text)">${totN.toLocaleString('pt-BR')}</span></td>
+    <td class="td-num" style="color:${tlc};font-weight:700">${fmtPL(totPL)}</td>
+    <td class="td-num">${fmtR(totS)}</td>
+    <td class="td-c" style="color:${trc};font-weight:700">${(totROI>=0?'+':'')+totROI.toFixed(2)}%</td>
+    <td class="td-c">${mkWRC(totWR)}</td>
+    <td class="td-c">${calcAvgOdd(rows).toFixed(2)}</td>
+    <td class="td-num">${totN>0?fmtR(totS/totN):'—'}</td>
   </tr>`;
   const anualRows=allTipsters.map(t=>{
     const d=annualByT[t];if(!d)return'';
@@ -74,29 +73,20 @@ function renderConsolidado(){
     const rc=roiV>=0?'var(--green)':'var(--red)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
     return`<tr>
-      <td style="font-weight:700;color:var(--text);padding:5px 8px;text-align:left;font-size:11px">${t}</td>
-      <td style="text-align:right;padding:5px 7px;font-size:11px;font-family:'JetBrains Mono',monospace"><span style="font-size:10px;color:var(--text3);margin-right:6px">${detail}</span><span style="font-size:13px;font-weight:600;color:var(--text)">${d.n.toLocaleString('pt-BR')}</span></td>
-      ${tdR(fmtPL(d.pl),`color:${lc};font-weight:600`)}
-      ${tdR(fmtR(turnover))}
-      ${tdR((roiV>=0?'+':'')+roiV.toFixed(2)+'%',`color:${rc}`)}
-      ${tdR(mkWRC(wr))}
-      ${tdR(avgOdd.toFixed(2))}
-      ${tdR(fmtR(avgStake))}
+      <td style="font-weight:700;color:var(--text)">${t}</td>
+      <td class="td-c"><span style="font-size:10px;color:var(--text3);margin-right:6px">${detail}</span><span style="font-size:13px;font-weight:600;color:var(--text)">${d.n.toLocaleString('pt-BR')}</span></td>
+      <td class="td-num" style="color:${lc};font-weight:600">${fmtPL(d.pl)}</td>
+      <td class="td-num">${fmtR(turnover)}</td>
+      <td class="td-c" style="color:${rc}">${(roiV>=0?'+':'')+roiV.toFixed(2)}%</td>
+      <td class="td-c">${mkWRC(wr)}</td>
+      <td class="td-c">${avgOdd.toFixed(2)}</td>
+      <td class="td-num">${fmtR(avgStake)}</td>
     </tr>`;
   }).join('');
   const resumoAnualHTML=mkCard('cons_resumo',
     `Resumo Anual <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${tlc};margin-left:10px">${fmtPL(totPL)}</span>`,
     `<div style="overflow-x:auto"><table class="tbl" id="tblConsAnual" style="width:100%;font-size:11px">
-      <thead><tr>
-        <th style="text-align:left;min-width:90px;padding:5px 8px">Tipster<span class="sort-icon"></span></th>
-        <th style="text-align:right;min-width:70px;padding:5px 7px">Bets<span class="sort-icon"></span></th>
-        <th style="text-align:right;min-width:100px;padding:5px 7px">P/L<span class="sort-icon"></span></th>
-        <th style="text-align:right;min-width:85px;padding:5px 7px">Turnover<span class="sort-icon"></span></th>
-        <th style="text-align:right;min-width:60px;padding:5px 7px">ROI<span class="sort-icon"></span></th>
-        <th style="text-align:right;min-width:60px;padding:5px 7px">WR%<span class="sort-icon"></span></th>
-        <th style="text-align:right;min-width:60px;padding:5px 7px">Odd<span class="sort-icon"></span></th>
-        <th style="text-align:right;min-width:75px;padding:5px 7px">Stake<span class="sort-icon"></span></th>
-      </tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}${mkTh('Odd média','ponderada','c')}${mkTh('Stake média','R$','r')}</tr></thead>
       <tbody>${totalAnnualRow}${anualRows}</tbody>
     </table></div>`);
   // Heatmap mensal
@@ -304,13 +294,13 @@ function renderMensal(){
     const lc=d.pl>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi2>=0?'color:var(--green)':'color:var(--red)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td>
-      <td><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
-      <td style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
-      <td>${fmtR(s)}</td>
-      <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td>
-      <td>${wr2.toFixed(1)}%</td>
-      <td>${calcAvgOdd(tR).toFixed(2)}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td class="td-c">${d.n}</td>
+      <td class="td-c"><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
+      <td class="td-num" style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
+      <td class="td-num">${fmtR(s)}</td>
+      <td class="td-c" style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td>
+      <td class="td-c">${wr2.toFixed(1)}%</td>
+      <td class="td-c">${calcAvgOdd(tR).toFixed(2)}</td></tr>`;
   }).join('');
   const tipLc=totPL>=0?'color:var(--green)':'color:var(--red)';
   const roi=totS>0?(totPL/totS*100):0;
@@ -324,9 +314,9 @@ function renderMensal(){
   const wr=setTot>0?((W+HW)/setTot*100):0;
   const tipTableHTML=mkCard('mensal_tiptable','Tipsters — Comparativo do Mês',
     `<div class="tbl-wrap"><table class="tbl" id="tblMensalTip">
-      <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Odd Méd.<span class="sort-icon"></span></th></tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('Resultados','','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}${mkTh('Odd média','ponderada','c')}</tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
+        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${calcAvgOdd(rows).toFixed(2)}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -422,21 +412,21 @@ function renderDiario(){
     const lc=d.pl>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi2>=0?'color:var(--green)':'color:var(--red)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td>
-      <td><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
-      <td style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
-      <td>${fmtR(d.s)}</td>
-      <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td>
-      <td class="td-num">${mkWRC(wr2)}</td>
-      <td>${avgOdd.toFixed(2)}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td class="td-c">${d.n}</td>
+      <td class="td-c"><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
+      <td class="td-num" style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
+      <td class="td-num">${fmtR(d.s)}</td>
+      <td class="td-c" style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td>
+      <td class="td-c">${mkWRC(wr2)}</td>
+      <td class="td-c">${avgOdd.toFixed(2)}</td></tr>`;
   }).join('');
   const tipLc=totPL>=0?'color:var(--green)':'color:var(--red)';
   const tipRc=roi>=0?'color:var(--green)':'color:var(--red)';
   const tipTableHTML=mkCard('diario_tips','Tipsters — Resultados do Dia',
     `<div class="tbl-wrap"><table class="tbl" id="tblDiarioTip">
-      <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Odd Méd.<span class="sort-icon"></span></th></tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('Resultados','','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}${mkTh('Odd média','ponderada','c')}</tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td><td>${calcAvgOdd(rows).toFixed(2)}</td></tr>
+        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${calcAvgOdd(rows).toFixed(2)}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -696,18 +686,18 @@ function renderSemana(){
     const lc=d.pl>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi2>=0?'color:var(--green)':'color:var(--red)';
     const det=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td>
-      <td><span style="font-size:9px;color:var(--text3)">${det}</span></td>
-      <td style="${lc};font-weight:600">${fmtPL(d.pl)}</td><td>${fmtR(d.s)}</td>
-      <td style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td><td class="td-num">${mkWRC(wr2)}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td class="td-c">${d.n}</td>
+      <td class="td-c"><span style="font-size:9px;color:var(--text3)">${det}</span></td>
+      <td class="td-num" style="${lc};font-weight:600">${fmtPL(d.pl)}</td><td class="td-num">${fmtR(d.s)}</td>
+      <td class="td-c" style="${rc}">${(roi2>=0?'+':'')+roi2.toFixed(2)}%</td><td class="td-c">${mkWRC(wr2)}</td></tr>`;
   }).join('');
   const tipLcW=totPL>=0?'color:var(--green)':'color:var(--red)';
   const tipRcW=roi>=0?'color:var(--green)':'color:var(--red)';
   const tipTableHTML2=mkCard('semana_tips','Tipsters — Comparativo da Semana',
     `<div class="tbl-wrap"><table class="tbl" id="tblSemanaTip">
-      <thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th></tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('Resultados','','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}</tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td>${rows.length}</td><td><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td style="${tipLcW};font-weight:700">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${tipRcW}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td></tr>
+        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLcW};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRcW}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-c">${mkWRC(wr)}</td></tr>
         ${tipTableRows2}
       </tbody>
     </table></div>`);
