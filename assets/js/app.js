@@ -411,7 +411,7 @@ function buildHTML(){
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
         ${mkCard('ov_custo','Custo de Contas — Resumo','<div id="ovCustoContent"></div>')}
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem" id="ovHeatmapCard">
-          <div style="font-size:11px;color:var(--accent-2);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem">Calendário</div>
+          <div class="analise-popup-section-title">Calendário</div>
           <div id="ovHeatmapContent"></div>
         </div>
       </div>
