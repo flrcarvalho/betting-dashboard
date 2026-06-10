@@ -489,11 +489,8 @@ html[data-theme="light"].t-page-gradient .page-title {
 }
 .card:hover {
   transform: translateY(-1px);
-  border-color: rgba(46,139,255,0.25);
 }
 
-/* ── Aparência — KPI tick azul ─────────────────────────────────────────────── */
-html.kpi-azul .kpi { border-left: 3px solid var(--accent); }
 
 /* ── Aparência — densidade compacta (item 13) ─────────────────────────────── */
 [data-density="compact"] .card-hdr  { min-height: 38px; padding: 0.55rem 1rem; }

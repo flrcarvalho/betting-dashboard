@@ -515,8 +515,7 @@ function renderTipsters(){
       const el=document.getElementById('tipsterPortfolioKPIs');
       if(el){
         el.innerHTML=
-          `<div class="kpi" style="position:relative;background:rgba(46,139,255,0.08);border-color:rgba(46,139,255,.22)">`+
-            `<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;opacity:.8"></div>`+
+          `<div class="kpi" style="position:relative">`+
             `<div class="kpi-label"><span class="kpi-pipe"></span> P/L Carteira</div>`+
             `<div class="kpi-val ${plCls}">${fmtPL(portPL)}</div>`+
             `<div class="kpi-sub">resultado do conjunto</div>`+

@@ -34,7 +34,7 @@ function renderKPI(rows){
     {l:'P/L Bruto',v:fmtPL(lucro),c:lucro>=0?'pos':'neg',s:'antes de custos',accent:''},
     {l:'Custo de Contas',v:costConta>0?fmtPL(-costConta):fmtR(0),c:costConta>0?'neg':'neu',s:'total aquisição',accent:''},
     {l:'Custo de Tipsters',v:costTipster>0?fmtPL(-costTipster):fmtR(0),c:costTipster>0?'neg':'neu',s:'assinaturas / serviços',accent:''},
-    {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'background:rgba(46,139,255,0.08);border-color:rgba(46,139,255,.22);',spark},
+    {l:'P/L Líquido',v:fmtPL(lucroLiq),c:lucroLiq>=0?'pos':'neg',s:'resultado final',accent:'',spark},
   ];
   // ── Andar 2: Turnover → ROI → Odd Média → Win Rate ──────────────────────
   const row2=[
@@ -219,17 +219,17 @@ function renderOvStreaks(rows){
   const isNegCurrent=negStreak>0&&byDay[lastDay]<0;
   el.innerHTML=`
     <div class="kpi-grid" style="margin-bottom:0">
-      <div class="kpi" style="border-color:var(--green)22">
+      <div class="kpi">
         <div class="kpi-label" style="color:var(--green)">Sequência Positiva</div>
         <div class="kpi-val ${isPosCurrent?'pos':'neu'}">${isPosCurrent?posStreak:0} dias</div>
         <div class="kpi-sub">${isPosCurrent?fmtPL(posVal):('última: '+posStreak+' dias  +'+fmtR(posVal))}</div>
       </div>
-      <div class="kpi" style="border-color:var(--red)22">
+      <div class="kpi">
         <div class="kpi-label" style="color:var(--red)">Drawdown Atual</div>
         <div class="kpi-val ${isNegCurrent?'neg':'neu'}">${isNegCurrent?negStreak:0} dias</div>
         <div class="kpi-sub">${isNegCurrent?fmtPL(negVal):('último: '+negStreak+' dias')}</div>
       </div>
-      <div class="kpi" style="border-color:var(--amber)22">
+      <div class="kpi">
         <div class="kpi-label" style="color:var(--amber)">Topo Histórico</div>
         <div class="kpi-val pos">${fmtPL(peakVal)}</div>
         <div class="kpi-sub">atingido em ${peakDateFmt}</div>
