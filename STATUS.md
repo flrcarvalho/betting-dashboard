@@ -1,6 +1,24 @@
-# STATUS — Aba Tipsters
+# STATUS — Betting Dashboard
 
-## Estado atual: T-6 FECHADO + refactor de export concluído (2026-06-09)
+## Estado atual: refactor visual de tabelas em andamento (2026-06-09)
+
+## Sessao 2026-06-09 (tarde) — mkTh + alinhamento de tabelas
+Trabalho desta sessao (continuacao da anterior):
+- Removidos accent borders de .kpi e .card hover (layout.css)
+- .kpi-pipe corrigido: flexbox no container, barra 4px sem float (components.css)
+- Todos os titulos azuis de secao: uppercase + letter-spacing leve (components.css, app.js)
+- mkTh() helper adicionado em shared.js; classes th-l/th-c/th-r/th-k/th-u em components.css
+- sortTable em app.js corrigido: usa classList para nao apagar classes de alinhamento
+- buildSummaryTable (shared.js) migrada para mkTh — cobre Esportes + Casas
+- temporal.js: 4 tabelas migradas (tblConsAnual, tblMensalTip, tblDiarioTip, tblSemanaTip)
+  - helper tdR removido; td com td-num/td-c no lugar de inline styles
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js — tblResCasa + tabelas do popup drill-down tipster
+
+## T-6 FECHADO + refactor de export concluído (2026-06-09)
 
 ## Próximo passo
 Verificar no navegador (versão publicada) após cache propagar:
