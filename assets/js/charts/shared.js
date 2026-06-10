@@ -186,12 +186,12 @@ function buildSummaryTable(tableId,label,ents,isCasa=false){
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
     const label_cell=isCasa?casaCell(nome):sportCell(nome);
-    return`<tr><td style="font-weight:600;color:var(--text)">${label_cell}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td></tr>`;
+    return`<tr><td style="font-weight:600;color:var(--text)">${label_cell}</td><td class="td-c">${d.n}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-c" style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td></tr>`;
   }).join('');
   const tot=ents.reduce((a,[,d])=>({n:a.n+d.n,w:a.w+d.w,t:a.t+d.t,s:a.s+d.s,l:a.l+d.l}),{n:0,w:0,t:0,s:0,l:0});
   const tRoi=tot.s>0?(tot.l/tot.s*100):0,tWr=tot.t>0?(tot.w/tot.t*100):0;
   const tlc=tot.l>=0?'color:var(--green)':'color:var(--red)';const trc=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr><th>${label}<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th></tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td>${tot.n}</td><td class="td-num">${mkWRC(tWr)}</td><td>${fmtR(tot.s)}</td><td style="${tlc}">${fmtPL(tot.l)}</td><td style="${trc}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td></tr></tbody></table></div>`;
+  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr>${mkTh(label,'','l')}${mkTh('Bets','qtd','c')}${mkTh('Win Rate','%','c')}${mkTh('Turnover','R$','r')}${mkTh('P/L','R$','r')}${mkTh('ROI','%','c')}</tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td class="td-c">${tot.n}</td><td class="td-c">${mkWRC(tWr)}</td><td class="td-num">${fmtR(tot.s)}</td><td class="td-num" style="${tlc}">${fmtPL(tot.l)}</td><td class="td-c" style="${trc}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td></tr></tbody></table></div>`;
 }
 
 
