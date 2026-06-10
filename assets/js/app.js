@@ -410,10 +410,7 @@ function buildHTML(){
         ${mkCard('roi_monthly','ROI Mensal (%)','<div class="chart-wrap" style="min-height:220px"><canvas id="chartROI" role="img" aria-label="ROI mensal"></canvas></div>')}
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
         ${mkCard('ov_custo','Custo de Contas — Resumo','<div id="ovCustoContent"></div>')}
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem" id="ovHeatmapCard">
-          <div class="analise-popup-section-title">Calendário</div>
-          <div id="ovHeatmapContent"></div>
-        </div>
+        ${mkCard('ov_heatmap','Calendário','<div id="ovHeatmapContent"></div>')}
       </div>
 
       <!-- CONSOLIDADO -->
