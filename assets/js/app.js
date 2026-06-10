@@ -176,7 +176,8 @@ function sortTable(tableId,colIdx,numeric){
   rows.forEach(r=>tbody.appendChild(r));
   if(totalRow)tbody.appendChild(totalRow);
   table.querySelectorAll('th').forEach((th,i)=>{
-    th.className=i===colIdx?(st.asc?'sort-asc':'sort-desc'):'';
+    th.classList.remove('sort-asc','sort-desc');
+    if(i===colIdx)th.classList.add(st.asc?'sort-asc':'sort-desc');
     if(!th.querySelector('.sort-icon')){const si=document.createElement('span');si.className='sort-icon';th.appendChild(si);}
   });
 }
