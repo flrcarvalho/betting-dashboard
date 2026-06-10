@@ -263,6 +263,17 @@ function mkSparkline(data,w=88,h=28){
   return`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible"><polyline points="${pts}" fill="none" stroke="var(--ink-soft,#95A1B0)" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.5" fill="var(--accent,#2E8BFF)" stroke="var(--bg,#0A0D12)" stroke-width="1.5"/></svg>`;
 }
 
+// Cabecalho de tabela: rotulo (linha 1) + unidade opcional (linha 2), alinhado por tipo.
+// align: 'l' | 'c' | 'r'  (default 'c')
+function mkTh(label, unit, align = 'c', extra = '') {
+  const alignCls = align === 'r' ? 'th-r' : align === 'l' ? 'th-l' : 'th-c';
+  const classAttr = `${alignCls} ${extra}`.trim();
+  return `<th class="${classAttr}">`
+       + `<span class="th-k">${label}<span class="sort-icon"></span></span>`
+       + (unit ? `<span class="th-u">${unit}</span>` : '')
+       + `</th>`;
+}
+
 const APOSTAS_COLS=['data','esporte','tipster','casa','parceiro','aposta','descricao','stake','odd','resultado','lucro'];
 const APOSTAS_HDRS=['Data','Esporte','Tipster','Casa','Parceiro','Aposta','Descrição','Stake','Odd','Resultado','P/L'];
 const APOSTAS_NUM=[7,8,10];
