@@ -755,31 +755,47 @@ async function loadData(){
 applyAparencia();
 loadData();
 
-// Tooltip global — appendado ao body para escapar de backdrop-filter stacking contexts
-const _gTip=(()=>{const d=document.createElement('div');d.className='fdc-tip';d.style.cssText='display:none;position:fixed;z-index:99999;pointer-events:none;';document.body.appendChild(d);return d;})();
-document.addEventListener('mouseover',function(e){
-  const info=e.target.closest('.fdc-info');
-  if(!info)return;
-  const src=info.querySelector('.fdc-tip');
+// MetricTooltip global — appendado ao body para escapar de backdrop-filter stacking contexts
+const _gTip=(()=>{const d=document.createElement('div');d.className='metric-tip';d.style.cssText='display:none;position:fixed;z-index:99999;pointer-events:none;';document.body.appendChild(d);return d;})();
+function _showTip(btn){
+  const anchor=btn.closest('.tip-anchor');
+  if(!anchor)return;
+  const src=anchor.querySelector('.metric-tip');
   if(!src)return;
   _gTip.innerHTML=src.innerHTML;
   _gTip.style.visibility='hidden';
   _gTip.style.display='block';
   const th=_gTip.offsetHeight;
   _gTip.style.visibility='';
-  const r=info.getBoundingClientRect();
+  const r=btn.getBoundingClientRect();
   let left=r.left-4;
-  if(left+220>window.innerWidth-8)left=window.innerWidth-228;
+  if(left+286>window.innerWidth-8)left=window.innerWidth-294;
   if(left<8)left=8;
-  let top=r.bottom+4;
-  if(top+th>window.innerHeight-8)top=r.top-th-4;
+  let top=r.bottom+6;
+  const flipped=top+th>window.innerHeight-8;
+  if(flipped)top=r.top-th-6;
   if(top<8)top=8;
   _gTip.style.top=top+'px';
   _gTip.style.left=left+'px';
+  const caret=_gTip.querySelector('.metric-tip__caret');
+  if(caret){
+    if(flipped){caret.style.display='none';}
+    else{caret.style.display='';caret.style.left=Math.max(10,Math.min(r.left+r.width/2-left-6,260))+'px';}
+  }
+}
+document.addEventListener('mouseover',function(e){
+  const btn=e.target.closest('.metric-info');if(!btn)return;_showTip(btn);
 });
 document.addEventListener('mouseout',function(e){
-  const info=e.target.closest('.fdc-info');
-  if(!info)return;
-  _gTip.style.display='none';
+  const btn=e.target.closest('.metric-info');if(!btn)return;_gTip.style.display='none';
+});
+document.addEventListener('focusin',function(e){
+  const btn=e.target.closest('.metric-info');if(!btn)return;_showTip(btn);
+});
+document.addEventListener('focusout',function(e){
+  const btn=e.target.closest('.metric-info');if(!btn)return;_gTip.style.display='none';
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')_gTip.style.display='none';
 });
 

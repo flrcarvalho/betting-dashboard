@@ -1,5 +1,10 @@
 ﻿// ── performance.js — Esportes, Casas, Tipsters, Resultados por Casa ──────────────
 
+// Helper: gera o markup completo de um tooltip de métrica (MetricTooltip)
+function _mkTipAnchor(label,formula,desc,bench){
+  return `<span class="tip-anchor"><button class="metric-info" type="button" aria-label="Sobre ${label}">i</button><div class="metric-tip" role="tooltip" hidden><span class="metric-tip__caret"></span>${formula?`<div class="metric-tip__formula">${formula}</div>`:''}<div class="metric-tip__desc">${desc}</div>${bench?`<div class="metric-tip__bench">${bench}</div>`:''}</div></span>`;
+}
+
 function renderSport(rows){
   const map={};rows.forEach(r=>{if(!map[r.esporte])map[r.esporte]={l:0,s:0,n:0,w:0,t:0};map[r.esporte].l+=r.lucro;map[r.esporte].s+=r.stake;map[r.esporte].n++;if(r.resultado!=='V'){map[r.esporte].t++;if(['W','HW'].includes(r.resultado))map[r.esporte].w++;}});
   const ents=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined').sort((a,b)=>b[1].l-a[1].l);
@@ -230,22 +235,22 @@ function renderTipsterDrill(rows){
       `<div class="analise-popup-section-title">Cenário Atual</div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico</div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico ${_mkTipAnchor('Topo Histórico','','Maior saldo que a banca <b>já atingiu</b> no período.','<span class="lbl">marco</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(_td.topo)}</div>`+
           `<div class="kpi-sub" style="${sbS}">atingido em ${_fmtD(_td.topoData)}</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual</div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual ${_mkTipAnchor('Drawdown Atual','<span class="lbl">DD</span> <span class="op">=</span> Topo <span class="op">→</span> Saldo atual','Quanto a banca está <b>abaixo do último pico</b>, agora.','<span class="thr">perto de 0</span> <span class="good">é o ideal</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_td.ddAtual)}</div>`+
           `<div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown <span class="fdc-info">i<span class="fdc-tip">MDD realizado: maior queda de pico a fundo que já aconteceu.</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">XMDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior perda</b> do topo ao fundo, em R$, no período.','<span class="thr">quanto menor, melhor</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div>`+
           `<div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor <span class="fdc-info">i<span class="fdc-tip">Lucro ÷ Max Drawdown. Quantas vezes o lucro cobre a maior queda. Projetado: Profit/XMDD (&gt;5 muito bom).</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor ${_mkTipAnchor('Recovery Factor','<span class="lbl">RF</span> <span class="op">=</span> Lucro <span class="op">÷</span> Máx. Drawdown','Quantas vezes o lucro total <b>cobre a maior queda</b> da banca.','<span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="thr">&gt; 5</span> <span class="good">muito bom</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div>`+
           `<div class="kpi-sub" style="${sbS}">qualidade</div>`+
         `</div>`+
@@ -255,22 +260,22 @@ function renderTipsterDrill(rows){
       `<div class="analise-popup-section-title">Diagnóstico de Risco <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(Monte Carlo · 10.000 simulações)</span></div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>p-value <span class="fdc-info">i<span class="fdc-tip">P(yield ≥ observado | edge=0), Buchdahl. &lt;0,05 rejeita o acaso.</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>p-value ${_mkTipAnchor('P-Value','<span class="lbl">p</span> <span class="op">=</span> P(resultado <span class="lbl">|</span> acaso)','Chance do resultado ter vindo <b>só de sorte</b>. Baixo = confiável.','<span class="thr">&lt; 0,05</span> <span class="good">rejeita o acaso</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmt(_pv,4)}</div>`+
           `<div class="kpi-sub" style="${sbS}">rejeita o acaso</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio <span class="fdc-info">i<span class="fdc-tip">Drawdown máximo médio das 10k simulações (XMDD). Tombo típico esperado.</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica esperada</b> nas 10.000 simulações de Monte Carlo.','<span class="lbl">projetado · média</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.xmdd)}</div>`+
           `<div class="kpi-sub" style="${sbS}">projetado · média</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Máximo <span class="fdc-info">i<span class="fdc-tip">Pior caso: percentil 99 (1 em 100). No P95 (1 em 20) é ${fmtPL(-_mc.p95)}.</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Máximo ${_mkTipAnchor('DD Máximo','<span class="lbl">pior</span> DD simulado','Pior queda plausível (<b>1 em 100</b> cenários). Dimensiona a banca.','<span class="lbl">projetado · cauda</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.p99)}</div>`+
           `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez <span class="fdc-info">i<span class="fdc-tip">Score 0–1 que combina p-value, XMDD e Recovery Factor. Quanto maior, mais robusta estatisticamente a estratégia.</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez ${_mkTipAnchor('Nível de Solidez','<span class="lbl">índice composto</span>','P-value, drawdown e consistência <b>num selo só</b>.','<span class="lbl">Escala</span> <span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="good">Baixa → Alta</span>')}</div>`+
           `<div class="fdc-risk-meter" style="margin-top:auto">`+
             `<span class="fdc-risk-meter__tag" style="color:${_solCor}">${_sol.faixa}</span>`+
             `<div class="fdc-risk-meter__track">`+
@@ -282,7 +287,7 @@ function renderTipsterDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
-      `<div class="tbl-wrap drill-tbl"><table class="tbl"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th>Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Casa</div>`+
@@ -522,12 +527,13 @@ function _tipBreakdownTbl(rows,dimKey,labelFn){
   const tRows=ents.map(([k,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0;
+    const avgStake=d.n>0?d.s/d.n:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td>${labelFn(k)}</td><td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
+    return`<tr><td>${labelFn(k)}</td><td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const th=dimKey==='casa'?'Casa':'Esporte';
-  return`<table class="tbl"><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>Win Rate%</th><th>Turnover</th><th>P/L</th><th>ROI</th><th>Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
+  return`<table class="tbl"><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
 }
 
 // Tipsters

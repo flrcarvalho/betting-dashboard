@@ -1184,20 +1184,61 @@
 .fdc-kpi__value[data-state="proj"]   { color: var(--d-proj); }
 .fdc-kpi__value[data-state="info"]   { color: var(--d-info); }
 
-/* ── Info tooltip (pure CSS) ────────────────────────────────────
-   Uso: <span class="fdc-info">i
-          <span class="fdc-tip"><b>Título</b> descrição.</span>
-        </span>                                                    */
-.fdc-info                  { position: relative; display: inline-flex; align-items: center;
-                              justify-content: center; width: 13px; height: 13px;
-                              border: 1px solid var(--ink-mute); border-radius: 50%;
-                              font-size: 9px; font-style: italic; cursor: help;
-                              color: var(--ink-mute); margin-left: 4px; }
-.fdc-tip                   { width: 220px; background: var(--surface-2, var(--fdc-steel));
-                              border: 1px solid var(--accent); border-radius: 8px;
-                              padding: 9px 11px; font-size: var(--text-xs); line-height: 1.5;
-                              color: var(--ink-soft); font-style: normal; text-align: left; }
-.fdc-info .fdc-tip         { display: none; }
-.fdc-tip b                 { color: var(--ink); }
+/* ── MetricTooltip — componente padrão de tooltip de métrica ───────────
+   Uso: <span class="tip-anchor">
+          <button class="metric-info" aria-label="Sobre X">i</button>
+          <div class="metric-tip" role="tooltip" hidden>
+            <span class="metric-tip__caret"></span>
+            <div class="metric-tip__formula">…</div>
+            <div class="metric-tip__desc">…</div>
+            <div class="metric-tip__bench">…</div>
+          </div>
+        </span>
+   O .metric-tip inline fica hidden — JS global (_gTip) o clona e posiciona. */
+.tip-anchor                { position: relative; display: inline-flex; align-items: center; }
+
+.metric-info               { width: 14px; height: 14px; border-radius: 50%;
+                              border: 1px solid var(--line); display: inline-grid;
+                              place-items: center; font-family: var(--font-mono);
+                              font-size: 9px; font-style: italic; color: var(--ink-mute);
+                              cursor: help; background: transparent; padding: 0;
+                              line-height: 1; margin-left: 4px; }
+.metric-info:hover,
+.metric-info:focus-visible { color: var(--accent-2); border-color: rgba(46,139,255,.5);
+                              background: rgba(46,139,255,.1); outline: none; }
+
+.metric-tip                { width: 286px; background: var(--elevated);
+                              border: 1px solid var(--line); border-radius: var(--r-md);
+                              padding: 14px 16px 15px;
+                              box-shadow: 0 20px 54px -22px rgba(0,0,0,.85),
+                                          0 0 0 1px rgba(46,139,255,.16);
+                              font-family: var(--font-sans); color: var(--ink); }
+
+.metric-tip__caret         { position: absolute; top: -7px; width: 12px; height: 12px;
+                              background: var(--elevated);
+                              border-left: 1px solid var(--line);
+                              border-top: 1px solid var(--line);
+                              transform: rotate(45deg); }
+
+.metric-tip__formula       { font-family: var(--font-mono); font-size: 11px;
+                              letter-spacing: .02em; color: var(--ink-soft);
+                              display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.metric-tip__formula .op   { color: var(--accent-2); }
+.metric-tip__formula .lbl  { color: var(--ink-mute); }
+
+.metric-tip__desc          { font-size: 13.5px; line-height: 1.5; color: var(--ink);
+                              margin-top: 9px; }
+.metric-tip__desc b        { font-weight: 600; }
+
+.metric-tip__bench         { font-family: var(--font-mono); font-size: 11px;
+                              color: var(--ink-mute); margin-top: 12px; padding-top: 11px;
+                              border-top: 1px solid var(--line-2);
+                              display: flex; align-items: center; gap: 9px; }
+.metric-tip__bench .thr    { color: var(--ink); font-variant-numeric: tabular-nums; }
+.metric-tip__bench .good   { color: var(--pos); }
+.metric-tip__bench .scale  { display: inline-flex; gap: 2px; }
+.metric-tip__bench .scale i     { width: 13px; height: 5px; border-radius: 1px;
+                                   background: rgba(255,255,255,.12); }
+.metric-tip__bench .scale i.on  { background: var(--pos); }
 
 
