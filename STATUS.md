@@ -1,6 +1,27 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: MetricTooltip padronizado — COMPLETO (2026-06-11 sessao 16)
+## Estado atual: tabelas do popup padronizadas — COMPLETO (2026-06-11 sessao 17)
+
+## Sessao 2026-06-11 (sessao 17) — Padronizacao das colunas das 3 tabelas do popup drill-down
+
+### Mudancas
+
+**assets/js/charts/performance.js** (_tipBreakdownTbl + renderTipsterDrill)
+- Tabelas Por Casa e Por Esporte: ordem de colunas corrigida para Bets / P/L / Turnover / ROI / Win Rate% / Stake Media / Odd Media Pond.
+- Stake Media adicionada nas tabelas Por Casa e Por Esporte (calculo: d.s / d.n)
+- Odd Media Pond.: largura fixada em width:88px nas 3 tabelas (era livre, ficava desproporcional)
+- As 3 tabelas (Mensal, Por Casa, Por Esporte) agora tem estrutura identica de colunas
+
+### Commits desta sessao
+- b770621 feat(tooltip): padroniza todos os tooltips de metrica para MetricTooltip (inclui mudancas das tabelas)
+
+## Proximo passo
+- performance.js: tblResCasa (tabela Resultados por Casa, ainda com ordem antiga)
+- gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (nao tocadas)
+
+---
+
+## Estado anterior: MetricTooltip padronizado — COMPLETO (2026-06-11 sessao 16)
 
 ## Sessao 2026-06-11 (sessao 16) — Padronizacao dos tooltips de metrica
 
@@ -29,7 +50,7 @@
 ## Proximo passo
 Migrar tabelas restantes para mkTh:
 1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
-2. performance.js: tblResCasa + header das tabelas Por Casa / Por Esporte no popup
+2. performance.js: tblResCasa
 
 ---
 
