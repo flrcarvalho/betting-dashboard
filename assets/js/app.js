@@ -763,15 +763,19 @@ document.addEventListener('mouseover',function(e){
   const src=info.querySelector('.fdc-tip');
   if(!src)return;
   _gTip.innerHTML=src.innerHTML;
+  _gTip.style.visibility='hidden';
+  _gTip.style.display='block';
+  const th=_gTip.offsetHeight;
+  _gTip.style.visibility='';
   const r=info.getBoundingClientRect();
   let left=r.left-4;
-  if(left+200>window.innerWidth-8)left=window.innerWidth-208;
+  if(left+220>window.innerWidth-8)left=window.innerWidth-228;
   if(left<8)left=8;
   let top=r.bottom+4;
-  if(top+130>window.innerHeight)top=r.top-134;
+  if(top+th>window.innerHeight-8)top=r.top-th-4;
+  if(top<8)top=8;
   _gTip.style.top=top+'px';
   _gTip.style.left=left+'px';
-  _gTip.style.display='block';
 });
 document.addEventListener('mouseout',function(e){
   const info=e.target.closest('.fdc-info');
