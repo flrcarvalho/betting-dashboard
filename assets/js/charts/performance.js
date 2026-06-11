@@ -53,41 +53,377 @@ function renderSport(rows){
 }
 
 function renderCasa(rows){
-  const map={};rows.forEach(r=>{if(!map[r.casa])map[r.casa]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};map[r.casa].l+=r.lucro;map[r.casa].s+=r.stake;map[r.casa].n++;if(r.resultado!=='V'){map[r.casa].t++;if(['W','HW'].includes(r.resultado))map[r.casa].w++;}if(r.odd>0&&r.stake>0){map[r.casa].wt+=r.odd*r.stake;map[r.casa].stk+=r.stake;}});
-  const ents=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined').sort((a,b)=>(b[1].s>0?b[1].l/b[1].s:0)-(a[1].s>0?a[1].l/a[1].s:0));
-
-  // KPI cards — all casas sorted by turnover, 6/row
-  const casaByTurnover = [...ents].sort((a,b)=>b[1].s-a[1].s);
-  const casaCards = casaByTurnover.map(([casa,d])=>{
-    const roi=d.s>0?(d.l/d.s*100):0;
-    const wr=d.t>0?(d.w/d.t*100):0;
-    return mkOneStatCard(mkHouseChip(casa), casa, d.l, roi, d.s, d.n, wr);
+  const map={},dayMap={};
+  rows.forEach(r=>{
+    if(!map[r.casa])map[r.casa]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+    map[r.casa].l+=r.lucro;map[r.casa].s+=r.stake;map[r.casa].n++;
+    if(r.resultado!=='V'){map[r.casa].t++;if(['W','HW'].includes(r.resultado))map[r.casa].w++;}
+    if(r.odd>0&&r.stake>0){map[r.casa].wt+=r.odd*r.stake;map[r.casa].stk+=r.stake;}
+    const dk=r.data.slice(0,10);
+    if(!dayMap[r.casa])dayMap[r.casa]={};
+    dayMap[r.casa][dk]=(dayMap[r.casa][dk]||0)+r.lucro;
   });
-  mkStatCards(casaCards, 'casaKpiCards');
+  _casaEnts=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined');
+  _casaDays=dayMap;
+  _casaAllDays=[...new Set(rows.map(r=>r.data.slice(0,10)))].sort();
 
-  // Tabela ACIMA
-  const casaTableEl=document.getElementById('casaTable');
-  if(casaTableEl){casaTableEl.innerHTML=buildSummaryTable('tblCasa','Casa',ents,true);setTimeout(()=>makeSortable('tblCasa',[1,3,4,5]),100);}
-  // Gráfico em HTML — barras inline horizontal ROI
-  const vals=ents.map(e=>e[1].s>0?parseFloat((e[1].l/e[1].s*100).toFixed(2)):0);
-  const maxAbs=Math.max(...vals.map(Math.abs),1);
-  const rows2=ents.map((e,i)=>{
-    const v=vals[i];const n=e[1].n;
-    const barW=Math.abs(v)/maxAbs*48;
-    const color=v>=0?'var(--green)':'var(--red)';
-    const lc=v>=0?'color:var(--green)':'color:var(--red)';
-    return`<div style="display:grid;grid-template-columns:160px 1fr 110px;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:12px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${casaCell(e[0])}</div>
-      <div style="position:relative;height:14px;background:var(--bg5);border-radius:3px;overflow:hidden">
-        <div style="position:absolute;left:50%;top:0;height:100%;width:1px;background:var(--border2);z-index:1"></div>
-        <div style="position:absolute;${v>=0?'left:50%':'right:'+((100-barW)/2)+'%'};width:${barW}%;height:100%;background:${color};border-radius:3px;opacity:.8"></div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:0;font-family:'JetBrains Mono',monospace;white-space:nowrap"><span style="font-size:11px;${lc};min-width:72px;text-align:right">${fmtPct(v,2)}</span><span style="font-size:10px;color:var(--text3);min-width:60px;text-align:right">(${n})</span></div>
-    </div>`;
-  }).join('');
-  const wrap=document.getElementById('chartCasa');
-  if(wrap){wrap.innerHTML=`<div style="padding:.25rem 0">${rows2}</div>`;}
+  // Portfolio KPIs
+  const portPL=rows.reduce((a,r)=>a+r.lucro,0);
+  const portS=rows.reduce((a,r)=>a+r.stake,0);
+  const portROI=portS>0?(portPL/portS*100):0;
+  const posCount=_casaEnts.filter(([,d])=>d.l>0).length;
+  const negCount=_casaEnts.filter(([,d])=>d.l<0).length;
+  const totalC=_casaEnts.length;
+  const portDayMap={};rows.forEach(r=>{const dk=r.data.slice(0,10);portDayMap[dk]=(portDayMap[dk]||0)+r.lucro;});
+  const portDays=Object.keys(portDayMap).sort();
+  let pCum=0;const portVals=portDays.map(d=>{pCum+=portDayMap[d];return parseFloat(pCum.toFixed(2));});
+  const portSpark=portVals.length>=2?mkSparkline(portVals,96,26):'';
+  const plCls=portPL>=0?'pos':'neg';
+  const roiCls=portROI>=0?'pos':'neg';
+  const el=document.getElementById('casaPortfolioKPIs');
+  if(el){
+    el.innerHTML=
+      `<div class="kpi" style="position:relative">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> P/L Total</div>`+
+        `<div class="kpi-val ${plCls}">${fmtPL(portPL)}</div>`+
+        `<div class="kpi-sub">resultado total</div>`+
+        (portSpark?`<div class="kpi-sparkline">${portSpark}</div>`:'')+
+      `</div>`+
+      `<div class="kpi">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> ROI Ponderado</div>`+
+        `<div class="kpi-val ${roiCls}">${fmtPct(portROI,2)}</div>`+
+        `<div class="kpi-sub">Σ(P/L) / Σ(turnover)</div>`+
+      `</div>`+
+      `<div class="kpi">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> Casas Positivas</div>`+
+        `<div class="kpi-val neu">${posCount} / ${totalC}</div>`+
+        `<div class="kpi-sub">▲ ${posCount} · ▼ ${negCount} no vermelho</div>`+
+      `</div>`+
+      `<div class="kpi">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> Turnover Total</div>`+
+        `<div class="kpi-val neu">${fmtR(portS)}</div>`+
+        `<div class="kpi-sub">${rows.length.toLocaleString('pt-BR')} apostas</div>`+
+      `</div>`;
+  }
+  _renderCasaCards();
 }
+
+// ── Bookie cards + drill-down ────────────────────────────────────────────────
+let _casaEnts=null,_casaDays=null,_casaAllDays=null;
+let _casaSort={k:'pl',dir:1};
+let _casaDrillEscHandler=null;
+let _casaDrillBaseName=null,_casaDrillBaseRows=[],_casaDrillPeriodSt={qd:0,qt:''};
+
+function _mkCasaCard(name,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
+  const plSign=pl>=0?'+':'−';
+  const plCls=pl>=0?'pos':'neg';
+  const roiCls=roi>=0?'pos':'neg';
+  const plAmt=Math.abs(pl).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const stakeInt=Math.round(stake).toLocaleString('pt-BR');
+  const avgStakeStr=Math.round(avgStake||0).toLocaleString('pt-BR');
+  const avgOddStr=fmtOdd(avgOdd);
+  const betsStr=bets.toLocaleString('pt-BR');
+  const roiStr=fmtPct(roi,1);
+  const wrStr=fmtPct(wr,1,false);
+  const wrPct=Math.min(wr,100).toFixed(1);
+  const esc=name.replace(/"/g,'&quot;');
+  return`<div class="tcard" data-casa="${esc}">`
+    +`<div class="tcard__top"><span class="tcard__casa-hdr">${mkHouseChip(name)}<span class="nametag__nm" title="${esc}">${name}</span></span><span class="tcard__vol"><b>${betsStr}</b>apostas</span></div>`
+    +`<div class="tcard__hero"><span class="tcard__pl ${plCls}"><span class="tcard__cur">${plSign} R$</span>${plAmt}</span><div class="tcard__roi"><span class="tcard__roi-lbl">ROI</span><span class="tcard__roi-val ${roiCls}">${roiStr}</span></div></div>`
+    +sparkSVG
+    +`<div class="tcard__foot">`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Stake Média</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${avgStakeStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div>`
+    +`</div>`
+    +`</div>`;
+}
+
+function _renderCasaCards(){
+  const el=document.getElementById('casaKpiCards');
+  if(!el||!_casaEnts)return;
+  if(!_casaEnts.length){el.innerHTML=mkEmpty('Nenhuma casa no período');return;}
+  const{k,dir}=_casaSort;
+  const fns={pl:([,d])=>d.l,roi:([,d])=>d.s>0?d.l/d.s*100:0,to:([,d])=>d.s,wr:([,d])=>d.t>0?d.w/d.t*100:0,vol:([,d])=>d.n};
+  const fn=fns[k]||fns.pl;
+  const sorted=[..._casaEnts].sort((a,b)=>dir*(fn(b)-fn(a)));
+  el.innerHTML=sorted.map(([c,d])=>{
+    const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
+    const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
+    return _mkCasaCard(c,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_casaDays[c]||{},_casaAllDays),avgStake,avgOdd);
+  }).join('');
+  el.onclick=function(e){const card=e.target.closest('.tcard');if(card&&card.dataset.casa)openCasaDrill(card.dataset.casa);};
+  document.querySelectorAll('#casaSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
+  const dirBtn=document.getElementById('casaDir');
+  if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
+}
+window.casaSortBy=function(k){_casaSort.k=k;_casaSort.dir=1;_renderCasaCards();};
+window.casaSortDir=function(){_casaSort.dir*=-1;_renderCasaCards();};
+
+// ── Bookie drill-down ────────────────────────────────────────────────────────
+function _sliceCasaDrillRows(){
+  const st=_casaDrillPeriodSt;
+  if(!st.qd&&!st.qt)return _casaDrillBaseRows;
+  const today=new Date().toISOString().slice(0,10);
+  let df='',dt='';
+  if(st.qt==='hoje'){df=dt=today;}
+  else if(st.qt==='wtd'){df=_wtdStart();dt=today;}
+  else if(st.qt==='mtd'){df=_mtdStart();dt=today;}
+  else if(st.qt==='ytd'){df=new Date().getFullYear()+'-01-01';dt=today;}
+  else if(st.qd>0){df=new Date(Date.now()-st.qd*864e5).toISOString().slice(0,10);}
+  return _casaDrillBaseRows.filter(r=>{
+    if(df&&r.data<df)return false;
+    if(dt&&r.data>dt)return false;
+    return true;
+  });
+}
+
+function _updateCasaDrillChips(){
+  const st=_casaDrillPeriodSt;
+  const bar=document.getElementById('casaDrillPeriodBar');
+  if(!bar)return;
+  bar.querySelectorAll('.qbtn').forEach(b=>{
+    let a=false;
+    if(b.dataset.all)a=(st.qd===0&&!st.qt);
+    else if(b.dataset.days)a=(st.qd===parseInt(b.dataset.days));
+    else if(b.dataset.qt)a=(st.qt===b.dataset.qt);
+    b.classList.toggle('active',a);
+  });
+}
+
+window.setDrillCasaQuick=function(d){_casaDrillPeriodSt={qd:d,qt:''};_updateCasaDrillChips();renderCasaDrill(_sliceCasaDrillRows());};
+window.setDrillCasaType=function(qt){_casaDrillPeriodSt={qd:0,qt:qt};_updateCasaDrillChips();renderCasaDrill(_sliceCasaDrillRows());};
+window.setDrillCasaAll=function(){_casaDrillPeriodSt={qd:0,qt:''};_updateCasaDrillChips();renderCasaDrill(_sliceCasaDrillRows());};
+
+// Singleton tooltip para linha "Outros"
+let _outrosTip=null;
+function _getOutrosTip(){
+  if(!_outrosTip){
+    _outrosTip=document.createElement('div');
+    _outrosTip.style.cssText='position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:11px;font-family:var(--font-mono);color:var(--ink-soft);max-width:320px;line-height:1.8;pointer-events:none;display:none;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+    document.body.appendChild(_outrosTip);
+  }
+  return _outrosTip;
+}
+
+function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10){
+  const map={};
+  rows.forEach(r=>{
+    const k=r[dimKey];if(!k)return;
+    if(!map[k])map[k]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+    map[k].l+=r.lucro;map[k].s+=r.stake;map[k].n++;
+    if(r.resultado!=='V'){map[k].t++;if(['W','HW'].includes(r.resultado))map[k].w++;}
+    if(r.odd>0&&r.stake>0){map[k].wt+=r.odd*r.stake;map[k].stk+=r.stake;}
+  });
+  const ents=Object.entries(map).sort((a,b)=>b[1].s-a[1].s);
+  if(!ents.length)return mkEmpty('Sem dados no período');
+  const visible=ents.slice(0,maxVisible);
+  const outros=ents.slice(maxVisible);
+  const mkRow=([k,d],isOutros=false,outrosNames='')=>{
+    const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
+    const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
+    const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
+    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    const labelCell=isOutros
+      ?`<td><span class="outros-anchor" data-outros="${outrosNames.replace(/"/g,'&quot;')}" style="cursor:help;border-bottom:1px dashed var(--ink-mute);color:var(--ink-mute)">Outros (${k})</span></td>`
+      :`<td>${labelFn(k)}</td>`;
+    return`<tr>${labelCell}<td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
+  };
+  let tRows=visible.map(e=>mkRow(e)).join('');
+  if(outros.length>0){
+    const agg={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+    outros.forEach(([,d])=>{agg.l+=d.l;agg.s+=d.s;agg.n+=d.n;agg.w+=d.w;agg.t+=d.t;agg.wt+=d.wt;agg.stk+=d.stk;});
+    const names=outros.map(([k])=>k).join(' · ');
+    tRows+=mkRow([String(outros.length),agg],true,names);
+  }
+  const th=dimKey==='tipster'?'Tipster':'Esporte';
+  return`<table class="tbl"><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
+}
+
+function renderCasaDrill(rows){
+  const nome=_casaDrillBaseName;
+  const pl=rows.reduce((a,r)=>a+r.lucro,0);
+  const s=rows.reduce((a,r)=>a+r.stake,0);
+  const roi=s>0?pl/s*100:0;
+  const settled=rows.filter(r=>r.resultado!=='V');
+  const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;
+  const wr=settled.length>0?wins/settled.length*100:0;
+  const wt=rows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.odd*r.stake:a,0);
+  const stk=rows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.stake:a,0);
+  const avgOdd=stk>0?wt/stk:0;
+  const plCls=pl>=0?'pos':'neg';
+  const roiCls=roi>=0?'pos':'neg';
+
+  const _td=calcTopoDrawdown(rows),_rf=calcRecoveryFactor(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows);
+  const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+
+  const body=document.getElementById('casaDrillBody');
+  if(!body)return;
+
+  const avgStake=rows.length?s/rows.length:0;
+  const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
+  const sbS='margin-top:auto;padding-top:6px';
+  const vS='font-size:16px';
+
+  body.innerHTML=
+    `<div class="analise-popup-section">`+
+      `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:stretch;width:100%">`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${fmtPct(roi,2)}</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média</div><div class="kpi-val neu" style="${vS}">${fmtOdd(avgOdd)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${fmtPct(wr,1,false)}</div><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px"><div style="height:100%;background:var(--accent-2);border-radius:3px;width:${Math.min(100,Math.max(0,wr)).toFixed(1)}%"></div></div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
+      `</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Resultado Geral</div>`+
+      `<div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:20px;height:2px;background:#2E8BFF;border-radius:1px;flex-shrink:0"></span>P/L acumulado</span>`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(43,192,126,.8);border-radius:2px;flex-shrink:0"></span>Dia positivo</span>`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(229,82,75,.8);border-radius:2px;flex-shrink:0"></span>Dia negativo</span>`+
+      `</div>`+
+      `<div class="chart-wrap" style="height:220px"><canvas id="casaDrillLine"></canvas></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Cenário Atual</div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico ${_mkTipAnchor('Topo Histórico','','Maior saldo que esta casa <b>já atingiu</b> no período.','<span class="lbl">marco</span>')}</div><div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(_td.topo)}</div><div class="kpi-sub" style="${sbS}">atingido em ${_fmtD(_td.topoData)}</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual ${_mkTipAnchor('Drawdown Atual','<span class="lbl">DD</span> <span class="op">=</span> Topo <span class="op">→</span> Saldo atual','Quanto o saldo nesta casa está <b>abaixo do último pico</b>, agora.','<span class="thr">perto de 0</span> <span class="good">é o ideal</span>')}</div><div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_td.ddAtual)}</div><div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">XMDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior perda</b> do topo ao fundo nesta casa.','<span class="thr">quanto menor, melhor</span>')}</div><div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div><div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor ${_mkTipAnchor('Recovery Factor','<span class="lbl">RF</span> <span class="op">=</span> Lucro <span class="op">÷</span> Máx. Drawdown','Quantas vezes o lucro total <b>cobre a maior queda</b>.','<span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="thr">&gt; 5</span> <span class="good">muito bom</span>')}</div><div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div><div class="kpi-sub" style="${sbS}">qualidade</div></div>`+
+      `</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Análise Mensal</div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Por Tipster</div>`+
+      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'tipster',t=>t,10)}</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Por Esporte</div>`+
+      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'esporte',sportCell,10)}</div>`+
+    `</div>`;
+
+  // Gráfico Resultado Geral
+  const byDayCh={};rows.forEach(r=>{const k=r.data.slice(0,10);byDayCh[k]=(byDayCh[k]||0)+r.lucro;});
+  const daysCh=Object.keys(byDayCh).sort();
+  if(daysCh.length>=2){
+    const dpL=daysCh.map(k=>byDayCh[k]);
+    let cum=0;const cumPLCh=dpL.map(v=>{cum+=v;return parseFloat(cum.toFixed(2));});
+    const labelStep=Math.max(1,Math.floor(daysCh.length/14));
+    const lbl=daysCh.map((d,i)=>{if(i%labelStep!==0&&i!==daysCh.length-1)return'';const p=d.split('-');return p[2]+'/'+p[1];});
+    const ptR=cumPLCh.map((_,i)=>i===cumPLCh.length-1?5:0);
+    mkChart('casaDrillLine',{type:'bar',data:{labels:lbl,datasets:[
+      {type:'line',data:cumPLCh,borderColor:'#2E8BFF',
+       backgroundColor:(ctx)=>{const c=ctx.chart,{ctx:cx,chartArea:ca}=c;if(!ca)return'rgba(46,139,255,0)';const g=cx.createLinearGradient(0,ca.top,0,ca.bottom);g.addColorStop(0,'rgba(46,139,255,.16)');g.addColorStop(1,'rgba(46,139,255,0)');return g;},
+       tension:.4,fill:true,borderWidth:2,pointRadius:ptR,pointBackgroundColor:'#2E8BFF',pointBorderColor:isDark()?'#12161D':'#ffffff',pointBorderWidth:2,yAxisID:'y1',label:'P/L acumulado'},
+      {type:'bar',data:dpL,backgroundColor:dpL.map(v=>v>=0?'rgba(43,192,126,.55)':'rgba(229,82,75,.55)'),hoverBackgroundColor:dpL.map(v=>v>=0?'rgba(43,192,126,.8)':'rgba(229,82,75,.8)'),borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return daysCh[i]?.split('-').reverse().join('/')||'';},}}},
+      scales:{x:{display:false},y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false},position:'left'},y1:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{display:false},border:{display:false},position:'right'}}
+    }});
+  }
+
+  // Tooltip para linhas "Outros"
+  const tip=_getOutrosTip();
+  body.addEventListener('mouseover',function(e){
+    const anchor=e.target.closest('.outros-anchor');
+    if(!anchor)return;
+    const names=anchor.dataset.outros||'';
+    tip.textContent=names;
+    const r=anchor.getBoundingClientRect();
+    tip.style.display='block';
+    const tw=tip.offsetWidth;
+    tip.style.left=Math.min(r.left,window.innerWidth-tw-16)+'px';
+    tip.style.top=(r.bottom+6)+'px';
+  });
+  body.addEventListener('mouseout',function(e){
+    if(!e.target.closest('.outros-anchor'))return;
+    tip.style.display='none';
+  });
+}
+
+function openCasaDrill(nome){
+  const overlay=document.getElementById('casaDrillOverlay');
+  if(!overlay)return;
+  const nameEl=document.getElementById('casaDrillName');
+  if(nameEl)nameEl.textContent=nome;
+  const chipEl=document.getElementById('casaDrillChip');
+  if(chipEl)chipEl.innerHTML=mkHouseChip(nome);
+
+  const sp=msGet('sp_casas');
+  _casaDrillBaseName=nome;
+  _casaDrillBaseRows=DADOS.filter(r=>{
+    if(r.casa!==nome)return false;
+    if(sp.size>0&&!sp.has(r.esporte))return false;
+    return true;
+  });
+  _casaDrillPeriodSt={qd:0,qt:''};
+  _updateCasaDrillChips();
+
+  overlay.style.display='flex';
+  document.body.style.overflow='hidden';
+  const modal=document.getElementById('casaDrillModal');
+  if(modal)modal.scrollTop=0;
+
+  renderCasaDrill(_sliceCasaDrillRows());
+
+  if(_casaDrillEscHandler)document.removeEventListener('keydown',_casaDrillEscHandler);
+  _casaDrillEscHandler=function(e){if(e.key==='Escape')closeCasaDrill();};
+  document.addEventListener('keydown',_casaDrillEscHandler);
+}
+window.openCasaDrill=openCasaDrill;
+
+function closeCasaDrill(e){
+  if(e&&e.target!==document.getElementById('casaDrillOverlay'))return;
+  const overlay=document.getElementById('casaDrillOverlay');
+  if(overlay)overlay.style.display='none';
+  document.body.style.overflow='';
+  if(_casaDrillEscHandler){document.removeEventListener('keydown',_casaDrillEscHandler);_casaDrillEscHandler=null;}
+}
+window.closeCasaDrill=closeCasaDrill;
+
+window.copyCasaDrill=async function(){
+  const modal=document.getElementById('casaDrillModal');
+  if(!modal)return;
+  const btn=modal.querySelector('.copy-casa-drill-btn');
+  const btnOrig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const ok=await _waitH2C();
+  if(!ok){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  const{canvas}=await _buildDrillCanvas(modal);
+  if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  canvas.toBlob(async blob=>{
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
+    }catch(e){
+      if(btn){btn.innerHTML='✗';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},1500);}
+    }
+  },'image/png');
+};
+
+window.saveCasaDrill=async function(){
+  const modal=document.getElementById('casaDrillModal');
+  if(!modal)return;
+  const btn=modal.querySelector('.save-casa-drill-btn');
+  const btnOrig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const ok=await _waitH2C();
+  if(!ok){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  const{canvas}=await _buildDrillCanvas(modal);
+  if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=Object.assign(document.createElement('a'),{href:url,download:'bookie-'+((_casaDrillBaseName||'drill').replace(/\s+/g,'_'))+'.png'});
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
+  },'image/png');
+};
 
 // ── tcard helpers (T-1) ─────────────────────────────────────────────────────
 let _tipsterEnts=null,_tipsterDays=null,_tipsterAllDays=null;

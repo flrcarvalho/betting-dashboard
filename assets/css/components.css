@@ -1057,6 +1057,7 @@
   background: var(--elevated);
 }
 .tcard__top { display: flex; align-items: center; gap: 8px; }
+.tcard__casa-hdr { display: inline-flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; flex: 1; }
 .nametag {
   display: inline-flex;
   align-items: center;

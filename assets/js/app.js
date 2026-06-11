@@ -478,8 +478,7 @@ function buildHTML(){
       <!-- CASAS DE APOSTAS -->
       <div class="page" id="page-casas">
         ${buildFilters('casas',sports,casas)}
-        ${mkCard('casa_kpi','Resumo por Casa','<div id="casaKpiCards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.5rem"></div>')}
-        ${mkCard('casa_chart','ROI% por Casa — Barras Horizontais','<div id="casaTable"></div><div id="chartCasa" style="margin-top:.75rem"></div>')}
+        ${mkCard('casa_kpi','Bookies — Visão Geral','<div id="casaPortfolioKPIs" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:.75rem;margin-bottom:.75rem"></div><div class="tcard-sort"><span class="tcard-sort__lbl">Ordenar</span><div class="tcard-seg" id="casaSeg"><button data-k="pl" class="active" onclick="casaSortBy(this.dataset.k)">P/L</button><button data-k="roi" onclick="casaSortBy(this.dataset.k)">ROI</button><button data-k="to" onclick="casaSortBy(this.dataset.k)">Turnover</button><button data-k="wr" onclick="casaSortBy(this.dataset.k)">Win Rate</button><button data-k="vol" onclick="casaSortBy(this.dataset.k)">Volume</button></div><button class="tcard-dir" id="casaDir" onclick="casaSortDir()">↓</button></div><div class="tcard-grid" id="casaKpiCards"></div>')}
       </div>
 
       <!-- APOSTAS -->
@@ -660,6 +659,41 @@ function buildHTML(){
           <button class="qbtn" data-all="1" onclick="setDrillAll()">Tudo</button>
         </div>
         <div id="tipsterDrillBody"></div>
+      </div>
+    </div>
+
+    <!-- Bookie drill-down popup -->
+    <div class="analise-popup-overlay" id="casaDrillOverlay" onclick="closeCasaDrill(event)">
+      <div class="analise-popup-modal" id="casaDrillModal" onclick="event.stopPropagation()">
+        <div class="analise-popup-hdr" style="gap:12px;align-items:center">
+          <div style="display:flex;align-items:center;flex-shrink:0">
+            <img src="brand/fdc-logo-horizontal-dark.svg" height="70" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;filter:brightness(1.15)" crossorigin="anonymous">
+            <div style="width:1px;height:32px;background:var(--line);flex-shrink:0;margin-left:10px;margin-right:14px"></div>
+            <div style="flex-shrink:0;display:flex;flex-direction:column;gap:2px">
+              <span style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.18em;color:var(--ink-mute)">BOOKIE</span>
+              <div style="display:flex;align-items:center;gap:8px;line-height:1">
+                <span id="casaDrillChip"></span>
+                <span id="casaDrillName" style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--text1);font-family:var(--font-sans)"></span>
+                <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2);border:1px solid var(--accent-2);border-radius:4px;padding:2px 6px;flex-shrink:0">DRILL-DOWN</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1"></div>
+          <button class="no-export copy-casa-drill-btn" onclick="copyCasaDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--accent-2);border-radius:8px;cursor:pointer;flex-shrink:0" title="Copiar como imagem"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="1" width="9" height="10" rx="2"/><rect x="1" y="4" width="9" height="10" rx="2"/></svg></button>
+          <button class="no-export save-casa-drill-btn" onclick="saveCasaDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;flex-shrink:0" title="Baixar PNG"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2v8"/><path d="M4.5 7l3 3 3-3"/><path d="M2 13h11"/></svg></button>
+          <button class="no-export" onclick="closeCasaDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;font-size:15px;flex-shrink:0" title="Fechar">✕</button>
+        </div>
+        <div id="casaDrillPeriodBar" class="no-export" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+          <button class="qbtn" data-qt="hoje" onclick="setDrillCasaType('hoje')">Hoje</button>
+          <button class="qbtn" data-qt="wtd" onclick="setDrillCasaType('wtd')">WTD</button>
+          <button class="qbtn" data-qt="mtd" onclick="setDrillCasaType('mtd')">MTD</button>
+          <button class="qbtn" data-qt="ytd" onclick="setDrillCasaType('ytd')">YTD</button>
+          <button class="qbtn" data-days="7" onclick="setDrillCasaQuick(7)">7d</button>
+          <button class="qbtn" data-days="30" onclick="setDrillCasaQuick(30)">30d</button>
+          <button class="qbtn" data-days="90" onclick="setDrillCasaQuick(90)">90d</button>
+          <button class="qbtn active" data-all="1" onclick="setDrillCasaAll()">Tudo</button>
+        </div>
+        <div id="casaDrillBody"></div>
       </div>
     </div>
   </div>`;
