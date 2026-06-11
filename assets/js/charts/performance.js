@@ -214,7 +214,7 @@ function renderTipsterDrill(rows){
   const avgStake=rows.length?s/rows.length:0;
   const kS='display:flex;flex-direction:column;min-width:0;overflow:hidden';
   const sbS='margin-top:auto;padding-top:6px';
-  const vS='font-size:var(--text-xl)';
+  const vS='font-size:var(--text-lg)';
 
   body.innerHTML=
     `<div class="analise-popup-section">`+
@@ -302,7 +302,7 @@ function renderTipsterDrill(rows){
        borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{display:true,position:'top',align:'start',
+        legend:{display:true,position:'bottom',align:'center',
           labels:{color:isDark()?'#AEB7C2':'#666E7A',font:{family:'JetBrains Mono, monospace',size:11},boxWidth:12,padding:16,
             generateLabels:()=>{const lc=isDark()?'#AEB7C2':'#666E7A';return[
               {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0,fontColor:lc},

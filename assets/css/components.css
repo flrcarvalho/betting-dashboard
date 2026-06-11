@@ -508,11 +508,19 @@
   color: #fff;
   flex-shrink: 0;
 }
-.analise-popup-section {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+#tipsterDrillBody {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.analise-popup-section:last-child { border-bottom: none; }
+.analise-popup-section {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.25rem;
+  backdrop-filter: blur(8px);
+}
 .analise-popup-section-title {
   font-size: 12px;
   color: var(--accent-2);
