@@ -1,6 +1,38 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: camada diagnostica --d-* + componentes CSS (2026-06-10 sessao 4)
+## Estado atual: secao de risco no popup do tipster — COMPLETO (2026-06-11 sessao 5)
+
+## Sessao 2026-06-11 (sessao 5) — Motor de calculo + wiring do popup de risco
+
+### Funcoes adicionadas (assets/js/app.js)
+- calcMCdrawdown(rows, sims=5000): Monte Carlo de drawdown maximo — retorna {xmdd, p50, p95, p99}
+- calcRecoveryFactor(rows): Lucro / MDD realizado
+- calcTopoDrawdown(rows): topo historico, data, drawdown atual e % do topo
+- calcSolidez(o): score 0-1 + faixa textual com base em pValue/profitXmdd/nApostas/oddMedia
+
+### Wiring no popup (assets/js/charts/performance.js)
+- "Sequencias & Topo Historico" substituida por duas .analise-popup-section:
+  1. Cenario Atual (barra --d-info): Topo Historico (pos) / Drawdown Atual (real) / Max Drawdown (real + tooltip) / Recovery Factor (info + tooltip)
+  2. Diagnostico de Risco (barra --d-info, subtitulo "Monte Carlo 10.000 simulacoes"): p-value (pos) / DD Medio XMDD (proj) / DD Maximo P99 (proj, P95 no tooltip) / Nivel de Solidez (.fdc-risk-meter)
+- Monte Carlo elevado de 5k para 10k sims (Arrudex com 2102 apostas: <1s)
+- Usa tokens --d-* e componentes .fdc-kpi__value/.fdc-risk-meter ja existentes
+
+### Commits desta sessao
+- fe90598 feat(calc): calcMCdrawdown, calcRecoveryFactor, calcTopoDrawdown, calcSolidez
+- 907270d feat(drill): secao de risco no popup — Cenario Atual + Diagnostico de Risco
+- 69d1102 perf(drill): eleva Monte Carlo de 5.000 para 10.000 simulacoes
+
+## Proximo passo
+Avaliar visualmente o popup no browser e ajustar se necessario:
+1. Verificar se .fdc-kpi__value herda tamanho de fonte adequado (atualmente font-size:16px via vS inline)
+2. Verificar tooltip .fdc-tip do card "DD Maximo" (contem fmtPL que retorna HTML — checar renderizacao)
+3. Migrar tabelas restantes para mkTh (pendente desde sessao 2026-06-09):
+   - gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+   - performance.js: tblResCasa + tabelas do popup
+
+---
+
+## Estado anterior: camada diagnostica --d-* + componentes CSS (2026-06-10 sessao 4)
 
 ## Sessao 2026-06-10 (sessao 4) — Tokens diagnosticos e componentes visuais
 
@@ -19,12 +51,6 @@
 ### Regra semantica documentada (CLAUDE.md + pack/CLAUDE.md)
 - Vermelho (--d-neg) = perda REALIZADA (fato). Ambar (--d-proj) = perda PROJETADA (estatistica).
 - Mint (--d-pos) = edge/significancia. Azul (--d-info) = metrica de qualidade.
-
-## Proximo passo
-Wiring dos componentes no popup drill-down de tipster:
-1. Substituir bloco "Sequencias & Topo Historico" (performance.js linhas 233-268) pela nova secao de risco
-2. Calcular MDD, EMDD, XMDD, P-Value para o tipster via calcMDDreais/calcXMDD/calcPValue (ja existem em app.js)
-3. Montar .fdc-risk-meter com --value=pct de MDD; .fdc-kpi__value[data-state=real/proj] para cada metrica
 
 ---
 
