@@ -1,18 +1,30 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: espacamento da barra separadora no popup — COMPLETO (2026-06-11 sessao 15)
+## Estado atual: MetricTooltip padronizado — COMPLETO (2026-06-11 sessao 16)
 
-## Sessao 2026-06-11 (sessao 15) — Ajuste de espacamento da barra separadora
+## Sessao 2026-06-11 (sessao 16) — Padronizacao dos tooltips de metrica
 
 ### Mudancas
 
-**app.js** (cabecalho do popup drill-down, buildHTML)
-- Removido gap:4px do container logo+barra+texto
-- Adicionado margin-left:10px e margin-right:14px diretamente na barra separadora
-- Resultado: 10px entre logo e barra, 14px entre barra e bloco "TIPSTER/nome"
+**assets/css/components.css**
+- Removidas .fdc-info e .fdc-tip (padrao antigo)
+- Adicionado sistema .metric-tip: .tip-anchor, .metric-info (button), .metric-tip__caret,
+  .metric-tip__formula, .metric-tip__desc, .metric-tip__bench com sub-classes .op/.lbl/.thr/.good/.scale
+- Superficie var(--elevated) #1A2029 + borda --line + ring azul rgba(46,139,255,.16)
+
+**assets/js/app.js**
+- _gTip migrado para classe metric-tip; width de deteccao de borda: 220 -> 286
+- Leitura do conteudo via .tip-anchor .metric-tip (irmao, nao filho)
+- Caret posicionado dinamicamente; escondido no flip para cima
+- Adicionados focusin/focusout (teclado) e keydown (Esc fecha)
+
+**assets/js/charts/performance.js**
+- Helper _mkTipAnchor(label, formula, desc, bench) no topo do arquivo
+- 6 tooltips existentes: conteudo atualizado para 3 camadas (formula/desc/bench) em PT-BR puro
+- 2 tooltips novos: Topo Historico e Drawdown Atual (painel agora consistente — 8 de 8 metricas)
 
 ### Commits desta sessao
-- e101a7a fix(drill): ajusta espacamento da barra separadora no cabecalho do popup
+- b770621 feat(tooltip): padroniza todos os tooltips de metrica para MetricTooltip
 
 ## Proximo passo
 Migrar tabelas restantes para mkTh:
