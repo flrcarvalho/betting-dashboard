@@ -228,6 +228,11 @@ function renderTipsterDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Resultado Geral</div>`+
+      `<div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:20px;height:2px;background:#2E8BFF;border-radius:1px;flex-shrink:0"></span>P/L acumulado</span>`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(43,192,126,.8);border-radius:2px;flex-shrink:0"></span>Dia positivo</span>`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(229,82,75,.8);border-radius:2px;flex-shrink:0"></span>Dia negativo</span>`+
+      `</div>`+
       `<div class="chart-wrap" style="height:220px"><canvas id="tipsterDrillLine"></canvas></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
@@ -302,13 +307,7 @@ function renderTipsterDrill(rows){
        borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{display:true,position:'bottom',align:'center',
-          labels:{color:isDark()?'#AEB7C2':'#666E7A',font:{family:'JetBrains Mono, monospace',size:11},boxWidth:12,padding:16,
-            generateLabels:()=>{const lc=isDark()?'#AEB7C2':'#666E7A';return[
-              {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0,fontColor:lc},
-              {text:'Dia positivo',strokeStyle:'rgba(43,192,126,.8)',fillStyle:'rgba(43,192,126,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1,fontColor:lc},
-              {text:'Dia negativo',strokeStyle:'rgba(229,82,75,.8)',fillStyle:'rgba(229,82,75,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1,fontColor:lc}
-            ];}}},
+        legend:{display:false},
         tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return daysCh[i]?.split('-').reverse().join('/')||'';},}}},
       scales:{
         x:{display:false},
