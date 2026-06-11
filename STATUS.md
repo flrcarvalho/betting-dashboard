@@ -1,6 +1,32 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: correcao de favicons de casas — COMPLETO (2026-06-11 sessao 13)
+## Estado atual: tipografia Variante B — COMPLETO (2026-06-11 sessao 14)
+
+## Sessao 2026-06-11 (sessao 14) — Sistema Tipografico Variante B (mono so nos numeros)
+
+### Mudancas
+
+**performance.js** (_tipMonthTbody + _tipBreakdownTbl)
+- Todas as colunas numericas (bets, P/L, Turnover, ROI, WR, Stake, Odd) passaram para class="td-num"
+- Bets formatado com toLocaleString('pt-BR') em vez de numero cru
+
+**temporal.js** (renderMensal + renderSemana)
+- Removido font-family:'JetBrains Mono' do style inline do table nas tabelas "Dia a Dia"
+- Headers (Tipster, nomes de dia) herdam Manrope do body; valores P/L continuam mono via .money
+
+> Nota: components.css e shared.js ja estavam corrigidos na sessao 13 (font-family sans nos .tbl th, gradiente no .wrc .f, class mono no mkWRC). Nao havia diff nesta sessao.
+
+### Commits desta sessao
+- (pendente — ver step 4)
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + header das tabelas Por Casa / Por Esporte no popup
+
+---
+
+## Estado anterior: correcao de favicons de casas — COMPLETO (2026-06-11 sessao 13)
 
 ## Sessao 2026-06-11 (sessao 13) — Favicons e visuais dos chips de casa
 

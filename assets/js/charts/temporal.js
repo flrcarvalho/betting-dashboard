@@ -265,7 +265,7 @@ function renderMensal(){
   }).join('');
 
   const tabelaHTML=mkCard('mensal_tabela',`Dia a Dia — ${moLabel}`,
-    `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:400px">
+    `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:400px">
       <thead><tr style="border-bottom:1px solid var(--border2)">
         <th style="${sT2}${hBgM}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text3);border-right:1px solid var(--border2);min-width:130px">Tipster</th>
         <th style="${sA2}${hBgM}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--text3);min-width:95px">Mês</th>
@@ -657,7 +657,7 @@ function renderSemana(){
   }).join('');
 
   const tabelaHTML=mkCard('semana_tabela',`Dia a Dia — ${weekLabel}`,
-    `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:400px">
+    `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:400px">
       <thead><tr style="border-bottom:1px solid var(--border2)">
         <th style="${sT3}${hBgW}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text3);border-right:1px solid var(--border2);min-width:130px">Tipster</th>
         <th style="${sA3}${hBgW}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--text3);min-width:95px">Semana</th>

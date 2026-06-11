@@ -505,7 +505,7 @@ function _tipMonthTbody(rows){
   }).join('');
   const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
   const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  return mHTML+`<tr class="total-row"><td>Total</td><td>${totB}</td><td style="${tc2}">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${rc2}">${fmtPct(tRoi,2)}</td><td class="td-num">${mkWRC(tWr)}</td><td>${totB>0?fmtR(totS/totB):'—'}</td><td>—</td></tr>`;
+  return mHTML+`<tr class="total-row"><td>Total</td><td class="td-num">${totB.toLocaleString('pt-BR')}</td><td class="td-num" style="${tc2}">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-num" style="${rc2}">${fmtPct(tRoi,2)}</td><td class="td-num">${mkWRC(tWr)}</td><td class="td-num">${totB>0?fmtR(totS/totB):'—'}</td><td class="td-num">—</td></tr>`;
 }
 
 function _tipBreakdownTbl(rows,dimKey,labelFn){
@@ -524,7 +524,7 @@ function _tipBreakdownTbl(rows,dimKey,labelFn){
     const avgOdd=d.stk>0?d.wt/d.stk:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td>${labelFn(k)}</td><td style="text-align:right">${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td style="text-align:right">${fmtR(d.s)}</td><td style="${lc};text-align:right">${fmtPL(d.l)}</td><td style="${rc};text-align:right">${fmtPct(roi,2)}</td><td style="text-align:right">${fmtOdd(avgOdd)}</td></tr>`;
+    return`<tr><td>${labelFn(k)}</td><td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const th=dimKey==='casa'?'Casa':'Esporte';
   return`<table class="tbl"><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>Win Rate%</th><th>Turnover</th><th>P/L</th><th>ROI</th><th>Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
