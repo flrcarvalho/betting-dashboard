@@ -674,7 +674,6 @@ function buildHTML(){
               <div style="display:flex;align-items:center;gap:8px;line-height:1">
                 <span id="casaDrillChip"></span>
                 <span id="casaDrillName" style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--text1);font-family:var(--font-sans)"></span>
-                <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2);border:1px solid var(--accent-2);border-radius:4px;padding:2px 6px;flex-shrink:0">DRILL-DOWN</span>
               </div>
             </div>
           </div>
