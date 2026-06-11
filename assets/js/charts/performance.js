@@ -68,7 +68,7 @@ function renderCasa(rows){
         <div style="position:absolute;left:50%;top:0;height:100%;width:1px;background:var(--border2);z-index:1"></div>
         <div style="position:absolute;${v>=0?'left:50%':'right:'+((100-barW)/2)+'%'};width:${barW}%;height:100%;background:${color};border-radius:3px;opacity:.8"></div>
       </div>
-      <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:0;font-family:'JetBrains Mono',monospace;white-space:nowrap"><span style="font-size:11px;${lc};min-width:72px;text-align:right">${(v>=0?'+':'')+v.toFixed(2)}%</span><span style="font-size:10px;color:var(--text3);min-width:60px;text-align:right">(${n})</span></div>
+      <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:0;font-family:'JetBrains Mono',monospace;white-space:nowrap"><span style="font-size:11px;${lc};min-width:72px;text-align:right">${fmtPct(v,2)}</span><span style="font-size:10px;color:var(--text3);min-width:60px;text-align:right">(${n})</span></div>
     </div>`;
   }).join('');
   const wrap=document.getElementById('chartCasa');
@@ -100,15 +100,14 @@ function _tipSparkSVG(dayMap,allDays){
 function _mkTipCard(name,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
   const plSign=pl>=0?'+':'−';
   const plCls=pl>=0?'pos':'neg';
-  const roiSign=roi>=0?'+':'';
   const roiCls=roi>=0?'pos':'neg';
   const plAmt=Math.abs(pl).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const stakeInt=Math.round(stake).toLocaleString('pt-BR');
   const avgStakeStr=Math.round(avgStake||0).toLocaleString('pt-BR');
-  const avgOddStr=(avgOdd||0).toFixed(2).replace('.',',');
+  const avgOddStr=fmtOdd(avgOdd);
   const betsStr=bets.toLocaleString('pt-BR');
-  const roiStr=roiSign+roi.toFixed(1).replace('.',',')+'%';
-  const wrStr=wr.toFixed(1).replace('.',',')+'%';
+  const roiStr=fmtPct(roi,1);
+  const wrStr=fmtPct(wr,1,false);
   const wrPct=Math.min(wr,100).toFixed(1);
   const esc=name.replace(/"/g,'&quot;');
   return`<div class="tcard" data-name="${esc}">`
@@ -204,7 +203,7 @@ function renderTipsterDrill(rows){
 
   // KPIs — 5 cards simétricos (1 row, repeat 5, font-xl para caber)
   const avgStake=rows.length?s/rows.length:0;
-  const kS='display:flex;flex-direction:column;min-width:0;overflow:hidden';
+  const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
   const sbS='margin-top:auto;padding-top:6px';
   const vS='font-size:16px';
 
@@ -246,7 +245,7 @@ function renderTipsterDrill(rows){
           `<div class="kpi-sub" style="${sbS}">${_mddP.toFixed(1)}% · pior real</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor <span class="fdc-info">i<span class="fdc-tip">Lucro ÷ Max Drawdown. Quantas vezes o lucro cobre a maior queda. Projetado: Profit/XMDD (&gt;5 muito bom).</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor <span class="fdc-info fdc-info--flip">i<span class="fdc-tip">Lucro ÷ Max Drawdown. Quantas vezes o lucro cobre a maior queda. Projetado: Profit/XMDD (&gt;5 muito bom).</span></span></div>`+
           `<div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?_rf.toFixed(2)+'×':'—'}</div>`+
           `<div class="kpi-sub" style="${sbS}">qualidade</div>`+
         `</div>`+
@@ -271,7 +270,7 @@ function renderTipsterDrill(rows){
           `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez</div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez <span class="fdc-info fdc-info--flip">i<span class="fdc-tip">Score 0–1 que combina p-value, XMDD e Recovery Factor. Quanto maior, mais robusta estatisticamente a estratégia.</span></span></div>`+
           `<div class="fdc-risk-meter" style="margin-top:auto">`+
             `<span class="fdc-risk-meter__tag" style="color:${_solCor}">${_sol.faixa}</span>`+
             `<div class="fdc-risk-meter__track">`+

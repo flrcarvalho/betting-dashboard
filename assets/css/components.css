@@ -485,7 +485,6 @@
   background: var(--bg2);
   border: 1px solid var(--border2);
   border-radius: 12px;
-  overflow: hidden;
   max-height: 85vh;
   overflow-y: auto;
 }
@@ -1190,5 +1189,6 @@
                               text-align: left; }
 .fdc-info:hover .fdc-tip   { display: block; }
 .fdc-info .fdc-tip b       { color: var(--ink); }
+.fdc-info--flip .fdc-tip   { left: auto; right: 0; }
 
 
