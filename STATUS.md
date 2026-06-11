@@ -1,5 +1,39 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: p-value card dinamico + bootstrap-t studentizado — COMPLETO (2026-06-11 sessao 19)
+
+## Sessao 2026-06-11 (sessao 19) — Card p-value dinamico e bootstrap-t
+
+### Mudancas
+
+**assets/js/app.js**
+- calcPValue: floor 0.001 removido (retornava valor identico para todos os tipsters com z>=3.5)
+- mulberry32: PRNG semeado adicionado (seed derivado de n e sumL, reproduzivel por tipster)
+- calcPValueMC v1: bootstrap percentil (reamostragem centrada sob H0: yield=0)
+- calcPValueMC v2 (final): bootstrap-t studentizado — compara t*=yield*/se* vs t_obs; corrige
+  vies de assimetria em odds altas; calibrado ~5% sob H0; passada unica O(n) com rr/rsa/ssq
+
+**assets/js/charts/performance.js**
+- rodapePValue(pv): escala dinamica de 3 niveis (inconclusivo/significativo/robusto) com nivel
+  ativo destacado em negrito; usado no bench do tooltip do card p-value
+- Card p-value no popup drill-down:
+  - display: `< 0,001` quando pv < 0.001; fmt(pv,4) caso contrario
+  - data-state: `pos` se pv < 0.05; `proj` (ambar) se pv >= 0.05
+  - sub-text: "resultado robusto" / "rejeita o acaso" / "inconclusivo"
+  - chamada trocada de calcPValue para calcPValueMC
+- calcPValue preservado intacto (em uso em gestao.js)
+
+### Commits desta sessao
+- 4f841b0 feat(pvalue): substitui p-value normal por bootstrap (calcPValueMC)
+- ce531dd perf(pvalue): troca bootstrap percentil por bootstrap-t studentizado
+
+## Proximo passo
+- Mesmos pendentes das sessoes anteriores:
+  1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (migracao para mkTh)
+  2. performance.js: tblResCasa
+
+---
+
 ## Estado atual: seed de custos de contas + calcPValueMC aprimorado — COMPLETO (2026-06-11 sessao 18)
 
 ## Sessao 2026-06-11 (sessao 18) — Seed automatico de custos de contas + p-value robusto
