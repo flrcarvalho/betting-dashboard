@@ -1,8 +1,33 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: popup drill-down tipster polido (2026-06-10)
+## Estado atual: popup drill-down tipster polido (2026-06-10 sessao 2)
 
-## Sessao 2026-06-10 — Popup drill-down: captura PNG + layout
+## Sessao 2026-06-10 (tarde) — Polimento visual + favicons PNG + fix botao copiar
+
+### Ajustes visuais
+- Header popup: logo 123->98px, tipster 30->24px (reducao de 20%)
+- KPI grid (5 cards): min-width:0 + overflow:hidden em cada card; width:100% no container
+- Legenda dos graficos (bankroll e drill): position bottom->top, align start (visivel acima do grafico)
+
+### Favicons de casa no PNG
+- mkHouseChip: adicionado data-casa ao span para preservar nome mesmo apos onerror remover o img
+- _buildDrillCanvas: fetch no-cors -> blob URL same-origin substitui a substituicao por inicial fixa
+  - Se onerror ja removeu o img: recriar img temporario com blobUrl usando data-casa
+  - Se fetch falhar (rede): fallback para chip-initial (comportamento anterior)
+  - _restore(): revoga blob URLs apos captura (sem vazamento de memoria)
+
+### Fix botao copiar (1o clique sempre falhava)
+- Causa: html2canvas carregado via CDN com defer; guarda typeof===undefined retornava silenciosamente
+- Solucao: _waitH2C() faz polling ate 8s; botao mostra "..." durante espera; funciona no 1o clique
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js — tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Sessao 2026-06-10 (manha) — Popup drill-down: captura PNG + layout
 
 ### Correcoes de captura (html2canvas)
 - Favicons de casa (Google S2) falham CORS em html2canvas; substituidos por letra inicial (.chip-initial) durante captura e restaurados depois
