@@ -501,7 +501,7 @@ function _tipMonthTbody(rows){
     totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
     const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPL(v.pl)}</td><td>${fmtR(v.s)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(avgStake)}</td><td>${fmtOdd(avgOdd)}</td></tr>`;
+    return`<tr><td style="white-space:nowrap">${MESES[v.mes]} ${v.ano}</td><td class="td-num">${v.bets.toLocaleString('pt-BR')}</td><td class="td-num" style="${pc}">${fmtPL(v.pl)}</td><td class="td-num">${fmtR(v.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
   const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';

@@ -1,6 +1,33 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: ajustes visuais no header do popup drill-down — COMPLETO (2026-06-11 sessao 12)
+## Estado atual: correcao de favicons de casas — COMPLETO (2026-06-11 sessao 13)
+
+## Sessao 2026-06-11 (sessao 13) — Favicons e visuais dos chips de casa
+
+### Mudancas
+
+**Dominios corrigidos** (assets/js/data.js — CASA_ICONS e HOUSE_DOMAIN)
+- Liderbet: liderbet.bet.br -> lider.bet.br (dominio errado causava globe icon)
+- Donald Bet: donaldbet.bet.br -> donald.bet.br (idem)
+- BetMGM: betmgm.com -> betmgm.bet.br
+- Tivo: adicionado tivo.bet.br (nao existia, exibia "T" fallback)
+
+**Correcoes visuais por chip** (assets/css/components.css)
+- Novibet, PixBet, Esportiva: transform:scale(1.3) — zoom corta margem transparente do S2
+- KTO, BetMGM: filter brightness(1.8) sem contrast(0.5) — logos nao mais apagados
+- BETesporte: invert(1) + mix-blend-mode:screen no dark mode — fundo branco desaparece
+
+### Commits desta sessao
+- b0b895d fix(chips): corrige favicons e visuais de casas
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Estado anterior: ajustes visuais no header do popup drill-down — COMPLETO (2026-06-11 sessao 12)
 
 ## Sessao 2026-06-11 (sessao 12) — Polimento do header do popup + titulos de secao
 

@@ -176,7 +176,7 @@ function mkEmpty(msg){
 // Win Rate bar component (número + barra azul proporcional)
 function mkWRC(wr){
   const pct=Math.min(100,Math.max(0,wr));
-  return `<div class="wrc"><span class="num">${fmtPct(wr,1,false)}</span><div class="t"><div class="f" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+  return `<div class="wrc"><span class="mono">${fmtPct(wr,1,false)}</span><div class="t"><div class="f" style="width:${pct.toFixed(1)}%"></div></div></div>`;
 }
 
 // Sports & Casas

@@ -247,9 +247,9 @@
 .tbl th {
   font-size: 11px;
   font-weight: var(--weight-bold);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
   color: var(--text2);
   padding: 7px 10px;
   text-align: right;
@@ -342,6 +342,7 @@
   justify-content: flex-end;
   gap: 4px;
   width: 100%;
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
@@ -971,13 +972,12 @@
 }
 
 /* ── Win Rate bar ────────────────────────────────────────────────────────── */
-.wrc { display: inline-flex; flex-direction: column; align-items: center; gap: 5px; }
-.wrc .t { width: 76px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.07); overflow: hidden; }
+.wrc { display: inline-flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; }
+.wrc .t { height: 6px; border-radius: 3px; background: rgba(255,255,255,.06); overflow: hidden; width: 100%; }
 [data-theme="light"] .wrc .t { background: rgba(0,0,0,.08); }
-.wrc .f { height: 100%; background: var(--accent-2); border-radius: 3px; }
+.wrc .f { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 3px; }
 /* Win Rate bar dentro de KPI card — full-width, sem número (já está no kpi-val) */
 .kpi .wrc { width: 100%; margin-top: 4px; }
-.kpi .wrc .t { width: 100%; }
 
 /* ── tcard — Tipster cards redesign (T-1) ────────────────────────────────── */
 .tcard-sort {
