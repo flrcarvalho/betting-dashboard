@@ -5,6 +5,15 @@ function _mkTipAnchor(label,formula,desc,bench){
   return `<span class="tip-anchor"><button class="metric-info" type="button" aria-label="Sobre ${label}">i</button><div class="metric-tip" role="tooltip" hidden><span class="metric-tip__caret"></span>${formula?`<div class="metric-tip__formula">${formula}</div>`:''}<div class="metric-tip__desc">${desc}</div>${bench?`<div class="metric-tip__bench">${bench}</div>`:''}</div></span>`;
 }
 
+function rodapePValue(pv){
+  const ativo=pv<0.001?'robusto':pv<0.05?'significativo':'inconclusivo';
+  const corAtivo=ativo==='inconclusivo'?'var(--d-proj)':'var(--d-pos)';
+  const seg=(lim,nome)=>nome===ativo
+    ?`<b style="color:${corAtivo}">${lim} ${nome}</b>`
+    :`<span style="color:var(--ink-soft)">${lim} ${nome}</span>`;
+  return seg('&gt;&nbsp;0,05','inconclusivo')+' · '+seg('&lt;&nbsp;0,05','significativo')+' · '+seg('&lt;&nbsp;0,001','robusto');
+}
+
 function renderSport(rows){
   const map={};rows.forEach(r=>{if(!map[r.esporte])map[r.esporte]={l:0,s:0,n:0,w:0,t:0};map[r.esporte].l+=r.lucro;map[r.esporte].s+=r.stake;map[r.esporte].n++;if(r.resultado!=='V'){map[r.esporte].t++;if(['W','HW'].includes(r.resultado))map[r.esporte].w++;}});
   const ents=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined').sort((a,b)=>b[1].l-a[1].l);
@@ -198,7 +207,7 @@ function renderTipsterDrill(rows){
   const roiCls=roi>=0?'pos':'neg';
 
   // Diagnóstico de risco
-  const _td=calcTopoDrawdown(rows),_mc=calcMCdrawdown(rows,10000),_rf=calcRecoveryFactor(rows),_pv=calcPValue(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows),_profit=_td.atual;
+  const _td=calcTopoDrawdown(rows),_mc=calcMCdrawdown(rows,10000),_rf=calcRecoveryFactor(rows),_pv=calcPValueMC(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows),_profit=_td.atual;
   const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});
   const _solCor=_sol.score>=0.65?'var(--d-pos)':_sol.score>=0.45?'var(--d-proj)':'var(--d-neg)';
   const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
@@ -260,9 +269,9 @@ function renderTipsterDrill(rows){
       `<div class="analise-popup-section-title">Diagnóstico de Risco <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(Monte Carlo · 10.000 simulações)</span></div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>p-value ${_mkTipAnchor('P-Value','<span class="lbl">p</span> <span class="op">=</span> P(resultado <span class="lbl">|</span> acaso)','Chance do resultado ter vindo <b>só de sorte</b>. Baixo = confiável.','<span class="thr">&lt; 0,05</span> <span class="good">rejeita o acaso</span>')}</div>`+
-          `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmt(_pv,4)}</div>`+
-          `<div class="kpi-sub" style="${sbS}">rejeita o acaso</div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>p-value ${_mkTipAnchor('P-Value','<span class="lbl">p</span> <span class="op">=</span> P(resultado <span class="lbl">|</span> acaso)','Probabilidade do resultado ser <b>mero acaso</b>. Quanto menor, mais confiável o <b>edge</b>.',rodapePValue(_pv))}</div>`+
+          `<div class="fdc-kpi__value" data-state="${_pv<0.05?'pos':'proj'}" style="${vS}">${_pv<0.001?'< 0,001':fmt(_pv,4)}</div>`+
+          `<div class="kpi-sub" style="${sbS}">${_pv<0.001?'resultado robusto':_pv<0.05?'rejeita o acaso':'inconclusivo'}</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica esperada</b> nas 10.000 simulações de Monte Carlo.','<span class="lbl">projetado · média</span>')}</div>`+
