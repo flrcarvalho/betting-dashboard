@@ -1,6 +1,29 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: tooltips fixed + greyscale nos filtros — COMPLETO (2026-06-11 sessao 9)
+## Estado atual: pill do tipster redesenhado — COMPLETO (2026-06-11 sessao 10)
+
+## Sessao 2026-06-11 (sessao 10) — Cabecalho do popup drill-down: pill integrado ao logo
+
+### Mudancas (assets/js/app.js)
+- Pill azul com borda substituido por layout integrado: logo | divisor | eyebrow "TIPSTER" + nome
+- Divisor: linha vertical 1px `--line`, 32px de altura
+- Eyebrow: JetBrains Mono 9px uppercase letter-spacing 0.18em `--ink-mute`
+- Nome do tipster: 24px bold `--text1` (era 22px `--accent` dentro de pill)
+- Logo: reducao de 78 para 70px (-10%)
+- ID `#tipsterDrillName` preservado, performance.js sem alteracao de logica
+
+### Commits desta sessao
+- c510324 feat(drill): integra nome do tipster ao header — logo | TIPSTER eyebrow + nome
+- fd34ad0 style(drill): logo -10% (78->70px), tipster name +10% (22->24px)
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Estado anterior: tooltips fixed + greyscale nos filtros — COMPLETO (2026-06-11 sessao 9)
 
 ## Sessao 2026-06-11 (sessao 9) — Correccoes visuais de filtros e tooltips
 
