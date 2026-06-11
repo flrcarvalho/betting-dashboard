@@ -245,7 +245,7 @@ function renderTipsterDrill(rows){
           `<div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor <span class="fdc-info fdc-info--flip">i<span class="fdc-tip">Lucro ÷ Max Drawdown. Quantas vezes o lucro cobre a maior queda. Projetado: Profit/XMDD (&gt;5 muito bom).</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor <span class="fdc-info">i<span class="fdc-tip">Lucro ÷ Max Drawdown. Quantas vezes o lucro cobre a maior queda. Projetado: Profit/XMDD (&gt;5 muito bom).</span></span></div>`+
           `<div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div>`+
           `<div class="kpi-sub" style="${sbS}">qualidade</div>`+
         `</div>`+
@@ -270,7 +270,7 @@ function renderTipsterDrill(rows){
           `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez <span class="fdc-info fdc-info--flip">i<span class="fdc-tip">Score 0–1 que combina p-value, XMDD e Recovery Factor. Quanto maior, mais robusta estatisticamente a estratégia.</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez <span class="fdc-info">i<span class="fdc-tip">Score 0–1 que combina p-value, XMDD e Recovery Factor. Quanto maior, mais robusta estatisticamente a estratégia.</span></span></div>`+
           `<div class="fdc-risk-meter" style="margin-top:auto">`+
             `<span class="fdc-risk-meter__tag" style="color:${_solCor}">${_sol.faixa}</span>`+
             `<div class="fdc-risk-meter__track">`+

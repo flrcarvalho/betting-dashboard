@@ -749,3 +749,27 @@ async function loadData(){
 applyAparencia();
 loadData();
 
+// Tooltip floating — position:fixed para escapar de contextos de overflow
+document.addEventListener('mouseover',function(e){
+  const info=e.target.closest('.fdc-info');
+  if(!info)return;
+  const t=info.querySelector('.fdc-tip');
+  if(!t)return;
+  const r=info.getBoundingClientRect();
+  let left=r.left-4;
+  if(left+200>window.innerWidth-8)left=window.innerWidth-208;
+  if(left<8)left=8;
+  let top=r.bottom+4;
+  if(top+130>window.innerHeight)top=r.top-134;
+  t.style.top=top+'px';
+  t.style.left=left+'px';
+  t.style.display='block';
+});
+document.addEventListener('mouseout',function(e){
+  const info=e.target.closest('.fdc-info');
+  if(!info)return;
+  if(info.contains(e.relatedTarget))return;
+  const t=info.querySelector('.fdc-tip');
+  if(t)t.style.display='none';
+});
+

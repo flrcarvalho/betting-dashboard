@@ -1181,14 +1181,12 @@
                               border: 1px solid var(--ink-mute); border-radius: 50%;
                               font-size: 9px; font-style: italic; cursor: help;
                               color: var(--ink-mute); margin-left: 4px; }
-.fdc-info .fdc-tip         { display: none; position: absolute; top: 18px; left: -4px;
+.fdc-info .fdc-tip         { display: none; position: fixed;
                               width: 200px; background: var(--surface-2, var(--fdc-steel));
                               border: 1px solid var(--accent); border-radius: 8px;
                               padding: 9px 11px; font-size: var(--text-xs); line-height: 1.5;
-                              color: var(--ink-soft); font-style: normal; z-index: 70;
+                              color: var(--ink-soft); font-style: normal; z-index: 9999;
                               text-align: left; }
-.fdc-info:hover .fdc-tip   { display: block; }
 .fdc-info .fdc-tip b       { color: var(--ink); }
-.fdc-info--flip .fdc-tip   { left: auto; right: 0; }
 
 
