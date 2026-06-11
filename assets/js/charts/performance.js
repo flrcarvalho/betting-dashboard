@@ -194,7 +194,7 @@ function renderTipsterDrill(rows){
   const roiCls=roi>=0?'pos':'neg';
 
   // Diagnóstico de risco
-  const _td=calcTopoDrawdown(rows),_mc=calcMCdrawdown(rows,5000),_rf=calcRecoveryFactor(rows),_pv=calcPValue(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows),_profit=_td.atual;
+  const _td=calcTopoDrawdown(rows),_mc=calcMCdrawdown(rows,10000),_rf=calcRecoveryFactor(rows),_pv=calcPValue(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows),_profit=_td.atual;
   const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});
   const _solCor=_sol.score>=0.65?'var(--d-pos)':_sol.score>=0.45?'var(--d-proj)':'var(--d-neg)';
   const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
@@ -253,7 +253,7 @@ function renderTipsterDrill(rows){
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title" style="border-left:3px solid var(--d-info);padding-left:8px">Diagnóstico de Risco <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(Monte Carlo · 5.000 simulações)</span></div>`+
+      `<div class="analise-popup-section-title" style="border-left:3px solid var(--d-info);padding-left:8px">Diagnóstico de Risco <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(Monte Carlo · 10.000 simulações)</span></div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>p-value <span class="fdc-info">i<span class="fdc-tip">P(yield ≥ observado | edge=0), Buchdahl. &lt;0,05 rejeita o acaso.</span></span></div>`+
@@ -261,7 +261,7 @@ function renderTipsterDrill(rows){
           `<div class="kpi-sub" style="${sbS}">rejeita o acaso</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio <span class="fdc-info">i<span class="fdc-tip">Drawdown máximo médio das 5k simulações (XMDD). Tombo típico esperado.</span></span></div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio <span class="fdc-info">i<span class="fdc-tip">Drawdown máximo médio das 10k simulações (XMDD). Tombo típico esperado.</span></span></div>`+
           `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.xmdd)}</div>`+
           `<div class="kpi-sub" style="${sbS}">projetado · média</div>`+
         `</div>`+
