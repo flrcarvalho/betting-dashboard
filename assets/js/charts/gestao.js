@@ -5,8 +5,20 @@ function normForn(f){return(!f||f==='—')?'Eu':f;}
 
 // Persistent cost store
 const COST_KEY='dash_custos_v2';
+const CUSTO_SEED={
+  "Annderson||Bet365":900,"JC||Betano":600,"JC||Superbet":500,
+  "Move||Betano":600,"Move||Bet365":950,"Move||Superbet":600,
+  "P2Pro||Betano":600,"P2Pro||Superbet":600,
+  "Richard||Bet365":800,"Richard||Betano":500,"Richard||Superbet":400
+};
 let custoData={};
-(()=>{try{custoData=JSON.parse(localStorage.getItem(COST_KEY)||'{}')}catch(e){}})();
+(()=>{
+  try{custoData=JSON.parse(localStorage.getItem(COST_KEY)||'null');}catch(e){}
+  if(!custoData||!Object.keys(custoData).length){
+    custoData={...CUSTO_SEED};
+    try{localStorage.setItem(COST_KEY,JSON.stringify(custoData));}catch(e){}
+  }
+})();
 function saveCusto(forn,casa,val){
   const k=forn+'||'+casa;
   const n=parseFloat(val.replace(/\./g,'').replace(',','.'));
