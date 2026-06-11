@@ -1,5 +1,47 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: aba Bookies migrada para padrao .tcard + popup drill-down — COMPLETO (2026-06-11 sessao 20)
+
+## Sessao 2026-06-11 (sessao 20) — Migracao aba Casas (Bookies)
+
+### Mudancas
+
+**assets/js/app.js**
+- page-casas: substitui mkCard legado (casaTable + chartCasa) por strip de KPIs + sort bar + tcard-grid
+- Adicionado popup casaDrillOverlay (header: logo + eyebrow BOOKIE + chip + nome + copy/save/fechar)
+- Period chips: Hoje/WTD/MTD/YTD/7d/30d/90d/Tudo (callbacks setDrillCasaQuick/Type/All)
+
+**assets/js/charts/performance.js**
+- renderCasa(): reescrita — acumula _casaEnts, _casaDays, _casaAllDays; portfolio KPIs 4 colunas; chama _renderCasaCards()
+- _mkCasaCard(): card .tcard com mkHouseChip no header (tcard__casa-hdr)
+- _renderCasaCards(): sort por P/L/ROI/Turnover/WR/Volume; event delegation para openCasaDrill
+- openCasaDrill/closeCasaDrill: abre popup filtrando DADOS por casa + sp_casas
+- renderCasaDrill(): 6 secoes — KPIs, Resultado Geral (chart), Cenario Atual, Analise Mensal, Por Tipster, Por Esporte
+- _casaBreakdownTbl(): top 10 por turnover + linha "Outros (N)" com tooltip hover mostrando nomes
+- copyCasaDrill/saveCasaDrill: copia/salva PNG do popup
+- _getOutrosTip(): singleton div fixo para tooltip "Outros"
+
+**assets/css/components.css**
+- .tcard__casa-hdr adicionado: flex container para chip + nome no header do card de casa
+
+### Commits desta sessao
+- ae1b280 feat(casas): migra aba Bookies para padrao .tcard + popup drill-down
+- b4ca6cc fix(casas): renomeia 'ROI Ponderado' para 'ROI' no strip de KPIs
+- 4350302 fix(casas): remove badge 'DRILL-DOWN' do cabecalho do popup
+
+### Notas de design
+- Secao Diagnostico de Risco omitida (sem Monte Carlo para casas — decisao intencional)
+- "Por Tipster" e "Por Esporte" mostram top 10 por turnover; demais agregados em linha "Outros"
+- Sparkline por casa reutiliza _tipSparkSVG (funcao compartilhada)
+
+## Proximo passo
+- Testar popup drill-down em producao: verificar chips periodo, tooltip "Outros", copy/save PNG
+- Pendentes anteriores:
+  1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (migracao para mkTh)
+  2. performance.js: tblResCasa
+
+---
+
 ## Estado atual: p-value card dinamico + bootstrap-t studentizado — COMPLETO (2026-06-11 sessao 19)
 
 ## Sessao 2026-06-11 (sessao 19) — Card p-value dinamico e bootstrap-t

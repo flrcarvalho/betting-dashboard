@@ -33,6 +33,16 @@ assets/js/
     temporal.js         → renderConsolidado, renderMensal, renderDiario, renderSemana
                           (+ getAvailableMonths/Days/Weeks e helpers de navegação)
     performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
+                          + _casaEnts, _casaDays, _casaAllDays, _casaSort (estado sort Bookies)
+                          + _mkCasaCard, _renderCasaCards — grid .tcard para casas
+                          + window.casaSortBy(k), window.casaSortDir() — sort bar Bookies
+                          + openCasaDrill(nome), closeCasaDrill() — popup drill-down Bookies
+                          + renderCasaDrill(rows) — 6 seções: KPIs, gráfico, Cenário Atual, Mensal, Por Tipster, Por Esporte
+                          + _sliceCasaDrillRows(), _updateCasaDrillChips() — período do popup Bookies
+                          + window.setDrillCasaQuick/Type/All — chips período Bookies
+                          + _casaBreakdownTbl(rows, dimKey, labelFn, maxVisible=10) — top 10 + Outros com tooltip
+                          + _getOutrosTip() — singleton tooltip fixo para linha "Outros"
+                          + window.copyCasaDrill(), window.saveCasaDrill() — copy/save PNG popup Bookies
                           + _tipSparkSVG, _mkTipCard, _renderTipCards (T-1 — cards de tipster)
                           + _tipsterEnts, _tipsterDays, _tipsterAllDays, _tipsterSort (estado sort)
                           + window.tipsterSortBy(k), window.tipsterSortDir() (callbacks sort bar)
