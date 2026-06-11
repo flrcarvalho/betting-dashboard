@@ -78,7 +78,7 @@ function buildMS(id,items,ph,page,cb,withIcons=false){
     const emo=isSport?sportEmoji(it):'';
     const safe=it.replace(/'/g,"\\'").replace(/"/g,'\\"');
     const safeAttr=it.replace(/"/g,'&quot;');
-    return`<div class="ms-opt ${MSS[id]?.has(it)?'sel':''}" data-val="${safeAttr}" onclick="toggleMS('${id}','${safe}','${page}','${cb||''}')"><span class="ms-chk">${MSS[id]?.has(it)?'✓':''}</span><span style="display:inline-flex;align-items:center;gap:2px">${ico}${emo}${it}</span></div>`;
+    return`<div class="ms-opt ${MSS[id]?.has(it)?'sel':''}" data-val="${safeAttr}" onclick="toggleMS('${id}','${safe}','${page}','${cb||''}')"><span class="ms-chk">${MSS[id]?.has(it)?'✓':''}</span><span style="display:inline-flex;align-items:center;gap:2px">${ico}${emo?`<span class="sport-emoji">${emo}</span>`:''}${it}</span></div>`;
   }).join('');
   const selLbl=hs?(MSS[id].size===1?[...MSS[id]][0]:MSS[id].size+' sel.'):ph;
   return`<div class="ms-wrap" id="msw_${id}">

@@ -855,6 +855,8 @@
 
 /* ── Sport emoji chip — grayscale per brand rules ────────────────────────── */
 .sport-emoji { filter: grayscale(1); }
+/* Logos e emojis dentro dos dropdowns multiselect seguem o mesmo padrão */
+.ms-opt img { filter: grayscale(1) contrast(0.5) brightness(1.25); }
 
 /* ── Chips de Esporte e Casa — 24×24px, grayscale, token-only ───────────── */
 .sp-chip,
