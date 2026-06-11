@@ -1,6 +1,32 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: pill do tipster redesenhado — COMPLETO (2026-06-11 sessao 10)
+## Estado atual: tooltips ⓘ do popup corrigidos — COMPLETO (2026-06-11 sessao 11)
+
+## Sessao 2026-06-11 (sessao 11) — Fix definitivo dos tooltips explicativos do popup
+
+### Problema
+Tooltips ⓘ (Max Drawdown, Recovery Factor, p-value, DD Medio, DD Maximo, Nivel de Solidez) pararam
+de aparecer apos a sessao 9. Causa: .fdc-tip com position:fixed estava dentro de .analise-popup-section
+que tem backdrop-filter:blur(8px). backdrop-filter cria um novo containing block, fazendo o fixed
+ser posicionado relativo ao container em vez do viewport — tooltip aparecia fora da area visivel.
+
+### Solucao (assets/js/app.js)
+- Criado _gTip: elemento div global appendado ao body (fora de qualquer stacking context)
+- mouseover: copia innerHTML do .fdc-tip fonte para _gTip e o posiciona via getBoundingClientRect
+- mouseout: simplificado — pointer-events:none no _gTip garante que o evento sempre dispara limpo
+- Nenhuma mudanca em performance.js, components.css ou index.html
+
+### Commits desta sessao
+- fd34ad0 style(drill): logo -10% (78->70px), tipster name +10% (22->24px) [incluiu tooltip fix]
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Estado anterior: pill do tipster redesenhado — COMPLETO (2026-06-11 sessao 10)
 
 ## Sessao 2026-06-11 (sessao 10) — Cabecalho do popup drill-down: pill integrado ao logo
 
