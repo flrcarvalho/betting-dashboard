@@ -193,19 +193,11 @@ function renderTipsterDrill(rows){
   const plCls=pl>=0?'pos':'neg';
   const roiCls=roi>=0?'pos':'neg';
 
-  // Sequências & Topo Histórico — lógica idêntica ao renderOvStreaks
-  const byDayS={};rows.forEach(r=>{const k=r.data.slice(0,10);if(!byDayS[k])byDayS[k]=0;byDayS[k]+=r.lucro;});
-  const daysS=Object.keys(byDayS).sort();
-  let cumS=0,peakVal=0,peakDate='';
-  daysS.forEach(d=>{cumS+=byDayS[d];if(cumS>peakVal){peakVal=cumS;peakDate=d;}});
-  let posStreak=0,posVal=0,negStreak=0,negVal=0;
-  for(let i=daysS.length-1;i>=0;i--){if(byDayS[daysS[i]]>0){posStreak++;posVal+=byDayS[daysS[i]];}else break;}
-  for(let i=daysS.length-1;i>=0;i--){if(byDayS[daysS[i]]<0){negStreak++;negVal+=byDayS[daysS[i]];}else break;}
-  const pd=peakDate?peakDate.split('-'):[];
-  const peakDateFmt=pd.length===3?`${pd[2]}/${pd[1]}/${pd[0].slice(2)}`:'-';
-  const lastDayS=daysS[daysS.length-1];
-  const isPosCurrent=posStreak>0&&!!lastDayS&&byDayS[lastDayS]>0;
-  const isNegCurrent=negStreak>0&&!!lastDayS&&byDayS[lastDayS]<0;
+  // Diagnóstico de risco
+  const _td=calcTopoDrawdown(rows),_mc=calcMCdrawdown(rows,5000),_rf=calcRecoveryFactor(rows),_pv=calcPValue(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows),_profit=_td.atual;
+  const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});
+  const _solCor=_sol.score>=0.65?'var(--d-pos)':_sol.score>=0.45?'var(--d-proj)':'var(--d-neg)';
+  const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
 
   const body=document.getElementById('tipsterDrillBody');
   if(!body)return;
@@ -236,38 +228,55 @@ function renderTipsterDrill(rows){
       `<div class="chart-wrap" style="height:220px"><canvas id="tipsterDrillLine"></canvas></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title" style="border-left:3px solid var(--accent);padding-left:8px">Sequências &amp; Topo Histórico</div>`+
+      `<div class="analise-popup-section-title" style="border-left:3px solid var(--d-info);padding-left:8px">Cenário Atual</div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
-        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Sequência Positiva</div>`+
-          `<div class="kpi-val ${isPosCurrent?'pos':'neu'}" style="font-size:var(--text-xl)">${isPosCurrent?posStreak:0} dias</div>`+
-          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
-            `<span class="kpi-sub">melhor: ${posStreak} dias</span>`+
-            `<span class="kpi-sub">${posStreak?fmtPL(posVal):fmtR(0)}</span>`+
-          `</div>`+
-        `</div>`+
-        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual</div>`+
-          `<div class="kpi-val ${isNegCurrent?'neg':'neu'}" style="font-size:var(--text-xl)">${isNegCurrent?negStreak:0} dias</div>`+
-          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
-            `<span class="kpi-sub">pior: ${negStreak} dias</span>`+
-            `<span class="kpi-sub">${negStreak?fmtPL(negVal):fmtR(0)}</span>`+
-          `</div>`+
-        `</div>`+
-        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
+        `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico</div>`+
-          `<div class="kpi-val pos">${fmtPL(peakVal)}</div>`+
-          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
-            `<span class="kpi-sub">atingido em ${peakDateFmt}</span>`+
-            `<span class="kpi-sub" style="color:var(--pos)">pico</span>`+
-          `</div>`+
+          `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(_td.topo)}</div>`+
+          `<div class="kpi-sub" style="${sbS}">atingido em ${_fmtD(_td.topoData)}</div>`+
         `</div>`+
-        `<div class="kpi" style="display:flex;flex-direction:column;gap:4px">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Distância do Topo</div>`+
-          `<div class="kpi-val ${cumS<peakVal?'neg':'pos'}">${cumS<peakVal?fmtPL(cumS-peakVal):fmtPL(0)}</div>`+
-          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:4px">`+
-            `<span class="kpi-sub">do pico · ${peakDateFmt}</span>`+
-            `<span class="kpi-sub" style="${cumS<peakVal?'color:var(--neg)':''}">${peakVal>0?(((cumS-peakVal)/peakVal*100).toFixed(1)+'%'):'—'}</span>`+
+        `<div class="kpi" style="${kS}">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual</div>`+
+          `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_td.ddAtual)}</div>`+
+          `<div class="kpi-sub" style="${sbS}">${(_td.ddAtualPct*100).toFixed(1)}% do topo</div>`+
+        `</div>`+
+        `<div class="kpi" style="${kS}">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown <span class="fdc-info">i<span class="fdc-tip">MDD realizado: maior queda de pico a fundo que já aconteceu.</span></span></div>`+
+          `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div>`+
+          `<div class="kpi-sub" style="${sbS}">${_mddP.toFixed(1)}% · pior real</div>`+
+        `</div>`+
+        `<div class="kpi" style="${kS}">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor <span class="fdc-info">i<span class="fdc-tip">Lucro ÷ Max Drawdown. Quantas vezes o lucro cobre a maior queda. Projetado: Profit/XMDD (&gt;5 muito bom).</span></span></div>`+
+          `<div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?_rf.toFixed(2)+'×':'—'}</div>`+
+          `<div class="kpi-sub" style="${sbS}">qualidade</div>`+
+        `</div>`+
+      `</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title" style="border-left:3px solid var(--d-info);padding-left:8px">Diagnóstico de Risco <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(Monte Carlo · 5.000 simulações)</span></div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
+        `<div class="kpi" style="${kS}">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>p-value <span class="fdc-info">i<span class="fdc-tip">P(yield ≥ observado | edge=0), Buchdahl. &lt;0,05 rejeita o acaso.</span></span></div>`+
+          `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${_pv.toFixed(4).replace('.',',')}</div>`+
+          `<div class="kpi-sub" style="${sbS}">rejeita o acaso</div>`+
+        `</div>`+
+        `<div class="kpi" style="${kS}">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio <span class="fdc-info">i<span class="fdc-tip">Drawdown máximo médio das 5k simulações (XMDD). Tombo típico esperado.</span></span></div>`+
+          `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.xmdd)}</div>`+
+          `<div class="kpi-sub" style="${sbS}">projetado · média</div>`+
+        `</div>`+
+        `<div class="kpi" style="${kS}">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Máximo <span class="fdc-info">i<span class="fdc-tip">Pior caso: percentil 99 (1 em 100). No P95 (1 em 20) é ${fmtPL(-_mc.p95)}.</span></span></div>`+
+          `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.p99)}</div>`+
+          `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
+        `</div>`+
+        `<div class="kpi" style="${kS}">`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez</div>`+
+          `<div class="fdc-risk-meter" style="margin-top:auto">`+
+            `<span class="fdc-risk-meter__tag" style="color:${_solCor}">${_sol.faixa}</span>`+
+            `<div class="fdc-risk-meter__track">`+
+              `<span class="fdc-risk-meter__knob" style="--value:${(_sol.score*100).toFixed(1)}%"></span>`+
+            `</div>`+
           `</div>`+
         `</div>`+
       `</div>`+
