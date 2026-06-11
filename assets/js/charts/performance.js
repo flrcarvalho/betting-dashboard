@@ -227,7 +227,7 @@ function renderTipsterDrill(rows){
       `<div class="chart-wrap" style="height:220px"><canvas id="tipsterDrillLine"></canvas></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title" style="border-left:3px solid var(--d-info);padding-left:8px">Cenário Atual</div>`+
+      `<div class="analise-popup-section-title">Cenário Atual</div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico</div>`+
@@ -252,7 +252,7 @@ function renderTipsterDrill(rows){
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title" style="border-left:3px solid var(--d-info);padding-left:8px">Diagnóstico de Risco <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(Monte Carlo · 10.000 simulações)</span></div>`+
+      `<div class="analise-popup-section-title">Diagnóstico de Risco <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(Monte Carlo · 10.000 simulações)</span></div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>p-value <span class="fdc-info">i<span class="fdc-tip">P(yield ≥ observado | edge=0), Buchdahl. &lt;0,05 rejeita o acaso.</span></span></div>`+
