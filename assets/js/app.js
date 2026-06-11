@@ -209,8 +209,9 @@ function sortTable(tableId,colIdx,numeric){
   const tbody=table.querySelector('tbody');
   const rows=[...tbody.querySelectorAll('tr:not(.total-row)')];
   rows.sort((a,b)=>{
-    const at=a.cells[colIdx]?.textContent||'';
-    const bt=b.cells[colIdx]?.textContent||'';
+    const ac=a.cells[colIdx],bc=b.cells[colIdx];
+    const at=ac?.dataset.sort??ac?.textContent||'';
+    const bt=bc?.dataset.sort??bc?.textContent||'';
     const res=numeric?(parseNum(at)-parseNum(bt)):(at.trim().localeCompare(bt.trim()));
     return st.asc?res:-res;
   });

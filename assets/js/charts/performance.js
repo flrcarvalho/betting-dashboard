@@ -207,38 +207,61 @@ function _getOutrosTip(){
   return _outrosTip;
 }
 
-function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10){
+function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
+  const cutoff30=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  const cutoff15=new Date(Date.now()-15*864e5).toISOString().slice(0,10);
   const map={};
   rows.forEach(r=>{
     const k=r[dimKey];if(!k)return;
-    if(!map[k])map[k]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+    if(!map[k])map[k]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0,r30s:0,r15s:0};
     map[k].l+=r.lucro;map[k].s+=r.stake;map[k].n++;
     if(r.resultado!=='V'){map[k].t++;if(['W','HW'].includes(r.resultado))map[k].w++;}
     if(r.odd>0&&r.stake>0){map[k].wt+=r.odd*r.stake;map[k].stk+=r.stake;}
+    if(dimKey==='tipster'){
+      if(r.data>=cutoff30)map[k].r30s+=r.stake;
+      if(r.data>=cutoff15)map[k].r15s+=r.stake;
+    }
   });
-  const ents=Object.entries(map).sort((a,b)=>b[1].s-a[1].s);
+  const sortFn=dimKey==='tipster'
+    ?(a,b)=>(b[1].r30s-a[1].r30s)||b[1].s-a[1].s
+    :(a,b)=>b[1].s-a[1].s;
+  const ents=Object.entries(map).sort(sortFn);
   if(!ents.length)return mkEmpty('Sem dados no período');
   const visible=ents.slice(0,maxVisible);
-  const outros=ents.slice(maxVisible);
-  const mkRow=([k,d],isOutros=false,outrosNames='')=>{
+  const rest=ents.slice(maxVisible);
+  const mkRow=([k,d],isOutros=false,outrosLabel='Outros',outrosNames='',muted=false)=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    const trStyle=muted?' style="opacity:0.45"':'';
     const labelCell=isOutros
-      ?`<td><span class="outros-anchor" data-outros="${outrosNames.replace(/"/g,'&quot;')}" style="cursor:help;border-bottom:1px dashed var(--ink-mute);color:var(--ink-mute)">Outros (${k})</span></td>`
+      ?`<td><span class="outros-anchor" data-outros="${outrosNames.replace(/"/g,'&quot;')}" style="cursor:help;border-bottom:1px dashed var(--ink-mute);color:var(--ink-mute)">${outrosLabel} (${k})</span></td>`
       :`<td>${labelFn(k)}</td>`;
-    return`<tr>${labelCell}<td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
+    return`<tr${trStyle}>${labelCell}<td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   };
   let tRows=visible.map(e=>mkRow(e)).join('');
-  if(outros.length>0){
+  if(dimKey==='tipster'){
+    const outrosAtivos=rest.filter(([,d])=>d.r15s>0);
+    const inativos=rest.filter(([,d])=>d.r15s===0);
+    if(outrosAtivos.length>0){
+      const agg={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+      outrosAtivos.forEach(([,d])=>{agg.l+=d.l;agg.s+=d.s;agg.n+=d.n;agg.w+=d.w;agg.t+=d.t;agg.wt+=d.wt;agg.stk+=d.stk;});
+      tRows+=mkRow([String(outrosAtivos.length),agg],true,'Outros',outrosAtivos.map(([k])=>k).join(' · '),false);
+    }
+    if(inativos.length>0){
+      const agg={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+      inativos.forEach(([,d])=>{agg.l+=d.l;agg.s+=d.s;agg.n+=d.n;agg.w+=d.w;agg.t+=d.t;agg.wt+=d.wt;agg.stk+=d.stk;});
+      tRows+=mkRow([String(inativos.length),agg],true,'Inativos +15d',inativos.map(([k])=>k).join(' · '),true);
+    }
+  } else if(rest.length>0){
     const agg={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
-    outros.forEach(([,d])=>{agg.l+=d.l;agg.s+=d.s;agg.n+=d.n;agg.w+=d.w;agg.t+=d.t;agg.wt+=d.wt;agg.stk+=d.stk;});
-    const names=outros.map(([k])=>k).join(' · ');
-    tRows+=mkRow([String(outros.length),agg],true,names);
+    rest.forEach(([,d])=>{agg.l+=d.l;agg.s+=d.s;agg.n+=d.n;agg.w+=d.w;agg.t+=d.t;agg.wt+=d.wt;agg.stk+=d.stk;});
+    tRows+=mkRow([String(rest.length),agg],true,'Outros',rest.map(([k])=>k).join(' · '),false);
   }
   const th=dimKey==='tipster'?'Tipster':'Esporte';
-  return`<table class="tbl"><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
+  const idAttr=tableId?` id="${tableId}"`:'';
+  return`<table class="tbl"${idAttr}><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
 }
 
 function renderCasaDrill(rows){
@@ -296,15 +319,15 @@ function renderCasaDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
-      `<div class="tbl-wrap drill-tbl"><table class="tbl"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="casaDrillTblMensal"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Tipster</div>`+
-      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'tipster',t=>t,10)}</div>`+
+      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'tipster',t=>t,10,'casaDrillTblTipster')}</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Esporte</div>`+
-      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'esporte',sportCell,10)}</div>`+
+      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'esporte',sportCell,10,'casaDrillTblEsporte')}</div>`+
     `</div>`;
 
   // Gráfico Resultado Geral
@@ -344,6 +367,12 @@ function renderCasaDrill(rows){
     if(!e.target.closest('.outros-anchor'))return;
     tip.style.display='none';
   });
+
+  setTimeout(()=>{
+    makeSortable('casaDrillTblMensal',[1,2,3,4,5,6,7]);
+    makeSortable('casaDrillTblTipster',[1,2,3,4,5,6,7]);
+    makeSortable('casaDrillTblEsporte',[1,2,3,4,5,6,7]);
+  },0);
 }
 
 function openCasaDrill(nome){
@@ -632,15 +661,15 @@ function renderTipsterDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
-      `<div class="tbl-wrap drill-tbl"><table class="tbl"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="tipDrillTblMensal"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Casa</div>`+
-      `<div class="tbl-wrap drill-tbl">${_tipBreakdownTbl(rows,'casa',casaCell)}</div>`+
+      `<div class="tbl-wrap drill-tbl">${_tipBreakdownTbl(rows,'casa',casaCell,'tipDrillTblCasa')}</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Esporte</div>`+
-      `<div class="tbl-wrap drill-tbl">${_tipBreakdownTbl(rows,'esporte',sportCell)}</div>`+
+      `<div class="tbl-wrap drill-tbl">${_tipBreakdownTbl(rows,'esporte',sportCell,'tipDrillTblEsporte')}</div>`+
     `</div>`;
 
   // Gráfico Resultado Geral — clone do renderBankroll, scoped ao tipster
@@ -673,6 +702,12 @@ function renderTipsterDrill(rows){
         y1:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{display:false},border:{display:false},position:'right'}
       }}});
   }
+
+  setTimeout(()=>{
+    makeSortable('tipDrillTblMensal',[1,2,3,4,5,6,7]);
+    makeSortable('tipDrillTblCasa',[1,2,3,4,5,6,7]);
+    makeSortable('tipDrillTblEsporte',[1,2,3,4,5,6,7]);
+  },0);
 }
 
 function openTipsterDrill(nome){
@@ -851,14 +886,14 @@ function _tipMonthTbody(rows){
     totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
     const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="white-space:nowrap">${MESES[v.mes]} ${v.ano}</td><td class="td-num">${v.bets.toLocaleString('pt-BR')}</td><td class="td-num" style="${pc}">${fmtPL(v.pl)}</td><td class="td-num">${fmtR(v.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
+    return`<tr><td data-sort="${k}" style="white-space:nowrap">${MESES[v.mes]} ${v.ano}</td><td class="td-num">${v.bets.toLocaleString('pt-BR')}</td><td class="td-num" style="${pc}">${fmtPL(v.pl)}</td><td class="td-num">${fmtR(v.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
   const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';
   return mHTML+`<tr class="total-row"><td>Total</td><td class="td-num">${totB.toLocaleString('pt-BR')}</td><td class="td-num" style="${tc2}">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-num" style="${rc2}">${fmtPct(tRoi,2)}</td><td class="td-num">${mkWRC(tWr)}</td><td class="td-num">${totB>0?fmtR(totS/totB):'—'}</td><td class="td-num">—</td></tr>`;
 }
 
-function _tipBreakdownTbl(rows,dimKey,labelFn){
+function _tipBreakdownTbl(rows,dimKey,labelFn,tableId=''){
   const map={};
   rows.forEach(r=>{
     const k=r[dimKey];if(!k)return;
@@ -878,7 +913,8 @@ function _tipBreakdownTbl(rows,dimKey,labelFn){
     return`<tr><td>${labelFn(k)}</td><td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const th=dimKey==='casa'?'Casa':'Esporte';
-  return`<table class="tbl"><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
+  const idAttr=tableId?` id="${tableId}"`:'';
+  return`<table class="tbl"${idAttr}><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
 }
 
 // Tipsters
