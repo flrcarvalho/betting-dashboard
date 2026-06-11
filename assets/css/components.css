@@ -872,6 +872,18 @@
   width: 100%; height: 100%; object-fit: cover; display: block;
   filter: grayscale(1) contrast(0.5) brightness(1.25);
 }
+/* Logos circulares com padding transparente: scale corta a margem e preenche o chip */
+.house-chip[data-casa="Novibet"] img,
+.house-chip[data-casa="PixBet"] img,
+.house-chip[data-casa="Esportiva"] img { transform: scale(1.3); }
+/* KTO e BetMGM: logo claro sobre fundo escuro, sem redução de contraste */
+.house-chip[data-casa="KTO"] img,
+.house-chip[data-casa="BetMGM"] img { filter: grayscale(1) brightness(1.8); }
+/* BETesporte: fundo branco → invert + screen funde com o fundo escuro do chip */
+[data-theme="dark"] .house-chip[data-casa="BETesporte"] img {
+  filter: grayscale(1) invert(1) brightness(1.4);
+  mix-blend-mode: screen;
+}
 /* Fallback: inicial da casa em mono quando favicon indisponível */
 .chip-initial { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); }
 
