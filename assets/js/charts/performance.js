@@ -90,7 +90,7 @@ function renderCasa(rows){
         (portSpark?`<div class="kpi-sparkline">${portSpark}</div>`:'')+
       `</div>`+
       `<div class="kpi">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span> ROI Ponderado</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> ROI</div>`+
         `<div class="kpi-val ${roiCls}">${fmtPct(portROI,2)}</div>`+
         `<div class="kpi-sub">Σ(P/L) / Σ(turnover)</div>`+
       `</div>`+
