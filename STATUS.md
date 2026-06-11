@@ -1,5 +1,32 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: seed de custos de contas + calcPValueMC aprimorado — COMPLETO (2026-06-11 sessao 18)
+
+## Sessao 2026-06-11 (sessao 18) — Seed automatico de custos de contas + p-value robusto
+
+### Mudancas
+
+**assets/js/charts/gestao.js**
+- Adicionado CUSTO_SEED com valores de referencia do dash_custos_v2
+- Se localStorage estiver vazio ou ausente, os valores sao carregados automaticamente e salvos
+- Valores: Annderson/JC/Move/P2Pro/Richard nas casas Bet365/Betano/Superbet
+
+**assets/js/app.js**
+- calcPValueMC: troca comparacao simples de yield por t-estatistico com bootstrap
+- Sims ajustados por faixa: n>10000 usa 3000, n>3000 usa 5000, demais 10000
+- Mais robusto para amostras grandes (reduz custo) e pequenas (mantem precisao)
+
+### Commits desta sessao
+- c30ea4d feat(custos): seed automatico dos custos de contas se localStorage vazio
+- (app.js commitado nesta sessao junto com STATUS.md)
+
+## Proximo passo
+- Mesmos pendentes das sessoes anteriores:
+  1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (migracao para mkTh)
+  2. performance.js: tblResCasa
+
+---
+
 ## Estado atual: tabelas do popup padronizadas — COMPLETO (2026-06-11 sessao 17)
 
 ## Sessao 2026-06-11 (sessao 17) — Padronizacao das colunas das 3 tabelas do popup drill-down
