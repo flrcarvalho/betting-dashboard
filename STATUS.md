@@ -1,6 +1,34 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: popup drill-down tipster — layout em cards + legenda + KPI ajustados (2026-06-10 sessao 3)
+## Estado atual: camada diagnostica --d-* + componentes CSS (2026-06-10 sessao 4)
+
+## Sessao 2026-06-10 (sessao 4) — Tokens diagnosticos e componentes visuais
+
+### Tokens adicionados (assets/css/tokens.css)
+- 11 tokens --d-*: --d-pos/#4FC79A --d-neg/#E5524B --d-proj/#D6A45A --d-info/#4DA3FF
+- Strong/soft variants: --d-pos-strong --d-proj-strong --d-pos-soft --d-neg-soft --d-proj-soft --d-info-soft
+- --risk-grad: gradiente linear vermelho->ambar->mint para barras de risco
+- Skin [data-skin="navy"] definido mas NAO aplicado (superficies Deep Navy para uso futuro)
+- Pack espelhado: tokens.css/json/scss/tailwind.tokens.js/palette.csv todos atualizados
+
+### Componentes adicionados (assets/css/components.css)
+- .fdc-risk-meter + __tag + __track + __knob: trilho de gradiente com knob via --value CSS custom prop
+- .fdc-kpi__value[data-state]: 4 estados semanticos (pos/real/proj/info)
+- .fdc-info + .fdc-tip: icone de ajuda com tooltip puro CSS no hover
+
+### Regra semantica documentada (CLAUDE.md + pack/CLAUDE.md)
+- Vermelho (--d-neg) = perda REALIZADA (fato). Ambar (--d-proj) = perda PROJETADA (estatistica).
+- Mint (--d-pos) = edge/significancia. Azul (--d-info) = metrica de qualidade.
+
+## Proximo passo
+Wiring dos componentes no popup drill-down de tipster:
+1. Substituir bloco "Sequencias & Topo Historico" (performance.js linhas 233-268) pela nova secao de risco
+2. Calcular MDD, EMDD, XMDD, P-Value para o tipster via calcMDDreais/calcXMDD/calcPValue (ja existem em app.js)
+3. Montar .fdc-risk-meter com --value=pct de MDD; .fdc-kpi__value[data-state=real/proj] para cada metrica
+
+---
+
+## Estado anterior: popup drill-down tipster — layout em cards + legenda + KPI ajustados (2026-06-10 sessao 3)
 
 ## Sessao 2026-06-10 (sessao 3) — Cards no popup + legenda manual + font-size KPIs
 
