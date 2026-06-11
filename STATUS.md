@@ -1,6 +1,31 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: popup drill-down tipster polido (2026-06-10 sessao 2)
+## Estado atual: popup drill-down tipster — layout em cards + legenda + KPI ajustados (2026-06-10 sessao 3)
+
+## Sessao 2026-06-10 (sessao 3) — Cards no popup + legenda manual + font-size KPIs
+
+### Correcoes visuais no popup drill-down
+- Secoes do popup viram cards visuais: background var(--bg3) + border + border-radius + backdrop-filter
+  - #tipsterDrillBody ganhou padding:1rem 1.5rem + flex-direction:column + gap:12px
+  - .analise-popup-section: removidos padding antigo e border-bottom; agora e card standalone
+- KPI cards (5 colunas): font-size reduzido 22px->18px->16px (valor P/L nao transborda mais)
+- Legenda do grafico "Resultado Geral": removida do canvas Chart.js (display:false)
+  - Substituida por HTML manual (row de spans) posicionado diretamente abaixo do titulo da secao
+  - Alinhamento esquerda, mesmo estilo mono muted das legendas do dashboard
+- Nome do tipster no cabecario do popup: color var(--ink) -> var(--accent) (azul FDC #2E8BFF)
+
+### Commits desta sessao
+- f368c46 fix(drill): corrige overflow dos KPI cards + secoes em card boxes + legenda abaixo do grafico
+- 6a2d986 test(drill): nome do tipster em azul FDC (--accent) no cabecario do popup
+- fa35d4f fix(drill): legenda manual abaixo do titulo Resultado Geral (fora do canvas)
+- 14d2e51 fix(drill): reduz font-size dos KPI cards de 18px para 16px
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js — tblResCasa + tabelas do popup drill-down tipster
+
+---
 
 ## Sessao 2026-06-10 (tarde) — Polimento visual + favicons PNG + fix botao copiar
 
