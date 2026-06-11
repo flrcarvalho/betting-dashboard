@@ -214,7 +214,7 @@ function renderTipsterDrill(rows){
   const avgStake=rows.length?s/rows.length:0;
   const kS='display:flex;flex-direction:column;min-width:0;overflow:hidden';
   const sbS='margin-top:auto;padding-top:6px';
-  const vS='font-size:var(--text-lg)';
+  const vS='font-size:16px';
 
   body.innerHTML=
     `<div class="analise-popup-section">`+
