@@ -222,8 +222,8 @@ function renderTipsterDrill(rows){
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média Pond.</div><div class="kpi-val neu" style="${vS}">${avgOdd.toFixed(2)}</div><div class="kpi-sub" style="${sbS}">ponderada por stake</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${wr.toFixed(1)}%</div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média</div><div class="kpi-val neu" style="${vS}">${avgOdd.toFixed(2)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${wr.toFixed(1)}%</div><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px"><div style="height:100%;background:var(--accent-2);border-radius:3px;width:${Math.min(100,Math.max(0,wr)).toFixed(1)}%"></div></div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
@@ -361,6 +361,21 @@ function closeTipsterDrill(e){
   if(_drillEscHandler){document.removeEventListener('keydown',_drillEscHandler);_drillEscHandler=null;}
 }
 window.closeTipsterDrill=closeTipsterDrill;
+
+// Renderiza emoji em canvas 24×24 e retorna data URL grayscale
+async function _emojiToGrayDataUrl(emoji){
+  const s=24,c=document.createElement('canvas');
+  c.width=c.height=s;
+  const cx=c.getContext('2d');
+  cx.font=`${Math.round(s*0.72)}px serif`;
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.fillText(emoji,s/2,s/2);
+  const id=cx.getImageData(0,0,s,s),d=id.data;
+  for(let i=0;i<d.length;i+=4){const g=Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]);d[i]=d[i+1]=d[i+2]=g;}
+  cx.putImageData(id,0,0);
+  return c.toDataURL('image/png');
+}
+
 // Prepara o modal para captura com html2canvas; retorna {canvas} ou {canvas:null} em erro
 async function _buildDrillCanvas(modal){
   const logoEl=modal.querySelector('.drill-brand-logo');
@@ -369,20 +384,38 @@ async function _buildDrillCanvas(modal){
     origLogoSrc=logoEl.getAttribute('src');
     try{const r=await fetch(origLogoSrc);const svg=await r.text();logoEl.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));}catch(e){}
   }
-  const houseImgs=[...modal.querySelectorAll('.house-chip img')];
-  const origHouseSrcs=houseImgs.map(img=>img.getAttribute('src'));
-  for(const img of houseImgs){
-    try{const res=await fetch(img.src);const blob=await res.blob();const objUrl=URL.createObjectURL(blob);img.dataset._objUrl=objUrl;img.src=objUrl;}catch(e){}
-  }
+  // Casas: favicons do Google S2 não têm CORS — substitui por letra inicial durante captura
+  const houseChips=[...modal.querySelectorAll('.house-chip')];
+  const _houseRestoreData=houseChips.map(span=>{
+    const img=span.querySelector('img');
+    if(!img)return{img:null,initEl:null};
+    img.style.display='none';
+    const init=span.dataset.initial||(img.getAttribute('alt')?.[0]?.toUpperCase()??'?');
+    const initEl=Object.assign(document.createElement('span'),{textContent:init,className:'chip-initial'});
+    span.appendChild(initEl);
+    return{img,initEl};
+  });
+  // Esportes: html2canvas não suporta CSS filter em emoji — converte via canvas grayscale
   const spChips=[...modal.querySelectorAll('.sp-chip')];
-  spChips.forEach(el=>el.style.setProperty('filter','grayscale(1)','important'));
+  const _spRestoreData=[];
+  for(const el of spChips){
+    const emoji=el.textContent.trim();
+    const dataUrl=await _emojiToGrayDataUrl(emoji);
+    const origHTML=el.innerHTML;
+    const origStyle=el.getAttribute('style');
+    const img=Object.assign(document.createElement('img'),{src:dataUrl});
+    img.style.cssText='width:14px;height:14px;display:block';
+    el.innerHTML='';el.appendChild(img);
+    el.style.removeProperty('filter');
+    _spRestoreData.push({el,origHTML,origStyle});
+  }
   const prevMaxH=modal.style.maxHeight;modal.style.maxHeight='none';
   const prevOv=modal.style.overflowY;modal.style.overflowY='visible';
   const _restore=()=>{
     modal.style.maxHeight=prevMaxH;modal.style.overflowY=prevOv;
     if(logoEl&&origLogoSrc)logoEl.src=origLogoSrc;
-    houseImgs.forEach((img,i)=>{if(img.dataset._objUrl){URL.revokeObjectURL(img.dataset._objUrl);delete img.dataset._objUrl;}img.src=origHouseSrcs[i];});
-    spChips.forEach(el=>el.style.removeProperty('filter'));
+    _houseRestoreData.forEach(({img,initEl})=>{if(img)img.style.display='';if(initEl)initEl.remove();});
+    _spRestoreData.forEach(({el,origHTML,origStyle})=>{el.innerHTML=origHTML;if(origStyle!==null)el.setAttribute('style',origStyle);else el.removeAttribute('style');});
   };
   try{
     const canvas=await html2canvas(modal,{scale:2,useCORS:true,

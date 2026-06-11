@@ -1,6 +1,31 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: refactor visual de tabelas em andamento (2026-06-09)
+## Estado atual: popup drill-down tipster polido (2026-06-10)
+
+## Sessao 2026-06-10 — Popup drill-down: captura PNG + layout
+
+### Correcoes de captura (html2canvas)
+- Favicons de casa (Google S2) falham CORS em html2canvas; substituidos por letra inicial (.chip-initial) durante captura e restaurados depois
+- Emojis de esporte: CSS filter nao e suportado em html2canvas; convertidos para data URL grayscale via canvas pixel manipulation antes da captura (_emojiToGrayDataUrl helper)
+- _buildDrillCanvas refatorado: removido bloco fetch/blob URL de houseImgs; adicionado _houseRestoreData e _spRestoreData com restore limpo
+
+### Ajustes de layout do cabecario
+- Logo: height 48 -> 82 -> 123px (1.7x, depois 1.5x adicional)
+- Nome do tipster: font-size 15 -> 20 -> 30px
+
+### KPI cards (5 cards)
+- "Odd Media Pond." -> "Odd Media" (label unica linha, simetria visual)
+- "ponderada por stake" -> "ponderada"
+- Card Win Rate: barra azul (--accent-2) adicionada apos o valor (altura 5px, border-radius 3px)
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js — tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Estado anterior: refactor visual de tabelas em andamento (2026-06-09)
 
 ## Sessao 2026-06-09 (tarde) — mkTh + alinhamento de tabelas
 Trabalho desta sessao (continuacao da anterior):
