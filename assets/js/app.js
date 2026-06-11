@@ -141,6 +141,44 @@ function calcMDDreais(rows){let cum=0,peak=0,mdd=0;for(const r of rows){cum+=r.l
 function calcMDDpct(rows){let bank=BASE_BANK,peak=BASE_BANK,mdd=0;for(const r of rows){bank+=r.lucro;if(bank>peak)peak=bank;const dd=(peak-bank)/peak*100;if(dd>mdd)mdd=dd;}return mdd;}
 function calcXMDD(rows,sims=250){const settled=rows.filter(r=>r.resultado!=='V');if(settled.length<5)return 0;const n=settled.length,wr=calcWR(rows)/100;const avgOdd=settled.reduce((a,r)=>a+r.odd,0)/settled.length;const avgStake=rows.reduce((a,r)=>a+r.stake,0)/rows.length;let total=0;for(let s=0;s<sims;s++){let cum=0,peak=0,mdd=0;for(let i=0;i<n;i++){const win=Math.random()<wr;cum+=win?avgStake*(avgOdd-1):-avgStake;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}total+=mdd;}return total/sims;}
 function calcPValue(rows){const settled=rows.filter(r=>r.resultado!=='V');const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;const n=settled.length;if(n<5)return 1;const avgOdd=settled.reduce((a,r)=>a+r.odd,0)/n;const z=(wins/n-1/avgOdd)/Math.sqrt((1/avgOdd)*(1-1/avgOdd)/n);return Math.max(0.001,Math.min(0.999,1-normalCDF(z)));}
+function calcMCdrawdown(rows,sims){
+  sims=sims||5000;
+  var n=rows.length;
+  if(n<2)return{xmdd:0,p50:0,p95:0,p99:0};
+  var pls=new Float64Array(n);
+  for(var i=0;i<n;i++)pls[i]=rows[i].lucro||0;
+  var mdds=new Float64Array(sims);
+  for(var s=0;s<sims;s++){
+    var acc=0,peak=0,dd=0;
+    for(var b=0;b<n;b++){acc+=pls[(Math.random()*n)|0];if(acc>peak)peak=acc;var t=peak-acc;if(t>dd)dd=t;}
+    mdds[s]=dd;
+  }
+  var arr=Array.prototype.slice.call(mdds).sort(function(a,b){return a-b;});
+  var q=function(f){return arr[Math.min(sims-1,Math.floor(f*sims))];};
+  var sum=0;for(var k=0;k<sims;k++)sum+=arr[k];
+  return{xmdd:sum/sims,p50:q(0.50),p95:q(0.95),p99:q(0.99)};
+}
+function calcRecoveryFactor(rows){
+  var profit=0;for(var i=0;i<rows.length;i++)profit+=(rows[i].lucro||0);
+  var mdd=calcMDDreais(rows);
+  return mdd>0?profit/mdd:null;
+}
+function calcTopoDrawdown(rows){
+  var s=rows.slice().sort(function(a,b){return a.data<b.data?-1:a.data>b.data?1:0;});
+  var acc=0,peak=-Infinity,peakDate=null;
+  for(var i=0;i<s.length;i++){acc+=(s[i].lucro||0);if(acc>peak){peak=acc;peakDate=s[i].data;}}
+  var dd=peak-acc;
+  return{topo:peak,topoData:peakDate,atual:acc,ddAtual:dd,ddAtualPct:peak>0?dd/peak:0};
+}
+function calcSolidez(o){
+  var sEdge=o.pValue<0.001?1:o.pValue<0.05?0.5:0;
+  var sFolga=o.profitXmdd>5?1:o.profitXmdd>=2?0.5:0;
+  var sAmostra=o.nApostas>=1000?1:o.nApostas>=300?0.5:0;
+  var sVar=o.oddMedia<=3?1:o.oddMedia<=10?0.5:0;
+  var score=(sEdge*3+sFolga*3+sAmostra*2+sVar*2)/10;
+  var faixa=score>=0.85?'Muito Alta':score>=0.65?'Alta':score>=0.45?'Média':score>=0.25?'Baixa':'Muito Baixa';
+  return{score:score,faixa:faixa};
+}
 
 
 // Formatação de eixos com ponto como separador de milhar
