@@ -82,11 +82,11 @@ function renderCostPies(){
       font:{size:11,family:"'Manrope',sans-serif"},
       boxWidth:10,boxHeight:10,padding:10,borderRadius:3,useBorderRadius:true,
       generateLabels(chart){const ds=chart.data.datasets[0];return chart.data.labels.map((lbl,i)=>{
-        const v=ds.data[i];const pct=totalVal>0?(v/totalVal*100).toFixed(1):'0';
+        const v=ds.data[i];const pct=totalVal>0?fmtPct(v/totalVal*100,1,false):'0%';
         const shortLbl=lbl.length>14?lbl.slice(0,13)+'…':lbl;
-        return{text:`${shortLbl}  ${pct}%  ·  R$${fmt(v,0)}`,fillStyle:ds.backgroundColor[i],strokeStyle:'transparent',hidden:false,index:i};
+        return{text:`${shortLbl}  ${pct}  ·  R$${fmt(v,0)}`,fillStyle:ds.backgroundColor[i],strokeStyle:'transparent',hidden:false,index:i};
       });}}},
-    tooltip:{callbacks:{label:ctx=>{const pct=totalVal>0?(ctx.raw/totalVal*100).toFixed(1):'0';return`${ctx.label}: R$ ${fmt(ctx.raw,0)} (${pct}%)`}}}}});
+    tooltip:{callbacks:{label:ctx=>{const pct=totalVal>0?fmtPct(ctx.raw/totalVal*100,1,false):'0%';return`${ctx.label}: R$ ${fmt(ctx.raw,0)} (${pct})`}}}}});
   const fTotal=fEnts.reduce((a,e)=>a+e[1],0);
   mkChart('chartCostForn',{type:'doughnut',data:{labels:fEnts.map(e=>e[0]),datasets:[{data:fEnts.map(e=>parseFloat(e[1].toFixed(2))),backgroundColor:PIE_COLORS.slice(0,fEnts.length),borderWidth:3,borderColor:isDark()?'#0A0D12':'#fff',hoverOffset:8}]},options:pieOpts(fTotal)});
   const cTotal=cEnts.reduce((a,e)=>a+e[1],0);
@@ -146,7 +146,7 @@ function renderParceiros(rows){
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
     const cc=custo>0?'color:var(--amber)':'color:var(--text3)';
-    return`<tr><td style="font-weight:700;color:var(--text)">${f}</td><td>${d.contas.size}</td><td>${d.n}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td style="${cc}">${custo>0?'R$ '+fmt(custo,0):'—'}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${f}</td><td>${d.contas.size}</td><td>${d.n}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td style="${cc}">${custo>0?'R$ '+fmt(custo,0):'—'}</td></tr>`;
   }).join('');
   const totFornPL=fornEnts.reduce((a,[,d])=>a+d.l,0);
   const totFornS=fornEnts.reduce((a,[,d])=>a+d.s,0);
@@ -156,7 +156,7 @@ function renderParceiros(rows){
   const totFornROI=totFornS>0?(totFornPL/totFornS*100):0;
   const totFornLC=totFornPL>=0?'color:var(--green)':'color:var(--red)';
   const totFornRC=totFornROI>=0?'color:var(--green)':'color:var(--red)';
-  const fornTotalRow=`<tr class="total-row"><td style="font-weight:700">Total</td><td>${totFornContas}</td><td>${totFornN}</td><td>${fmtR(totFornS)}</td><td style="${totFornLC}">${fmtPL(totFornPL)}</td><td style="${totFornRC}">${(totFornROI>=0?'+':'')+totFornROI.toFixed(2)}%</td><td style="color:var(--amber)">${totFornCusto>0?'R$ '+fmt(totFornCusto,0):'—'}</td></tr>`;
+  const fornTotalRow=`<tr class="total-row"><td style="font-weight:700">Total</td><td>${totFornContas}</td><td>${totFornN}</td><td>${fmtR(totFornS)}</td><td style="${totFornLC}">${fmtPL(totFornPL)}</td><td style="${totFornRC}">${fmtPct(totFornROI,2)}</td><td style="color:var(--amber)">${totFornCusto>0?'R$ '+fmt(totFornCusto,0):'—'}</td></tr>`;
   document.getElementById('fornTable').innerHTML=`<table class="tbl" id="tblForn"><thead><tr><th>Fornecedor<span class="sort-icon"></span></th><th>Contas<span class="sort-icon"></span></th><th>Apostas<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Lucro<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Custo<span class="sort-icon"></span></th></tr></thead><tbody>${fornTotalRow}${fornRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblForn',[1,2,3,4,5,6]),100);
   const grandTotal=allCasas.reduce((a,c)=>a+(casaTotal[c]||0),0);
@@ -173,7 +173,7 @@ function renderParceiros(rows){
   // ── Contas Individuais ──
   const map={};
   normRows.forEach(r=>{const key=r.fornecedor+'||'+r.conta+'||'+r.casa;if(!map[key])map[key]={conta:r.conta,forn:r.fornecedor,casa:r.casa,n:0,s:0,l:0,datas:[]};map[key].n++;map[key].s+=r.stake;map[key].l+=r.lucro;map[key].datas.push(r.data);});
-  const accRows=Object.values(map).sort((a,b)=>b.l-a.l).map(e=>{const roi=e.s>0?(e.l/e.s*100):0;const lc=e.l>=0?'color:var(--green)':'color:var(--red)';const rc=roi>=0?'color:var(--green)':'color:var(--red)';const sorted=e.datas.slice().sort();const d1=sorted[0].slice(0,10).split('-'),d2=sorted[sorted.length-1].slice(0,10).split('-');const dias=Math.round((new Date(sorted[sorted.length-1])-new Date(sorted[0]))/864e5);return`<tr><td style="font-weight:700;color:var(--text)">${e.forn}</td><td>${e.conta}</td><td>${casaCell(e.casa)}</td><td>${e.n}</td><td>${fmtR(e.s)}</td><td style="${lc}">${fmtPL(e.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(1)}%</td><td>${d1[2]}/${d1[1]}/${d1[0].slice(2)}</td><td>${d2[2]}/${d2[1]}/${d2[0].slice(2)}</td><td>${dias}d</td></tr>`;}).join('');
+  const accRows=Object.values(map).sort((a,b)=>b.l-a.l).map(e=>{const roi=e.s>0?(e.l/e.s*100):0;const lc=e.l>=0?'color:var(--green)':'color:var(--red)';const rc=roi>=0?'color:var(--green)':'color:var(--red)';const sorted=e.datas.slice().sort();const d1=sorted[0].slice(0,10).split('-'),d2=sorted[sorted.length-1].slice(0,10).split('-');const dias=Math.round((new Date(sorted[sorted.length-1])-new Date(sorted[0]))/864e5);return`<tr><td style="font-weight:700;color:var(--text)">${e.forn}</td><td>${e.conta}</td><td>${casaCell(e.casa)}</td><td>${e.n}</td><td>${fmtR(e.s)}</td><td style="${lc}">${fmtPL(e.l)}</td><td style="${rc}">${fmtPct(roi,1)}</td><td>${d1[2]}/${d1[1]}/${d1[0].slice(2)}</td><td>${d2[2]}/${d2[1]}/${d2[0].slice(2)}</td><td>${dias}d</td></tr>`;}).join('');
   document.getElementById('parcTable').innerHTML=`<table class="tbl" id="tblParc"><thead><tr><th>Fornecedor<span class="sort-icon"></span></th><th>Conta<span class="sort-icon"></span></th><th>Casa<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Profit<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>1ª Aposta<span class="sort-icon"></span></th><th>Última<span class="sort-icon"></span></th><th>Período<span class="sort-icon"></span></th></tr></thead><tbody>${accRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblParc',[3,4,5,6,9]),100);
 }
@@ -264,16 +264,17 @@ function renderMetrics(rows){
   const mddR=calcMDDreais(rows),mddPct=calcMDDpct(rows);
   const xmdd=calcXMDD(rows),emdd=xmdd*0.85;
   const pval=calcPValue(rows),pl=rows.reduce((a,r)=>a+r.lucro,0);
-  const profEmdd=emdd>0?(pl/emdd).toFixed(2):'—';
+  const profEmddRaw=emdd>0?pl/emdd:null;
+  const profEmdd=profEmddRaw!==null?fmt(profEmddRaw,2):'—';
   const roi=calcROI(rows),wr=calcWR(rows),avgOdd=calcAvgOdd(rows);
   const stake=rows.reduce((a,r)=>a+r.stake,0);
   document.getElementById('metricsKPI').innerHTML=[
     {l:'MDD Real (R$)',v:'R$ '+fmt(mddR,0),c:mddR<5000?'pos':mddR<15000?'neu':'neg'},
-    {l:'MDD Real (%)',v:mddPct.toFixed(2)+'%',c:mddPct<15?'pos':mddPct<30?'neu':'neg'},
+    {l:'MDD Real (%)',v:fmtPct(mddPct,2,false),c:mddPct<15?'pos':mddPct<30?'neu':'neg'},
     {l:'EMDD (R$)',v:'R$ '+fmt(emdd,0),c:emdd<5000?'pos':emdd<15000?'neu':'neg'},
     {l:'XMDD Monte Carlo',v:'R$ '+fmt(xmdd,0),c:xmdd<5000?'pos':xmdd<15000?'neu':'neg'},
-    {l:'P-Value',v:pval<0.001?'<0.001':pval.toFixed(3),c:pval<0.05?'pos':pval<0.15?'neu':'neg'},
-    {l:'Profit / EMDD',v:profEmdd,c:parseFloat(profEmdd)>=5?'pos':parseFloat(profEmdd)>=2?'neu':'neg'},
+    {l:'P-Value',v:pval<0.001?'<0,001':fmt(pval,3),c:pval<0.05?'pos':pval<0.15?'neu':'neg'},
+    {l:'Profit / EMDD',v:profEmdd,c:profEmddRaw!==null&&profEmddRaw>=5?'pos':profEmddRaw!==null&&profEmddRaw>=2?'neu':'neg'},
   ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div></div>`).join('');
 }
 

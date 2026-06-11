@@ -35,7 +35,7 @@ function renderSport(rows){
     });
     ctx.restore();
   }};
-  mkChart('chartSport',{type:'bar',data:{labels:topN.map(e=>sportEmoji(e[0])+' '+e[0]),datasets:[{data:topN.map(e=>parseFloat(e[1].l.toFixed(2))),backgroundColor:topN.map(e=>e[1].l>=0?'rgba(0,214,143,.75)':'rgba(240,80,110,.75)'),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,bottom:4}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const e=topN[ctx.dataIndex];const roi=e[1].s>0?(e[1].l/e[1].s*100):0;return[fmtPL(e[1].l),`ROI: ${(roi>=0?'+':'')+roi.toFixed(1)}%`,`Apostas: ${e[1].n}`];}}}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false}}}},plugins:[valLabelPlugin]});
+  mkChart('chartSport',{type:'bar',data:{labels:topN.map(e=>sportEmoji(e[0])+' '+e[0]),datasets:[{data:topN.map(e=>parseFloat(e[1].l.toFixed(2))),backgroundColor:topN.map(e=>e[1].l>=0?'rgba(0,214,143,.75)':'rgba(240,80,110,.75)'),borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,bottom:4}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const e=topN[ctx.dataIndex];const roi=e[1].s>0?(e[1].l/e[1].s*100):0;return[fmtPL(e[1].l),`ROI: ${fmtPct(roi,1)}`,`Apostas: ${e[1].n}`];}}}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false}}}},plugins:[valLabelPlugin]});
 }
 
 function renderCasa(rows){
@@ -211,10 +211,10 @@ function renderTipsterDrill(rows){
     `<div class="analise-popup-section">`+
       `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:stretch;width:100%">`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${fmtPct(roi,2)}</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média</div><div class="kpi-val neu" style="${vS}">${avgOdd.toFixed(2)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${wr.toFixed(1)}%</div><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px"><div style="height:100%;background:var(--accent-2);border-radius:3px;width:${Math.min(100,Math.max(0,wr)).toFixed(1)}%"></div></div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média</div><div class="kpi-val neu" style="${vS}">${fmtOdd(avgOdd)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${fmtPct(wr,1,false)}</div><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px"><div style="height:100%;background:var(--accent-2);border-radius:3px;width:${Math.min(100,Math.max(0,wr)).toFixed(1)}%"></div></div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
@@ -237,16 +237,16 @@ function renderTipsterDrill(rows){
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual</div>`+
           `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_td.ddAtual)}</div>`+
-          `<div class="kpi-sub" style="${sbS}">${(_td.ddAtualPct*100).toFixed(1)}% do topo</div>`+
+          `<div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown <span class="fdc-info">i<span class="fdc-tip">MDD realizado: maior queda de pico a fundo que já aconteceu.</span></span></div>`+
           `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div>`+
-          `<div class="kpi-sub" style="${sbS}">${_mddP.toFixed(1)}% · pior real</div>`+
+          `<div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor <span class="fdc-info fdc-info--flip">i<span class="fdc-tip">Lucro ÷ Max Drawdown. Quantas vezes o lucro cobre a maior queda. Projetado: Profit/XMDD (&gt;5 muito bom).</span></span></div>`+
-          `<div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?_rf.toFixed(2)+'×':'—'}</div>`+
+          `<div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div>`+
           `<div class="kpi-sub" style="${sbS}">qualidade</div>`+
         `</div>`+
       `</div>`+
@@ -256,7 +256,7 @@ function renderTipsterDrill(rows){
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>p-value <span class="fdc-info">i<span class="fdc-tip">P(yield ≥ observado | edge=0), Buchdahl. &lt;0,05 rejeita o acaso.</span></span></div>`+
-          `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${_pv.toFixed(4).replace('.',',')}</div>`+
+          `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmt(_pv,4)}</div>`+
           `<div class="kpi-sub" style="${sbS}">rejeita o acaso</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
@@ -501,11 +501,11 @@ function _tipMonthTbody(rows){
     totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
     const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPL(v.pl)}</td><td>${fmtR(v.s)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(avgStake)}</td><td>${avgOdd.toFixed(2)}</td></tr>`;
+    return`<tr><td>${MESES[v.mes]} ${v.ano}</td><td>${v.bets}</td><td style="${pc}">${fmtPL(v.pl)}</td><td>${fmtR(v.s)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(avgStake)}</td><td>${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
   const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  return mHTML+`<tr class="total-row"><td>Total</td><td>${totB}</td><td style="${tc2}">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${rc2}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td><td class="td-num">${mkWRC(tWr)}</td><td>${totB>0?fmtR(totS/totB):'—'}</td><td>—</td></tr>`;
+  return mHTML+`<tr class="total-row"><td>Total</td><td>${totB}</td><td style="${tc2}">${fmtPL(totPL)}</td><td>${fmtR(totS)}</td><td style="${rc2}">${fmtPct(tRoi,2)}</td><td class="td-num">${mkWRC(tWr)}</td><td>${totB>0?fmtR(totS/totB):'—'}</td><td>—</td></tr>`;
 }
 
 function _tipBreakdownTbl(rows,dimKey,labelFn){
@@ -524,7 +524,7 @@ function _tipBreakdownTbl(rows,dimKey,labelFn){
     const avgOdd=d.stk>0?d.wt/d.stk:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td>${labelFn(k)}</td><td style="text-align:right">${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td style="text-align:right">${fmtR(d.s)}</td><td style="${lc};text-align:right">${fmtPL(d.l)}</td><td style="${rc};text-align:right">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td style="text-align:right">${avgOdd.toFixed(2)}</td></tr>`;
+    return`<tr><td>${labelFn(k)}</td><td style="text-align:right">${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td style="text-align:right">${fmtR(d.s)}</td><td style="${lc};text-align:right">${fmtPL(d.l)}</td><td style="${rc};text-align:right">${fmtPct(roi,2)}</td><td style="text-align:right">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const th=dimKey==='casa'?'Casa':'Esporte';
   return`<table class="tbl"><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>Win Rate%</th><th>Turnover</th><th>P/L</th><th>ROI</th><th>Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
@@ -569,7 +569,7 @@ function renderTipsters(){
       const portSpark=portVals.length>=2?mkSparkline(portVals,96,26):'';
       const plCls=portPL>=0?'pos':'neg';
       const roiCls=portROI>=0?'pos':'neg';
-      const roiStr=(portROI>=0?'+':'')+portROI.toFixed(2)+'%';
+      const roiStr=fmtPct(portROI,2);
       const el=document.getElementById('tipsterPortfolioKPIs');
       if(el){
         el.innerHTML=
@@ -608,7 +608,7 @@ function renderTipsters(){
     const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td><td>${fmtR(avgStake)}</td></tr>`;
+    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td><td>${fmtR(avgStake)}</td></tr>`;
   }).join('');
   document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th><th>Stake Média<span class="sort-icon"></span></th></tr></thead><tbody>${compRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblTipComp',[1,3,4,5,6,7]),100);
@@ -638,9 +638,9 @@ function renderResultadosCasa(){
   const kpiEl=document.getElementById('resultadosCasaKPI');
   if(kpiEl)kpiEl.innerHTML=[
     {l:'P/L Total',v:fmtPL(totPL),c:totPL>=0?'pos':'neg',s:'Turnover: '+fmtR(totS)},
-    {l:'ROI',v:(totROI>=0?'+':'')+totROI.toFixed(2)+'%',c:totROI>=0?'pos':'neg',s:rows.length+' apostas'},
-    {l:'Win Rate',v:totWR.toFixed(1)+'%',c:'neu',s:`${ents.length} casas`,bar:totWR},
-    {l:'Odd Média Pond.',v:calcAvgOdd(rows).toFixed(2),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
+    {l:'ROI',v:fmtPct(totROI,2),c:totROI>=0?'pos':'neg',s:rows.length+' apostas'},
+    {l:'Win Rate',v:fmtPct(totWR,1,false),c:'neu',s:`${ents.length} casas`,bar:totWR},
+    {l:'Odd Média Pond.',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
   ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div>${k.bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,k.bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub">${k.s}</div></div>`).join('');
   // Gráfico barras ROI por casa
   const vals=ents.map(([,d])=>d.s>0?parseFloat((d.l/d.s*100).toFixed(2)):0);
@@ -655,7 +655,7 @@ function renderResultadosCasa(){
         <div style="position:absolute;left:50%;top:0;height:100%;width:1px;background:var(--border2);z-index:1"></div>
         <div style="position:absolute;${v>=0?'left:50%':'right:'+((100-barW)/2)+'%'};width:${barW}%;height:100%;background:${color};border-radius:3px;opacity:.8"></div>
       </div>
-      <div style="text-align:right;font-size:11px;font-family:'JetBrains Mono',monospace;white-space:nowrap;${lc}"><span style="display:inline-block;min-width:64px;text-align:right">${(v>=0?'+':'')+v.toFixed(2)}%</span><span style="display:inline-block;min-width:52px;text-align:right;color:var(--text3);font-size:10px">(${d.n})</span></div>
+      <div style="text-align:right;font-size:11px;font-family:'JetBrains Mono',monospace;white-space:nowrap;${lc}"><span style="display:inline-block;min-width:64px;text-align:right">${fmtPct(v,2)}</span><span style="display:inline-block;min-width:52px;text-align:right;color:var(--text3);font-size:10px">(${d.n})</span></div>
     </div>`;
   }).join('');
   const barEl=document.getElementById('resultadosCasaBars');
@@ -665,7 +665,7 @@ function renderResultadosCasa(){
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?((d.w+d.hw)/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0;
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--green)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--red)">L:${d.l2}</span> <span style="color:var(--text3)">V:${d.v}</span></td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc};font-weight:600">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td></tr>`;
+    return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--green)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--red)">L:${d.l2}</span> <span style="color:var(--text3)">V:${d.v}</span></td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc};font-weight:600">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tblEl=document.getElementById('resultadosCasaTable');
   if(tblEl)tblEl.innerHTML=`<table class="tbl" id="tblResCasa"><thead><tr><th>Casa<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th></tr></thead><tbody>${tblRows}</tbody></table>`;

@@ -106,9 +106,9 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:2px">
       ${mkMini('P/L',fmtPL(mPL),plColor,'')}
       ${mkMini('Turnover',fmtR(mTurnover),'var(--text)','')}
-      ${mkMini('ROI',(mROI>=0?'+':'')+mROI.toFixed(2)+'%',roiColor,'')}
-      ${mkMini('Apostas',mN,'var(--text)',`WR: <span style="color:${wrColor}">${mWR.toFixed(1)}%</span> · <span class="res-w">W:${mWCount}</span> <span class="res-hw">HW:${mHWCount}</span> <span class="res-l">L:${mLCount}</span> <span class="res-hl">HL:${mHLCount}</span>`)}
-      ${mkMini('Odd Média Pond.',mAvgOdd>0?mAvgOdd.toFixed(2):'—','var(--text)','')}
+      ${mkMini('ROI',fmtPct(mROI,2),roiColor,'')}
+      ${mkMini('Apostas',mN,'var(--text)',`WR: <span style="color:${wrColor}">${fmtPct(mWR,1,false)}</span> · <span class="res-w">W:${mWCount}</span> <span class="res-hw">HW:${mHWCount}</span> <span class="res-l">L:${mLCount}</span> <span class="res-hl">HL:${mHLCount}</span>`)}
+      ${mkMini('Odd Média Pond.',mAvgOdd>0?fmtOdd(mAvgOdd):'—','var(--text)','')}
       ${mkMini('Stake Média',mAvgStake>0?fmtR(mAvgStake):'—','var(--text)','')}
     </div>
   `:'';
@@ -145,12 +145,12 @@ function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
   const row1=[
     mkK(plLabel,fmtPL(pl),pl>=0?'pos':'neg','Turnover: '+fmtR(stake)),
     mkK('Turnover',fmtR(stake),'neu',n+' apostas'),
-    mkK('ROI',(roi>=0?'+':'')+roi.toFixed(2)+'%',roi>=0?'pos':'neg',(settled)+' encerradas'),
+    mkK('ROI',fmtPct(roi,2),roi>=0?'pos':'neg',(settled)+' encerradas'),
     mkK('Apostas',n.toLocaleString('pt-BR'),'neu',betsBreak,true),
   ].join('');
   const row2=[
-    mkK('Win Rate',wr.toFixed(1)+'%','neu',settled+' encerradas',false,wr),
-    mkK('Odd Média Pond.',avgOdd.toFixed(2),'neu','Σ(odd×stake)/Σ(stake)'),
+    mkK('Win Rate',fmtPct(wr,1,false),'neu',settled+' encerradas',false,wr),
+    mkK('Odd Média Pond.',fmtOdd(avgOdd),'neu','Σ(odd×stake)/Σ(stake)'),
     mkK('Stake Média',fmtR(avgStake),'neu','por aposta'),
     mkK(contextLabel,contextVal,'neu',contextSub),
   ].join('');
@@ -176,7 +176,7 @@ function mkEmpty(msg){
 // Win Rate bar component (número + barra azul proporcional)
 function mkWRC(wr){
   const pct=Math.min(100,Math.max(0,wr));
-  return `<div class="wrc"><span class="num">${wr.toFixed(1)}%</span><div class="t"><div class="f" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+  return `<div class="wrc"><span class="num">${fmtPct(wr,1,false)}</span><div class="t"><div class="f" style="width:${pct.toFixed(1)}%"></div></div></div>`;
 }
 
 // Sports & Casas
@@ -186,12 +186,12 @@ function buildSummaryTable(tableId,label,ents,isCasa=false){
     const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
     const label_cell=isCasa?casaCell(nome):sportCell(nome);
-    return`<tr><td style="font-weight:600;color:var(--text)">${label_cell}</td><td class="td-c">${d.n}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-c" style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td></tr>`;
+    return`<tr><td style="font-weight:600;color:var(--text)">${label_cell}</td><td class="td-c">${d.n}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-c" style="${rc}">${fmtPct(roi,2)}</td></tr>`;
   }).join('');
   const tot=ents.reduce((a,[,d])=>({n:a.n+d.n,w:a.w+d.w,t:a.t+d.t,s:a.s+d.s,l:a.l+d.l}),{n:0,w:0,t:0,s:0,l:0});
   const tRoi=tot.s>0?(tot.l/tot.s*100):0,tWr=tot.t>0?(tot.w/tot.t*100):0;
   const tlc=tot.l>=0?'color:var(--green)':'color:var(--red)';const trc=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr>${mkTh(label,'','l')}${mkTh('Bets','qtd','c')}${mkTh('Win Rate','%','c')}${mkTh('Turnover','R$','r')}${mkTh('P/L','R$','r')}${mkTh('ROI','%','c')}</tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td class="td-c">${tot.n}</td><td class="td-c">${mkWRC(tWr)}</td><td class="td-num">${fmtR(tot.s)}</td><td class="td-num" style="${tlc}">${fmtPL(tot.l)}</td><td class="td-c" style="${trc}">${(tRoi>=0?'+':'')+tRoi.toFixed(2)}%</td></tr></tbody></table></div>`;
+  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr>${mkTh(label,'','l')}${mkTh('Bets','qtd','c')}${mkTh('Win Rate','%','c')}${mkTh('Turnover','R$','r')}${mkTh('P/L','R$','r')}${mkTh('ROI','%','c')}</tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td class="td-c">${tot.n}</td><td class="td-c">${mkWRC(tWr)}</td><td class="td-num">${fmtR(tot.s)}</td><td class="td-num" style="${tlc}">${fmtPL(tot.l)}</td><td class="td-c" style="${trc}">${fmtPct(tRoi,2)}</td></tr></tbody></table></div>`;
 }
 
 
@@ -219,8 +219,8 @@ function mkStatCards(items, containerId){
 function mkOneStatCard(icon, name, pl, roi, turnover, bets, wr){
   const plColor = pl>=0 ? 'var(--green)' : 'var(--red)';
   const roiColor = roi>=0 ? 'var(--green)' : 'var(--red)';
-  const roiStr = (roi>=0?'+':'')+roi.toFixed(1)+'%';
-  const wrVal = typeof wr === 'number' ? wr.toFixed(1)+'%' : (wr||'—');
+  const roiStr = fmtPct(roi,1);
+  const wrVal = typeof wr === 'number' ? fmtPct(wr,1,false) : (wr||'—');
   return `<div class="stat-card">
     <div class="stat-card-hdr">
       ${icon}

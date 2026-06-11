@@ -39,9 +39,9 @@ function renderKPI(rows){
   // ── Andar 2: Turnover → ROI → Odd Média → Win Rate ──────────────────────
   const row2=[
     {l:'Turnover',v:fmtR(stake),c:'neu',s:'volume apostado'},
-    {l:'ROI',v:(roi>=0?'+':'')+roi.toFixed(2)+'%',c:roi>=0?'pos':'neg',s:n+' apostas'},
-    {l:'Odd Média Pond.',v:calcAvgOdd(rows).toFixed(2),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
-    {l:'Win Rate',v:wr.toFixed(1)+'%',c:'neu',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`,bar:wr},
+    {l:'ROI',v:fmtPct(roi,2),c:roi>=0?'pos':'neg',s:n+' apostas'},
+    {l:'Odd Média Pond.',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
+    {l:'Win Rate',v:fmtPct(wr,1,false),c:'neu',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`,bar:wr},
   ];
   const divider=`<div style="grid-column:1/-1;height:1px;background:var(--border);margin:2px 0;opacity:.6"></div>`;
   document.getElementById('kpiGrid').innerHTML=
@@ -114,11 +114,11 @@ function renderROIMonthly(rows){
       ctx.textAlign='center';
       ctx.textBaseline=val>=0?'bottom':'top';
       const yPos=val>=0?bar.y-3:bar.y+3;
-      ctx.fillText((val>=0?'+':'')+val.toFixed(2)+'%',bar.x,yPos);
+      ctx.fillText(fmtPct(val,2),bar.x,yPos);
     });
     ctx.restore();
   }};
-  mkChart('chartROI',{type:'bar',data:{labels:lbl,datasets:[{data:vals,backgroundColor:vals.map(roiColor),borderRadius:3,label:'ROI%'}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18,bottom:4}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw.toFixed(2)+'%'}}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>v.toFixed(1)+'%'},grid:{color:gc()},border:{display:false}}}},plugins:[roiLabelPlugin]});
+  mkChart('chartROI',{type:'bar',data:{labels:lbl,datasets:[{data:vals,backgroundColor:vals.map(roiColor),borderRadius:3,label:'ROI%'}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18,bottom:4}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtPct(ctx.raw,2)}}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtPct(v,1,v<0)},grid:{color:gc()},border:{display:false}}}},plugins:[roiLabelPlugin]});
 }
 
 function renderOddsDist(rows){
@@ -139,7 +139,7 @@ function renderOddsDist(rows){
     {type:'line',data:rois,borderColor:'#E0A21A',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#E0A21A',borderWidth:2,label:'ROI %',yAxisID:'y2',borderDash:[4,3],spanGaps:false}
   ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,position:'top',labels:{color:tc(),font:{size:11},boxWidth:12,padding:16}},
-      tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return'Apostas: '+ctx.raw;if(ctx.datasetIndex===1)return'Win Rate: '+(ctx.raw?.toFixed(1)||'—')+'%';return'ROI: '+(ctx.raw?.toFixed(2)||'—')+'%';}}}},
+      tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return'Apostas: '+ctx.raw;if(ctx.datasetIndex===1)return'Win Rate: '+(ctx.raw!=null?fmtPct(ctx.raw,1,false):'—');return'ROI: '+(ctx.raw!=null?fmtPct(ctx.raw,2):'—');}}}},
     scales:{
       x:{ticks:{color:tc(),font:{size:10}},grid:{display:false},border:{display:false}},
       y:{ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false},position:'left'},
@@ -167,8 +167,8 @@ function renderHeatmap(rows){
       const k=ano+'-'+m;
       if(byM[k]){
         const v=byM[k].l;
-        const roi=byM[k].s>0?(v/byM[k].s*100).toFixed(2):'0.00';
-        html+=`<td class="heat-cell" style="background:${heatBg(v)};color:${heatTxt(v)}" title="${MESES_CURTOS[m]}/${ano}: ${fmtPL(v)} (ROI ${roi}%)">${roi}%</td>`;
+        const roi=byM[k].s>0?fmtPct(v/byM[k].s*100,2,false):'0,00%';
+        html+=`<td class="heat-cell" style="background:${heatBg(v)};color:${heatTxt(v)}" title="${MESES_CURTOS[m]}/${ano}: ${fmtPL(v)} (ROI ${roi})">${roi}</td>`;
       } else html+=`<td class="heat-empty"></td>`;
     }
     html+='</tr>';

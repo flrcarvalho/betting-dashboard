@@ -1,6 +1,30 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: limpeza da aba Tipsters — COMPLETO (2026-06-11 sessao 7)
+## Estado atual: formatacao numerica pt-BR consistente — COMPLETO (2026-06-11 sessao 8)
+
+## Sessao 2026-06-11 (sessao 8) — Padronizacao de formatacao numerica
+
+### Mudancas (7 arquivos JS)
+- Adicionados 2 helpers em app.js: fmtPct(v,d,signed) e fmtOdd(v) com toLocaleString pt-BR
+- fmtPL e fmtK: troca de hifen '-' por minus tipografico U+2212
+- Eliminados todos os .toFixed(N)+'%' de exibicao (50+ ocorrencias em 6 arquivos)
+- Eliminados todos os .replace('.',',' ) espalhados (performance.js)
+- Eliminado espaco antes de % em performance.js
+- gestao.js: '<0.001' -> '<0,001'; profEmdd separado em raw/fmt para preservar comparacoes
+- apostas.js, shared.js, overview.js, temporal.js: tabelas, KPIs, tooltips e canvas labels atualizados
+- Nao alterado: coords SVG, CSS inline widths, parseFloat(x.toFixed(N)) de precisao interna
+
+### Commits desta sessao
+- (pendente)
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Estado anterior: limpeza da aba Tipsters — COMPLETO (2026-06-11 sessao 7)
 
 ## Sessao 2026-06-11 (sessao 7) — Remocao de cards e fix de sort
 

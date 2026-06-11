@@ -194,7 +194,8 @@ fato realizado, ou vermelho para uma projeção estatística, confunde o leitor.
 - `dashboard.html` é versão legada; não editar, serve como referência histórica.
 - Custos de contas e custos de tipsters são persistidos em `localStorage` (não no Apps Script).
 - Filtros são por página e independentes entre si (estado em `FS[page]`).
-- `fmtPL`: sinal colado sem espaço (`+R$`/`-R$`). `.money-sign` em `0.76em`, cor `var(--ink-soft)` (neutro) — a cor pos/neg fica exclusiva do `.money-val` (número).
+- `fmtPL`: sinal colado sem espaço (`+R$`/`−R$`), usa minus tipográfico U+2212. `.money-sign` em `0.76em`, cor `var(--ink-soft)` (neutro) — a cor pos/neg fica exclusiva do `.money-val` (número).
+- **Formatação numérica — fonte única de verdade** (`app.js`): `fmt(v,d)` para moeda; `fmtPct(v,d=2,signed=true)` para percentual pt-BR com sinal `+`/`−` e `%` colado; `fmtOdd(v)` para odd com 2 casas pt-BR. Nunca usar `.toFixed(N)+'%'` ou `.replace('.',',')` fora destes helpers. CSS widths e coords SVG usam `.toFixed()` diretamente (valores de layout, não display).
 - Sidebar bottom: `#lastUpdate` é flexbox com `.pulse-dot` + `#lastUpdateText`.
 - **Win Rate (WR) é NEUTRO** — nunca usar `pos`/`neg` no WR. Verde/vermelho somente em P/L, ROI e badges de win/loss. Locais: `mkCalendarHeatmap` (shared.js), `mkKpiGrid` (shared.js), `renderKPI` (overview.js).
 - **Chips de esporte e casa**: usar `mkSpChip(sport)` e `mkHouseChip(nome)` — nunca construir chips à mão. Fallback de esporte: `🏅` (nunca `•`, nunca `?`). Fallback de casa sem domínio em `HOUSE_DOMAIN`: inicial mono via `.chip-initial`. O glifo de múltiplas é `🔗` — `🎰` (cassino) é proibido pela marca.

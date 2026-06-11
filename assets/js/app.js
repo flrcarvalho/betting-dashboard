@@ -53,8 +53,10 @@ function toggleTheme(){const h=document.documentElement;const t=h.getAttribute('
 
 // Helpers
 function fmt(v,d=2){return Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
-function fmtPL(v){const cls=v>=0?'pos':'neg';return`<span class="money ${cls}"><span class="money-sign">${v>=0?'+':'-'}R$</span><span class="money-val">${fmt(Math.abs(v))}</span></span>`;}
+function fmtPL(v){const cls=v>=0?'pos':'neg';return`<span class="money ${cls}"><span class="money-sign">${v>=0?'+':'−'}R$</span><span class="money-val">${fmt(Math.abs(v))}</span></span>`;}
 function fmtR(v){return`<span class="money"><span class="money-sign">R$</span><span class="money-val">${fmt(v,0)}</span></span>`;}
+function fmtPct(v,d=2,signed=true){const abs=Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});if(!signed)return abs+'%';return(v>=0?'+':'−')+abs+'%';}
+function fmtOdd(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function mkChart(id,cfg){destroyChart(id);if(!document.getElementById(id))return;charts[id]=new Chart(document.getElementById(id),cfg);}
 function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
@@ -185,7 +187,7 @@ function calcSolidez(o){
 function fmtK(v){
   const abs=Math.abs(Math.round(v));
   const s=abs.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-  return(v<0?'-':'')+'R$ '+s;
+  return(v<0?'−':'')+'R$ '+s;
 }
 const sortState={};
 function parseNum(raw){

@@ -44,14 +44,14 @@ function renderApostas(){
     const row1=[
       mkKA('P/L', fmtPL(pl), pl>=0?'pos':'neg', ''),
       mkKA('Turnover', fmtR(stake), 'neu', ''),
-      mkKA('ROI', (roi>=0?'+':'')+roi.toFixed(2)+'%', roi>=0?'pos':'neg', ''),
+      mkKA('ROI', fmtPct(roi,2), roi>=0?'pos':'neg', ''),
       mkKA('Tipsters Ativos', activeTips.length.toString(), 'neu', activeTips.slice(0,3).join(', ')+(activeTips.length>3?'...':'')),
     ];
     const row2=[
       mkKA('Apostas', apostasFiltered.length.toLocaleString('pt-BR'), 'neu', betsBreak),
       mkKA('Stake Média', fmtR(avgStakeAp), 'neu', 'por aposta'),
-      mkKA('Odd Média Pond.', avgOddAp.toFixed(2), 'neu', 'Σ(odd×stake)/Σ(stake)'),
-      mkKA('Win Rate', wr.toFixed(1)+'%', 'neu', settled+' encerradas', wr),
+      mkKA('Odd Média Pond.', fmtOdd(avgOddAp), 'neu', 'Σ(odd×stake)/Σ(stake)'),
+      mkKA('Win Rate', fmtPct(wr,1,false), 'neu', settled+' encerradas', wr),
     ];
     kpiEl.innerHTML=
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;width:100%">${row1.join('')}</div>`+
@@ -113,7 +113,7 @@ function renderApostasVirt(){
           <span class="bet-num-lbl">Resultado</span>
         </div>
         <div class="bet-num">
-          <span class="bet-num-val" style="color:var(--text)">${r.odd.toFixed(2)}</span>
+          <span class="bet-num-val" style="color:var(--text)">${fmtOdd(r.odd)}</span>
           <span class="bet-num-lbl">Odd</span>
         </div>
         <div class="bet-num">
