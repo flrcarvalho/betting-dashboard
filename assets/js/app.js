@@ -634,11 +634,11 @@ function buildHTML(){
     <div class="analise-popup-overlay" id="tipsterDrillOverlay" onclick="closeTipsterDrill(event)">
       <div class="analise-popup-modal" id="tipsterDrillModal" onclick="event.stopPropagation()">
         <div class="analise-popup-hdr" style="gap:12px;align-items:center">
-          <img src="brand/fdc-logo-horizontal-dark.svg" height="78" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;filter:brightness(1.15)" crossorigin="anonymous">
+          <img src="brand/fdc-logo-horizontal-dark.svg" height="70" alt="FDC Capital" class="drill-brand-logo" style="flex-shrink:0;filter:brightness(1.15)" crossorigin="anonymous">
           <div style="width:1px;height:32px;background:var(--line);flex-shrink:0"></div>
           <div style="flex-shrink:0;display:flex;flex-direction:column;gap:2px">
             <span style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.18em;color:var(--ink-mute)">TIPSTER</span>
-            <span id="tipsterDrillName" style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--text1);font-family:var(--font-sans);line-height:1.1"></span>
+            <span id="tipsterDrillName" style="font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--text1);font-family:var(--font-sans);line-height:1.1"></span>
           </div>
           <div style="flex:1"></div>
           <button class="no-export copy-drill-btn" onclick="copyDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--accent-2);border-radius:8px;cursor:pointer;flex-shrink:0" title="Copiar como imagem"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="1" width="9" height="10" rx="2"/><rect x="1" y="4" width="9" height="10" rx="2"/></svg></button>
@@ -753,27 +753,27 @@ async function loadData(){
 applyAparencia();
 loadData();
 
-// Tooltip floating — position:fixed para escapar de contextos de overflow
+// Tooltip global — appendado ao body para escapar de backdrop-filter stacking contexts
+const _gTip=(()=>{const d=document.createElement('div');d.className='fdc-tip';d.style.cssText='display:none;position:fixed;z-index:99999;pointer-events:none;';document.body.appendChild(d);return d;})();
 document.addEventListener('mouseover',function(e){
   const info=e.target.closest('.fdc-info');
   if(!info)return;
-  const t=info.querySelector('.fdc-tip');
-  if(!t)return;
+  const src=info.querySelector('.fdc-tip');
+  if(!src)return;
+  _gTip.innerHTML=src.innerHTML;
   const r=info.getBoundingClientRect();
   let left=r.left-4;
   if(left+200>window.innerWidth-8)left=window.innerWidth-208;
   if(left<8)left=8;
   let top=r.bottom+4;
   if(top+130>window.innerHeight)top=r.top-134;
-  t.style.top=top+'px';
-  t.style.left=left+'px';
-  t.style.display='block';
+  _gTip.style.top=top+'px';
+  _gTip.style.left=left+'px';
+  _gTip.style.display='block';
 });
 document.addEventListener('mouseout',function(e){
   const info=e.target.closest('.fdc-info');
   if(!info)return;
-  if(info.contains(e.relatedTarget))return;
-  const t=info.querySelector('.fdc-tip');
-  if(t)t.style.display='none';
+  _gTip.style.display='none';
 });
 
