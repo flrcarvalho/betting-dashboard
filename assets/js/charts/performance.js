@@ -212,13 +212,13 @@ function renderTipsterDrill(rows){
 
   // KPIs — 5 cards simétricos (1 row, repeat 5, font-xl para caber)
   const avgStake=rows.length?s/rows.length:0;
-  const kS='display:flex;flex-direction:column';
+  const kS='display:flex;flex-direction:column;min-width:0;overflow:hidden';
   const sbS='margin-top:auto;padding-top:6px';
   const vS='font-size:var(--text-xl)';
 
   body.innerHTML=
     `<div class="analise-popup-section">`+
-      `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:stretch">`+
+      `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:stretch;width:100%">`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${(roi>=0?'+':'')+roi.toFixed(2)}%</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
@@ -302,7 +302,7 @@ function renderTipsterDrill(rows){
        borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
     ]},options:{responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{display:true,position:'bottom',align:'center',
+        legend:{display:true,position:'top',align:'start',
           labels:{color:isDark()?'#AEB7C2':'#666E7A',font:{family:'JetBrains Mono, monospace',size:11},boxWidth:12,padding:16,
             generateLabels:()=>{const lc=isDark()?'#AEB7C2':'#666E7A';return[
               {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0,fontColor:lc},
@@ -384,17 +384,26 @@ async function _buildDrillCanvas(modal){
     origLogoSrc=logoEl.getAttribute('src');
     try{const r=await fetch(origLogoSrc);const svg=await r.text();logoEl.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));}catch(e){}
   }
-  // Casas: favicons do Google S2 não têm CORS — substitui por letra inicial durante captura
+  // Casas: converte favicons para blob URLs same-origin (html2canvas não lê cross-origin sem CORS)
   const houseChips=[...modal.querySelectorAll('.house-chip')];
-  const _houseRestoreData=houseChips.map(span=>{
+  const _houseRestoreData=[];
+  for(const span of houseChips){
     const img=span.querySelector('img');
-    if(!img)return{img:null,initEl:null};
-    img.style.display='none';
-    const init=span.dataset.initial||(img.getAttribute('alt')?.[0]?.toUpperCase()??'?');
-    const initEl=Object.assign(document.createElement('span'),{textContent:init,className:'chip-initial'});
-    span.appendChild(initEl);
-    return{img,initEl};
-  });
+    const casaNome=span.dataset.casa||(img?.getAttribute('alt')||'');
+    const origSrc=img?img.getAttribute('src'):(casaNome&&_houseDomain(casaNome)?favicon(_houseDomain(casaNome)):'');
+    let blobUrl=null;
+    if(origSrc){try{const r=await fetch(origSrc,{mode:'no-cors'});const blob=await r.blob();if(blob.size>0)blobUrl=URL.createObjectURL(blob);}catch(e){}}
+    if(blobUrl){
+      if(img){img.src=blobUrl;_houseRestoreData.push({img,origSrc,blobUrl,tempImg:false,initEl:null,restoredChipInit:null});}
+      else{const chipInit=span.querySelector('.chip-initial');if(chipInit)chipInit.style.display='none';const newImg=document.createElement('img');newImg.style.cssText='width:18px;height:18px;border-radius:3px;display:block';newImg.src=blobUrl;span.insertBefore(newImg,span.firstChild);_houseRestoreData.push({img:newImg,origSrc:null,blobUrl,tempImg:true,initEl:null,restoredChipInit:chipInit||null});}
+    }else if(img){
+      img.style.display='none';
+      const init=span.dataset.initial||(img.getAttribute('alt')?.[0]?.toUpperCase()??'?');
+      const initEl=Object.assign(document.createElement('span'),{textContent:init,className:'chip-initial'});
+      span.appendChild(initEl);
+      _houseRestoreData.push({img,origSrc,blobUrl:null,tempImg:false,initEl,restoredChipInit:null});
+    }else{_houseRestoreData.push({img:null,origSrc:null,blobUrl:null,tempImg:false,initEl:null,restoredChipInit:null});}
+  }
   // Esportes: html2canvas não suporta CSS filter em emoji — converte via canvas grayscale
   const spChips=[...modal.querySelectorAll('.sp-chip')];
   const _spRestoreData=[];
@@ -414,7 +423,7 @@ async function _buildDrillCanvas(modal){
   const _restore=()=>{
     modal.style.maxHeight=prevMaxH;modal.style.overflowY=prevOv;
     if(logoEl&&origLogoSrc)logoEl.src=origLogoSrc;
-    _houseRestoreData.forEach(({img,initEl})=>{if(img)img.style.display='';if(initEl)initEl.remove();});
+    _houseRestoreData.forEach(({img,origSrc,blobUrl,tempImg,initEl,restoredChipInit})=>{if(tempImg&&img)img.remove();if(restoredChipInit)restoredChipInit.style.display='';if(!tempImg&&img&&origSrc)img.src=origSrc;if(!tempImg&&img)img.style.display='';if(initEl)initEl.remove();if(blobUrl)URL.revokeObjectURL(blobUrl);});
     _spRestoreData.forEach(({el,origHTML,origStyle})=>{el.innerHTML=origHTML;if(origStyle!==null)el.setAttribute('style',origStyle);else el.removeAttribute('style');});
   };
   try{
@@ -429,12 +438,19 @@ async function _buildDrillCanvas(modal){
   }
 }
 
+function _waitH2C(ms=8000){
+  if(typeof html2canvas!=='undefined')return Promise.resolve(true);
+  return new Promise(r=>{const t=Date.now();const c=()=>{if(typeof html2canvas!=='undefined')r(true);else if(Date.now()-t<ms)setTimeout(c,150);else r(false);};setTimeout(c,150);});
+}
+
 window.copyDrill=async function(){
   const modal=document.getElementById('tipsterDrillModal');
-  if(!modal||typeof html2canvas==='undefined')return;
+  if(!modal)return;
   const btn=modal.querySelector('.copy-drill-btn');
   const btnOrig=btn?btn.innerHTML:null;
   if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const ok=await _waitH2C();
+  if(!ok){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
   const{canvas}=await _buildDrillCanvas(modal);
   if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
   canvas.toBlob(async blob=>{
@@ -450,10 +466,12 @@ window.copyDrill=async function(){
 
 window.saveDrill=async function(){
   const modal=document.getElementById('tipsterDrillModal');
-  if(!modal||typeof html2canvas==='undefined')return;
+  if(!modal)return;
   const btn=modal.querySelector('.save-drill-btn');
   const btnOrig=btn?btn.innerHTML:null;
   if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const ok=await _waitH2C();
+  if(!ok){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
   const{canvas}=await _buildDrillCanvas(modal);
   if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
   canvas.toBlob(blob=>{

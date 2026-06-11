@@ -74,7 +74,7 @@ function renderBankroll(rows){
      borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{
-      legend:{display:true,position:'bottom',align:'center',
+      legend:{display:true,position:'top',align:'start',
         labels:{color:isDark()?'#AEB7C2':'#666E7A',font:{family:'JetBrains Mono, monospace',size:11},boxWidth:12,padding:16,
           generateLabels:()=>{const lc=isDark()?'#AEB7C2':'#666E7A';return[
             {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0,fontColor:lc},
