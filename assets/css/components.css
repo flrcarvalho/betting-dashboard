@@ -1137,4 +1137,56 @@
 [data-density="compact"] .tcard-grid { gap: 8px; }
 [data-density="compact"] .tcard__pl { font-size: 19px; }
 
+/* ================================================================
+   Componentes diagnósticos — camada de risco (--d-*)
+   Tokens: assets/css/tokens.css  ·  Regra semântica: CLAUDE.md
+   ================================================================ */
+
+/* ── Risk Meter ─────────────────────────────────────────────────
+   Uso: <div class="fdc-risk-meter" style="--value:35%">
+          <div class="fdc-risk-meter__tag">35%</div>
+          <div class="fdc-risk-meter__track">
+            <div class="fdc-risk-meter__knob"></div>
+          </div>
+        </div>                                                     */
+.fdc-risk-meter            { display: grid; gap: 8px; }
+.fdc-risk-meter__tag       { font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+                              letter-spacing: .12em; text-align: right; color: var(--d-pos); }
+.fdc-risk-meter__track     { position: relative; height: 7px; border-radius: var(--r-pill, 4px);
+                              background: var(--risk-grad); }
+.fdc-risk-meter__knob      { position: absolute; top: 50%; width: 6px; height: 18px;
+                              border-radius: 3px; background: #fff;
+                              transform: translate(-50%, -50%);
+                              box-shadow: 0 2px 8px rgba(0,0,0,.5);
+                              left: var(--value, 50%); }
+
+/* ── KPI value states ───────────────────────────────────────────
+   data-state="pos"  → mint    (resultado a favor / edge)
+   data-state="real" → vermelho (perda realizada — fato)
+   data-state="proj" → âmbar   (perda projetada — estatística)
+   data-state="info" → azul    (métrica de qualidade / rótulo)  */
+.fdc-kpi__value                      { font-family: var(--font-mono); font-weight: 500; }
+.fdc-kpi__value[data-state="pos"]    { color: var(--d-pos); }
+.fdc-kpi__value[data-state="real"]   { color: var(--d-neg); }
+.fdc-kpi__value[data-state="proj"]   { color: var(--d-proj); }
+.fdc-kpi__value[data-state="info"]   { color: var(--d-info); }
+
+/* ── Info tooltip (pure CSS) ────────────────────────────────────
+   Uso: <span class="fdc-info">i
+          <span class="fdc-tip"><b>Título</b> descrição.</span>
+        </span>                                                    */
+.fdc-info                  { position: relative; display: inline-flex; align-items: center;
+                              justify-content: center; width: 13px; height: 13px;
+                              border: 1px solid var(--ink-mute); border-radius: 50%;
+                              font-size: 9px; font-style: italic; cursor: help;
+                              color: var(--ink-mute); margin-left: 4px; }
+.fdc-info .fdc-tip         { display: none; position: absolute; top: 18px; left: -4px;
+                              width: 200px; background: var(--surface-2, var(--fdc-steel));
+                              border: 1px solid var(--accent); border-radius: 8px;
+                              padding: 9px 11px; font-size: var(--text-xs); line-height: 1.5;
+                              color: var(--ink-soft); font-style: normal; z-index: 70;
+                              text-align: left; }
+.fdc-info:hover .fdc-tip   { display: block; }
+.fdc-info .fdc-tip b       { color: var(--ink); }
+
 

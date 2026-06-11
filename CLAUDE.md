@@ -161,6 +161,29 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - **`.drill-tbl`** (`components.css`, T-6.5): wrapper class para tabelas do popup. `.drill-tbl .tbl th { text-align:center }` + `.drill-tbl .tbl td:not(:first-child) { text-align:right }`. Primeira coluna (entidade/mês) fica com `style="text-align:left"` inline no `th`.
 - **`_buildDrillCanvas` / `copyDrill` / `saveDrill`** (T-6.5+): NÃO usar `allowTaint:true` (conflita com useCORS). `_buildDrillCanvas` centraliza prep: logo → data URL, favicons de `.house-chip img` → blob URLs (fetch+createObjectURL), `filter:grayscale(1)` inline em `.sp-chip`, modal `maxHeight:none; overflowY:visible`; chama html2canvas e executa `_restore()` antes de retornar `{canvas}`. `copyDrill`: só `navigator.clipboard.write()`; mostra ✗ se falhar, sem fallback download. `saveDrill`: só download via `URL.createObjectURL(blob)`; sem tentativa de clipboard. Header do popup tem dois botões separados: `.copy-drill-btn` e `.save-drill-btn`.
 
+## Regra semântica: camada de diagnóstico (`--d-*`)
+
+Tokens para o painel de risco do tipster (MDD, EMDD, XMDD, P-Value). Usar `--neg` /
+`--pos` / `--warn` direto acoplaria cor e significado incorretamente — âmbar para um
+fato realizado, ou vermelho para uma projeção estatística, confunde o leitor.
+
+| Token | Hex | Semântica — quando usar |
+|---|---|---|
+| `--d-neg` | `#E5524B` | Perda **REALIZADA** — fato registrado (MDD real, P/L negativo, barra de loss) |
+| `--d-proj` | `#D6A45A` | Perda **PROJETADA** — estatística (EMDD, XMDD, drawdown esperado) |
+| `--d-pos` | `#4FC79A` | Resultado a favor / edge significativo (mint suave; P-value < 5%) |
+| `--d-info` | `#4DA3FF` | Métrica de qualidade / rótulo neutro (ROI, WR, odd média, labels) |
+| `--d-pos-strong` | `#2BC07E` | Positivo forte (= `--pos`) — igual ao verde de P/L |
+| `--d-proj-strong` | `#E0A21A` | Projeção forte (= `--warn`) — destaque âmbar |
+| `--risk-grad` | neg→proj→pos | Barra de risco contínuo (gradiente) |
+
+**Regras duras:**
+- Nunca vermelho (`--d-neg`) para projeções — vermelho = fato acontecido.
+- Nunca âmbar (`--d-proj`) para resultados realizados — âmbar = estimativa.
+- Win Rate sempre neutro (`--d-info` ou `--ink-soft`), nunca verde/vermelho.
+- `--risk-grad` só para barras de risco contínuo.
+- Os soft variants (`--d-*-soft`) são para fundos/fills de cards; os sólidos para texto e bordas.
+
 ## Regras específicas
 
 - NÃO alterar estrutura de pastas nem nomes de arquivos sem confirmação.

@@ -116,6 +116,19 @@
   --r-lg:  18px;
   --r-xl:  26px;
   --r-pill: 999px;
+
+  /* ---- Diagnóstico / camada de risco (--d-*) ---- */
+  --d-pos:         #4FC79A;
+  --d-neg:         #E5524B;
+  --d-proj:        #D6A45A;
+  --d-info:        #4DA3FF;
+  --d-pos-strong:  #2BC07E;
+  --d-proj-strong: #E0A21A;
+  --d-pos-soft:    rgba(79,199,154,.14);
+  --d-neg-soft:    rgba(229,82,75,.14);
+  --d-proj-soft:   rgba(214,164,90,.15);
+  --d-info-soft:   rgba(77,163,255,.14);
+  --risk-grad:     linear-gradient(90deg,var(--d-neg) 0%,var(--d-proj) 50%,var(--d-pos) 100%);
 }
 
 /* ============ Tema claro ============ */
@@ -172,4 +185,18 @@
   --pos:  #2BC07E;
   --neg:  #E5524B;
   --warn: #E0A21A;
+}
+
+/* ============ Skin: Deep Navy ============ */
+/* Não aplicar ainda — definido para uso futuro via data-skin="navy" */
+[data-skin="navy"] {
+  --bg:        #081320;
+  --surface:   #0F1D2F;
+  --surface-2: #13243A;
+  --elevated:  #162943;
+  --line:      rgba(125,170,255,.10);
+  --line-2:    rgba(125,170,255,.055);
+  --ink:       #EAF1FA;
+  --ink-soft:  #8C9BB0;
+  --ink-mute:  #5C6B82;
 }
