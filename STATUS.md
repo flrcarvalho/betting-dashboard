@@ -1,6 +1,27 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: tipografia Variante B — COMPLETO (2026-06-11 sessao 14)
+## Estado atual: espacamento da barra separadora no popup — COMPLETO (2026-06-11 sessao 15)
+
+## Sessao 2026-06-11 (sessao 15) — Ajuste de espacamento da barra separadora
+
+### Mudancas
+
+**app.js** (cabecalho do popup drill-down, buildHTML)
+- Removido gap:4px do container logo+barra+texto
+- Adicionado margin-left:10px e margin-right:14px diretamente na barra separadora
+- Resultado: 10px entre logo e barra, 14px entre barra e bloco "TIPSTER/nome"
+
+### Commits desta sessao
+- e101a7a fix(drill): ajusta espacamento da barra separadora no cabecalho do popup
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + header das tabelas Por Casa / Por Esporte no popup
+
+---
+
+## Estado anterior: tipografia Variante B — COMPLETO (2026-06-11 sessao 14)
 
 ## Sessao 2026-06-11 (sessao 14) — Sistema Tipografico Variante B (mono so nos numeros)
 
