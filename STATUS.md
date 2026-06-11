@@ -1,6 +1,31 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: secao de risco no popup do tipster — COMPLETO (2026-06-11 sessao 5)
+## Estado atual: novo header do popup de tipsters — COMPLETO (2026-06-11 sessao 6)
+
+## Sessao 2026-06-11 (sessao 6) — Header do popup redesenhado
+
+### Mudancas (assets/js/app.js + assets/js/charts/performance.js)
+- Header do popup drill-down: logo horizontal dark 98->78px (reducao 20%)
+- Nome do tipster: span .nametag (borda neutra) substituido por pill com borda azul (--accent 1.5px), border-radius 10px, padding 8x22px, font-weight 800
+- Layout: logo (esquerda) | flex spacer | pill nome (direita) | botoes acao
+- ID #tipsterDrillName preservado — performance.js sem mudancas de logica
+- Classe .drill-brand-logo preservada — _buildDrillCanvas funciona sem alteracao
+- Removidos 4 cards redundantes da aba Tipsters do buildHTML: tipster_lines, tipster_results, tipster_casa, tipster_month (ja migrados para o popup drill-down)
+- Fix: tipsterSortBy — dir=1 (ascendente) ao clicar novo criterio (era -1)
+
+### Commits desta sessao
+- d3edcbd feat(drill): novo header do popup — logo 78px + pill azul para nome do tipster
+- (pendente) chore: remove cards redundantes da aba tipsters + fix sort dir
+
+## Proximo passo
+1. Avaliar visualmente o novo header no browser
+2. Migrar tabelas restantes para mkTh (pendente desde 2026-06-09):
+   - gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+   - performance.js: tblResCasa + tabelas do popup
+
+---
+
+## Estado anterior: secao de risco no popup do tipster — COMPLETO (2026-06-11 sessao 5)
 
 ## Sessao 2026-06-11 (sessao 5) — Motor de calculo + wiring do popup de risco
 

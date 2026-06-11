@@ -142,7 +142,7 @@ function _renderTipCards(){
   const dirBtn=document.getElementById('tipsterDir');
   if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
 }
-window.tipsterSortBy=function(k){_tipsterSort.k=k;_tipsterSort.dir=-1;_renderTipCards();};
+window.tipsterSortBy=function(k){_tipsterSort.k=k;_tipsterSort.dir=1;_renderTipCards();};
 window.tipsterSortDir=function(){_tipsterSort.dir*=-1;_renderTipCards();};
 
 // ── T-6: drill-down popup ────────────────────────────────────────────────────
@@ -600,40 +600,7 @@ function renderTipsters(){
     _renderTipCards();
   }
 
-  // Comparison chart
-  const byTDay={};activeT.forEach(t=>{byTDay[t]={};});
-  baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{if(!byTDay[r.tipster])byTDay[r.tipster]={};const k=r.data.slice(0,10);if(!byTDay[r.tipster][k])byTDay[r.tipster][k]=0;byTDay[r.tipster][k]+=r.lucro;});
-  const allDays=[...new Set(baseRows.map(r=>r.data.slice(0,10)))].sort();
-  const step=Math.max(1,Math.floor(allDays.length/20));
-  const lbl=allDays.filter((_,i)=>i%step===0||i===allDays.length-1).map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
-  const datasets=activeT.slice(0,15).map((t,i)=>{let cum=0;const data=allDays.map(d=>{cum+=byTDay[t]?.[d]||0;return parseFloat(cum.toFixed(2));}).filter((_,i)=>i%step===0||i===allDays.length-1);return{label:t,data,borderColor:TC_COLORS[i%TC_COLORS.length],backgroundColor:(ctx)=>{const c=ctx.chart,{ctx:cx,chartArea:ca}=c;if(!ca)return'rgba(46,139,255,0)';const g=cx.createLinearGradient(0,ca.top,0,ca.bottom);g.addColorStop(0,'rgba(46,139,255,.16)');g.addColorStop(1,'rgba(46,139,255,0)');return g;},fill:true,tension:.4,pointRadius:0,borderWidth:2};});
-  mkChart('chartTipsterLines',{type:'line',data:{labels:lbl,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{color:tc(),font:{size:10},boxWidth:10,padding:12}}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>'R$'+Math.round(v)},grid:{color:gc()},border:{display:false}}}}});
-
-  // ── Resultados por Tipster (stacked horizontal) ──
-  const tipsterMap={};
-  baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{
-    if(!tipsterMap[r.tipster])tipsterMap[r.tipster]={W:0,HW:0,L:0,HL:0,V:0};
-    tipsterMap[r.tipster][r.resultado]=(tipsterMap[r.tipster][r.resultado]||0)+1;
-  });
-  const tipEnts=Object.entries(tipsterMap).sort((a,b)=>(b[1].W+b[1].HW)-(a[1].W+a[1].HW));
-  const tipLabels=tipEnts.map(e=>e[0]);
-  const resH=Math.max(180,tipEnts.length*36+60);
-  const wrap=document.getElementById('chartTipsterResultsWrap');
-  if(wrap)wrap.style.height=resH+'px';
-  mkChart('chartTipsterResults',{type:'bar',data:{labels:tipLabels,datasets:[
-    {label:'W',data:tipEnts.map(e=>e[1].W||0),backgroundColor:'rgba(0,214,143,.8)',borderRadius:2,stack:'s'},
-    {label:'HW',data:tipEnts.map(e=>e[1].HW||0),backgroundColor:'rgba(52,211,153,.7)',borderRadius:2,stack:'s'},
-    {label:'HL',data:tipEnts.map(e=>e[1].HL||0),backgroundColor:'rgba(248,113,113,.7)',borderRadius:2,stack:'s'},
-    {label:'L',data:tipEnts.map(e=>e[1].L||0),backgroundColor:'rgba(240,80,110,.8)',borderRadius:2,stack:'s'},
-    {label:'V',data:tipEnts.map(e=>e[1].V||0),backgroundColor:'rgba(128,128,160,.4)',borderRadius:2,stack:'s'},
-  ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:true,position:'top',labels:{color:tc(),font:{size:11},boxWidth:12,padding:12}},
-      tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw}}},
-    scales:{
-      x:{stacked:true,ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false}},
-      y:{stacked:true,ticks:{color:tc(),font:{size:12,weight:'600'}},grid:{display:false},border:{display:false}}
-    }}});
-  // Comparison table
+  // Comparativo Geral
   const map={};
   baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{if(!map[r.tipster])map[r.tipster]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};map[r.tipster].l+=r.lucro;map[r.tipster].s+=r.stake;map[r.tipster].n++;if(r.resultado!=='V'){map[r.tipster].t++;if(['W','HW'].includes(r.resultado))map[r.tipster].w++;}if(r.odd>0&&r.stake>0){map[r.tipster].wt+=r.odd*r.stake;map[r.tipster].stk+=r.stake;}});
   const ents=Object.entries(map).sort((a,b)=>b[1].l-a[1].l);
@@ -646,29 +613,6 @@ function renderTipsters(){
   }).join('');
   document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th><th>Stake Média<span class="sort-icon"></span></th></tr></thead><tbody>${compRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblTipComp',[1,3,4,5,6,7]),100);
-
-  // ── Tabela Tipsters × Casa ──
-  const casaMap={};
-  baseRows.filter(r=>activeT.includes(r.tipster)&&r.casa).forEach(r=>{
-    const key=r.tipster+'||'+r.casa;
-    if(!casaMap[key])casaMap[key]={tipster:r.tipster,casa:r.casa,l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
-    casaMap[key].l+=r.lucro;casaMap[key].s+=r.stake;casaMap[key].n++;
-    if(r.resultado!=='V'){casaMap[key].t++;if(['W','HW'].includes(r.resultado))casaMap[key].w++;}
-    if(r.odd>0&&r.stake>0){casaMap[key].wt+=r.odd*r.stake;casaMap[key].stk+=r.stake;}
-  });
-  const casaRows2=Object.values(casaMap).sort((a,b)=>b.l-a.l).map(d=>{
-    const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
-    const avgOdd=d.stk>0?d.wt/d.stk:0;
-    const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:700;color:var(--text)">${d.tipster}</td><td>${casaCell(d.casa)}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${(roi>=0?'+':'')+roi.toFixed(2)}%</td><td>${avgOdd.toFixed(2)}</td></tr>`;
-  }).join('');
-  document.getElementById('tipsterCasaTable').innerHTML=`<table class="tbl" id="tblTipCasa"><thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Casa<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th></tr></thead><tbody>${casaRows2}</tbody></table>`;
-  setTimeout(()=>makeSortable('tblTipCasa',[2,4,5,6,7]),100);
-  const singleT=selT.size===1?[...selT][0]:'all';
-  const trows=singleT==='all'?baseRows:baseRows.filter(r=>r.tipster===singleT);
-  document.querySelector('#tipsterMonthTable tbody').innerHTML=_tipMonthTbody(trows);
-  setTimeout(()=>makeSortable('tipsterMonthTable',[1,2,3,4,5,6,7]),100);
 }
 
 // ── Resultados por Casa ──

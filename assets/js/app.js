@@ -504,11 +504,7 @@ function buildHTML(){
       <div class="page" id="page-tipsters">
         ${buildFilters('tipsters',sports,casas,tipsters)}
         ${mkCard('tipster_kpi','Tipsters — Visão Geral','<div id="tipsterPortfolioKPIs" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:.75rem;margin-bottom:.75rem"></div><div class="tcard-sort"><span class="tcard-sort__lbl">Ordenar</span><div class="tcard-seg" id="tipsterSeg"><button data-k="pl" class="active" onclick="tipsterSortBy(this.dataset.k)">P/L</button><button data-k="roi" onclick="tipsterSortBy(this.dataset.k)">ROI</button><button data-k="to" onclick="tipsterSortBy(this.dataset.k)">Turnover</button><button data-k="wr" onclick="tipsterSortBy(this.dataset.k)">Win Rate</button><button data-k="vol" onclick="tipsterSortBy(this.dataset.k)">Volume</button></div><button class="tcard-dir" id="tipsterDir" onclick="tipsterSortDir()">↓</button></div><div class="tcard-grid" id="tipsterKpiCards"></div>')}
-        ${mkCard('tipster_lines','P/L Acumulado por Tipster','<div class="chart-wrap" style="height:240px"><canvas id="chartTipsterLines" role="img" aria-label="Tipster lines"></canvas></div>')}
-        ${mkCard('tipster_results','Resultados por Tipster','<div class="chart-wrap" id="chartTipsterResultsWrap" style="min-height:200px"><canvas id="chartTipsterResults" role="img" aria-label="Resultados tipster"></canvas></div>')}
         ${mkCard('tipster_comp','Comparativo Geral','<div class="tbl-wrap" id="tipsterCompTable"></div>')}
-        ${mkCard('tipster_casa','Tipsters por Casa','<div class="tbl-wrap" id="tipsterCasaTable"></div>')}
-        ${mkCard('tipster_month','Análise Mensal','<div class="tbl-wrap"><table class="tbl" id="tipsterMonthTable"><thead><tr><th>Mês<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Stake Média<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th></tr></thead><tbody></tbody></table></div>')}
       </div>
 
       <!-- RESULTADOS POR CASA -->
