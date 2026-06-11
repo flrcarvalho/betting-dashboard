@@ -1,27 +1,38 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: novo header do popup de tipsters — COMPLETO (2026-06-11 sessao 6)
+## Estado atual: limpeza da aba Tipsters — COMPLETO (2026-06-11 sessao 7)
+
+## Sessao 2026-06-11 (sessao 7) — Remocao de cards e fix de sort
+
+### Mudancas (assets/js/app.js + assets/js/charts/performance.js)
+- Removidos 4 cards da aba Tipsters: tipster_lines (P/L Acumulado), tipster_results (Resultados por Tipster), tipster_casa (Tipsters por Casa), tipster_month (Analise Mensal)
+- Removido codigo de render correspondente em renderTipsters(): grafico chartTipsterLines, grafico chartTipsterResults, tabela tipsterCasaTable, tabela tipsterMonthTable
+- Mantidos: cards tipster_kpi (Visao Geral com sort) e tipster_comp (Comparativo Geral)
+- Fix: tipsterSortBy — dir=1 ao clicar novo criterio (era -1), garante ordenacao melhor para pior por padrao
+
+### Commits desta sessao
+- 978d4d7 chore(drill): remove cards redundantes da aba tipsters + fix sort dir
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Estado anterior: novo header do popup de tipsters — COMPLETO (2026-06-11 sessao 6)
 
 ## Sessao 2026-06-11 (sessao 6) — Header do popup redesenhado
 
 ### Mudancas (assets/js/app.js + assets/js/charts/performance.js)
 - Header do popup drill-down: logo horizontal dark 98->78px (reducao 20%)
-- Nome do tipster: span .nametag (borda neutra) substituido por pill com borda azul (--accent 1.5px), border-radius 10px, padding 8x22px, font-weight 800
+- Nome do tipster: span .nametag substituido por pill com borda azul (--accent 1.5px), border-radius 10px, padding 8x22px, font-weight 800
 - Layout: logo (esquerda) | flex spacer | pill nome (direita) | botoes acao
 - ID #tipsterDrillName preservado — performance.js sem mudancas de logica
 - Classe .drill-brand-logo preservada — _buildDrillCanvas funciona sem alteracao
-- Removidos 4 cards redundantes da aba Tipsters do buildHTML: tipster_lines, tipster_results, tipster_casa, tipster_month (ja migrados para o popup drill-down)
-- Fix: tipsterSortBy — dir=1 (ascendente) ao clicar novo criterio (era -1)
 
 ### Commits desta sessao
 - d3edcbd feat(drill): novo header do popup — logo 78px + pill azul para nome do tipster
-- (pendente) chore: remove cards redundantes da aba tipsters + fix sort dir
-
-## Proximo passo
-1. Avaliar visualmente o novo header no browser
-2. Migrar tabelas restantes para mkTh (pendente desde 2026-06-09):
-   - gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
-   - performance.js: tblResCasa + tabelas do popup
 
 ---
 
@@ -46,14 +57,6 @@
 - fe90598 feat(calc): calcMCdrawdown, calcRecoveryFactor, calcTopoDrawdown, calcSolidez
 - 907270d feat(drill): secao de risco no popup — Cenario Atual + Diagnostico de Risco
 - 69d1102 perf(drill): eleva Monte Carlo de 5.000 para 10.000 simulacoes
-
-## Proximo passo
-Avaliar visualmente o popup no browser e ajustar se necessario:
-1. Verificar se .fdc-kpi__value herda tamanho de fonte adequado (atualmente font-size:16px via vS inline)
-2. Verificar tooltip .fdc-tip do card "DD Maximo" (contem fmtPL que retorna HTML — checar renderizacao)
-3. Migrar tabelas restantes para mkTh (pendente desde sessao 2026-06-09):
-   - gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
-   - performance.js: tblResCasa + tabelas do popup
 
 ---
 
@@ -99,11 +102,6 @@ Avaliar visualmente o popup no browser e ajustar se necessario:
 - fa35d4f fix(drill): legenda manual abaixo do titulo Resultado Geral (fora do canvas)
 - 14d2e51 fix(drill): reduz font-size dos KPI cards de 18px para 16px
 
-## Proximo passo
-Migrar tabelas restantes para mkTh:
-1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
-2. performance.js — tblResCasa + tabelas do popup drill-down tipster
-
 ---
 
 ## Sessao 2026-06-10 (tarde) — Polimento visual + favicons PNG + fix botao copiar
@@ -124,11 +122,6 @@ Migrar tabelas restantes para mkTh:
 - Causa: html2canvas carregado via CDN com defer; guarda typeof===undefined retornava silenciosamente
 - Solucao: _waitH2C() faz polling ate 8s; botao mostra "..." durante espera; funciona no 1o clique
 
-## Proximo passo
-Migrar tabelas restantes para mkTh:
-1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
-2. performance.js — tblResCasa + tabelas do popup drill-down tipster
-
 ---
 
 ## Sessao 2026-06-10 (manha) — Popup drill-down: captura PNG + layout
@@ -139,25 +132,18 @@ Migrar tabelas restantes para mkTh:
 - _buildDrillCanvas refatorado: removido bloco fetch/blob URL de houseImgs; adicionado _houseRestoreData e _spRestoreData com restore limpo
 
 ### Ajustes de layout do cabecario
-- Logo: height 48 -> 82 -> 123px (1.7x, depois 1.5x adicional)
+- Logo: height 48 -> 82 -> 123px
 - Nome do tipster: font-size 15 -> 20 -> 30px
 
 ### KPI cards (5 cards)
 - "Odd Media Pond." -> "Odd Media" (label unica linha, simetria visual)
-- "ponderada por stake" -> "ponderada"
 - Card Win Rate: barra azul (--accent-2) adicionada apos o valor (altura 5px, border-radius 3px)
-
-## Proximo passo
-Migrar tabelas restantes para mkTh:
-1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
-2. performance.js — tblResCasa + tabelas do popup drill-down tipster
 
 ---
 
 ## Estado anterior: refactor visual de tabelas em andamento (2026-06-09)
 
 ## Sessao 2026-06-09 (tarde) — mkTh + alinhamento de tabelas
-Trabalho desta sessao (continuacao da anterior):
 - Removidos accent borders de .kpi e .card hover (layout.css)
 - .kpi-pipe corrigido: flexbox no container, barra 4px sem float (components.css)
 - Todos os titulos azuis de secao: uppercase + letter-spacing leve (components.css, app.js)
@@ -165,89 +151,25 @@ Trabalho desta sessao (continuacao da anterior):
 - sortTable em app.js corrigido: usa classList para nao apagar classes de alinhamento
 - buildSummaryTable (shared.js) migrada para mkTh — cobre Esportes + Casas
 - temporal.js: 4 tabelas migradas (tblConsAnual, tblMensalTip, tblDiarioTip, tblSemanaTip)
-  - helper tdR removido; td com td-num/td-c no lugar de inline styles
 
-## Proximo passo
-Migrar tabelas restantes para mkTh:
-1. gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT
-2. performance.js — tblResCasa + tabelas do popup drill-down tipster
+## T-6 FECHADO + refactor de export concluido (2026-06-09)
 
-## T-6 FECHADO + refactor de export concluído (2026-06-09)
-
-## Próximo passo
-Verificar no navegador (versão publicada) após cache propagar:
-1. Header popup: logo + .nametag + botao copiar (clipboard) + botao salvar (seta) + X
-2. Botao copiar: copia para clipboard, mostra OK ou X — sem fallback download
-3. Botao salvar: abre dialogo de download direto — sem tentativa de clipboard
-4. Tabela "Por Esporte": chips + nome na mesma linha (inline-flex via sportCell)
-5. Tabela "Por Casa": favicons carregados sem lazy loading
-
-## T-6.5+ — Ajustes pós-fechamento (feito, 2026-06-09)
-- Cards Sequências redesenhados: kpi-pipe no label (sem cor especial), footer 2-col justify-content:space-between
-  - Streaks (dias): font-size var(--text-xl) 22px — menor que valores monetários (assimetria visual)
-  - Footer streaks: "melhor/pior: N dias" + P/L do período
-  - Footer Topo: data + badge "pico" verde
-  - Footer Distância: "do pico · data" + percentual abaixo do pico
-  - Título da seção com border-left: 3px azul (pipe visual)
-- Cabeçalho reformulado (modelo topbar):
-  - Logo: height 66→28px (mesmo tamanho do topbar)
-  - Botão `‹ Tipsters`: pill steel, substitui ✕ como fechamento principal
-  - Nome: texto 22px bold direto (sem .nametag box)
-  - Badge DRILL-DOWN: pill com borda azul + texto mono caps
-  - Linha meta: N apostas · range de meses · "atualizado há X min"
-  - `window._dataLoadMs` armazenado em loadData para calcular tempo relativo
-  - `#tipsterDrillMeta` populado em openTipsterDrill (performance.js)
+## T-6.5+ — Ajustes pos-fechamento (feito, 2026-06-09)
+- Cards Sequencias redesenhados: kpi-pipe no label (sem cor especial), footer 2-col justify-content:space-between
+- Cabecario reformulado (modelo topbar): logo 28px, botao Tipsters pill steel, nome 22px bold, badge DRILL-DOWN, linha meta
+- window._dataLoadMs armazenado em loadData para calcular tempo relativo
+- #tipsterDrillMeta populado em openTipsterDrill (performance.js)
 
 ## T-6.5 — Fechamento do drill-down (feito, 2026-06-09)
-- Gráfico: substituído P/L Acumulado (linha simples) por clone do "Resultado Geral" (linha + área + barras dia+/dia− + eixo duplo), height 220px
-- KPIs simetria: todos os 4 com flex-column + subtítulo margin-top:auto; Turnover: fmtK → fmtR
-- Painel Sequências & Topo Histórico: novo painel, lógica idêntica ao renderOvStreaks, scoped a drillRows
-- Tabelas: classe .drill-tbl (th centrado + td:not(:first-child) direita); aplicada nas 3 tabelas
-- Export PNG: removido allowTaint; favicons via fetch+createObjectURL; grayscale inline em .sp-chip; _restore() centraliza cleanup
-- Export PNG: removido `allowTaint:true` (conflitava com useCORS); favicons de casa convertidos para blob URLs (fetch → createObjectURL) antes do html2canvas; filtro grayscale(1) aplicado inline em `.sp-chip` antes da captura e removido depois; função `_restore()` centraliza cleanup
-
-## T-6 COMPLETO — todas as etapas concluídas
-
-## T-6.4 — Ajustes finais + logo + export imagem (feito)
-- Removido gráfico "Resultados" (barras W/HW/HL/L/V) do popup — canvas tipsterDrillBar eliminado
-- Turnover KPI: fmtR(s) → fmtK(s) — remove tamanho 0.76em do "R$", deixa todos os 4 KPIs visuamente iguais
-- P/L Acumulado: degradê azul sob a linha (createLinearGradient rgba(46,139,255,.16)→0, fill:true) — igual ao Resultado Geral
-- Breakdown Por Esporte: sportEmoji() → mkSpChip() — emoji em grayscale, padrão de marca
-- Logo FDC horizontal dark (brand/fdc-logo-horizontal-dark.svg) no header do popup; SVG pré-convertido a data URL antes do html2canvas
-- Botão ⎘ "Copiar como imagem": html2canvas scale:2, ignoreElements com .no-export (botão ✕, botão ⎘, barra de chips); fallback download PNG; feedback ✓/⬇
-- html2canvas 1.4.1 via CDN adicionado ao index.html
-- .no-export aplicado: botão ✕, botão ⎘, #tipsterDrillPeriodBar
-
-## T-6.3 — Filtro de período + ajuste de posição do popup (feito)
-- Posição: `.analise-popup-overlay` mudou `align-items: flex-start` → `center` (components.css); scrollTop=0 ao abrir
-- Barra de chips no modal: Hoje · WTD · MTD · YTD · 7d · 30d · 90d · Tudo (`#tipsterDrillPeriodBar` em app.js), reutiliza `.qbtn`
-- Base do popup = todas as apostas do tipster respeitando esporte/casa, mas SEM herdar data global
-- Refactor: `renderTipsterDrill(rows)` — função única que redesenha KPIs + charts + tabelas a partir das rows recebidas
-- `_sliceDrillRows()` aplica período sobre `_drillBaseRows`; `_updateDrillChips()` atualiza ativo visualmente
-- `window.setDrillQuick(days)`, `window.setDrillType(qt)`, `window.setDrillAll()` — callbacks dos chips
-- `openTipsterDrill` refatorada: computa base sem data, reseta período para Tudo, chama `renderTipsterDrill`
-
-## T-6.2 — Conteúdo do popup (feito, commit 2483c76)
-- Fix de posicionamento: overlay flex + modal max-height:85vh + overflow-y:auto (scroll interno)
-- KPIs: P/L · ROI · Turnover · Win Rate no topo do popup
-- Gráfico de linha P/L acumulado (tipsterDrillLine) renderizado APÓS overlay.display='flex'
-- Gráfico de barras de resultados W/HW/HL/L/V (tipsterDrillBar)
-- Análise Mensal: _tipMonthTbody(rows) — helper reaproveitado em renderTipsters() e no popup
-- Breakdown Por Casa (_tipBreakdownTbl + casaCell) e Por Esporte (sportEmoji)
-
-## T-6.1 — Casca do popup (feito)
-- `#tipsterDrillOverlay` / `#tipsterDrillModal` injetados em `buildHTML()` (app.js)
-- Reaproveita 100% classes `.analise-popup-*` já existentes em components.css — zero CSS novo
-- `openTipsterDrill(nome)` / `closeTipsterDrill()` em performance.js
-- 3 formas de fechar: botão ✕, clique no overlay, tecla Esc (listener sem acúmulo)
-- `.tcard` ganhou `cursor: pointer`; `data-name` em cada card; event delegation em `#tipsterKpiCards`
-- `drillRows` calculado e exibido no placeholder (contagem de apostas no período)
+- Grafico: substituido P/L Acumulado por clone do "Resultado Geral" (linha + area + barras dia+/dia-, eixo duplo), height 220px
+- Painel Sequencias & Topo Historico: novo painel, logica identica ao renderOvStreaks, scoped a drillRows
+- Tabelas: classe .drill-tbl aplicada nas 3 tabelas
+- Export PNG: favicons via fetch+createObjectURL; grayscale inline em .sp-chip; _restore() centraliza cleanup
 
 ## Mapa de arquitetura (aba Tipsters)
 - Cards: renderTipsters em performance.js (_mkTipCard / _renderTipCards)
-- Shell da aba: app.js buildHTML() (~linhas 465-473)
-- CSS: assets/css/components.css (cards/KPIs) + layout.css (grid); variáveis em tokens.css
-- Página viva = index.html; dashboard.html é legado, NÃO editar
-- Sparkline = acumulação diária do chartTipsterLines (performance.js:106-112)
+- Shell da aba: app.js buildHTML() (~linhas 465-470)
+- CSS: assets/css/components.css (cards/KPIs) + layout.css (grid); variaveis em tokens.css
+- Pagina viva = index.html; dashboard.html e legado, NAO editar
 - Helpers: fmtPL, fmtR, fmt, fmtK, calcROI, calcWR, calcAvgOdd, calcMDDreais, calcMDDpct
-- IMPORTANTE: "T-1..T-6" é o track da aba Tipsters (origem Claude Design). NÃO confundir com as etapas numeradas do guia geral "FDC - Guia de Implementacao (Claude Code).md" — a Etapa 5 daquele guia é "Tabelas", sem relação.
+- IMPORTANTE: "T-1..T-6" e o track da aba Tipsters. NAO confundir com as etapas do guia geral.
