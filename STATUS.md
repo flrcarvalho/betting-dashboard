@@ -1,6 +1,37 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: tooltips ⓘ do popup corrigidos — COMPLETO (2026-06-11 sessao 11)
+## Estado atual: ajustes visuais no header do popup drill-down — COMPLETO (2026-06-11 sessao 12)
+
+## Sessao 2026-06-11 (sessao 12) — Polimento do header do popup + titulos de secao
+
+### Mudancas
+
+**Header do popup drill-down** (assets/js/app.js)
+- Gap logo+divider+tipster reduzido de 8px para 4px (tipster mais proximo do logo)
+- Nome do tipster: 24->28px (+15%)
+- Logo: 78->70px (-10%)
+
+**Titulos de secao** (assets/js/charts/performance.js)
+- Removido border-left:3px solid var(--d-info) de "Cenario Atual" e "Diagnostico de Risco"
+- Agora consistentes com "Resultado Geral" e "Analise Mensal" (sem barra lateral)
+
+**Tooltip** (assets/css/components.css + assets/js/app.js)
+- Largura aumentada de 200px para 220px
+- Posicionamento vertical dinamico via offsetHeight (era estimativa fixa de 130px)
+
+### Commits desta sessao
+- 2e5a542 style(drill): reduz gap logo+divider+tipster de 8px para 4px
+- 8605346 fix(drill): remove border-left dos titulos Cenario Atual e Diagnostico de Risco
+- 46942ff fix(tooltip): caixa visual + posicionamento por altura real
+
+## Proximo passo
+Migrar tabelas restantes para mkTh:
+1. gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT
+2. performance.js: tblResCasa + tabelas do popup drill-down tipster
+
+---
+
+## Estado anterior: tooltips ⓘ do popup corrigidos — COMPLETO (2026-06-11 sessao 11)
 
 ## Sessao 2026-06-11 (sessao 11) — Fix definitivo dos tooltips explicativos do popup
 
