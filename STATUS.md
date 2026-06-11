@@ -1,21 +1,27 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: formatacao numerica pt-BR consistente — COMPLETO (2026-06-11 sessao 8)
+## Estado atual: tooltips fixed + greyscale nos filtros — COMPLETO (2026-06-11 sessao 9)
 
-## Sessao 2026-06-11 (sessao 8) — Padronizacao de formatacao numerica
+## Sessao 2026-06-11 (sessao 9) — Correccoes visuais de filtros e tooltips
 
-### Mudancas (7 arquivos JS)
-- Adicionados 2 helpers em app.js: fmtPct(v,d,signed) e fmtOdd(v) com toLocaleString pt-BR
-- fmtPL e fmtK: troca de hifen '-' por minus tipografico U+2212
-- Eliminados todos os .toFixed(N)+'%' de exibicao (50+ ocorrencias em 6 arquivos)
-- Eliminados todos os .replace('.',',' ) espalhados (performance.js)
-- Eliminado espaco antes de % em performance.js
-- gestao.js: '<0.001' -> '<0,001'; profEmdd separado em raw/fmt para preservar comparacoes
-- apostas.js, shared.js, overview.js, temporal.js: tabelas, KPIs, tooltips e canvas labels atualizados
-- Nao alterado: coords SVG, CSS inline widths, parseFloat(x.toFixed(N)) de precisao interna
+### Mudancas
+
+**Greyscale nos dropdowns de filtro** (assets/js/filters.js + assets/css/components.css)
+- Emojis de esporte nos dropdowns agora envolvidos em `<span class="sport-emoji">` para herdar filter:grayscale(1)
+- Logos de casas nos dropdowns: regra `.ms-opt img { filter: grayscale(1) contrast(0.5) brightness(1.25) }`
+
+**Tooltips explicativos do popup** (assets/css/components.css + assets/js/app.js + assets/js/charts/performance.js)
+- .fdc-tip migrado de position:absolute para position:fixed
+- Posicionamento via JS (getBoundingClientRect) com deteccao de borda do viewport
+- z-index elevado de 70 para 9999
+- Tooltip adicionado ao "Nivel de Solidez"
+- Removida classe .fdc-info--flip (nao mais necessaria)
+- Removido overflow:hidden do kS dos cards .kpi no popup (era a raiz do primeiro clipping)
 
 ### Commits desta sessao
-- (pendente)
+- 52c912a fix(filtros): greyscale em emojis e logos nos dropdowns multiselect
+- b6bf1e3 fix(popup): corrige clipping dos tooltips + tooltip Nivel de Solidez
+- 49347a5 fix(tooltip): position:fixed + JS para escapar overflow contexts
 
 ## Proximo passo
 Migrar tabelas restantes para mkTh:
