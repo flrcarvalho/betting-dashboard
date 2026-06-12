@@ -210,8 +210,8 @@ function sortTable(tableId,colIdx,numeric){
   const rows=[...tbody.querySelectorAll('tr:not(.total-row)')];
   rows.sort((a,b)=>{
     const ac=a.cells[colIdx],bc=b.cells[colIdx];
-    const at=ac?.dataset.sort??ac?.textContent||'';
-    const bt=bc?.dataset.sort??bc?.textContent||'';
+    const at=ac?.dataset.sort||ac?.textContent||'';
+    const bt=bc?.dataset.sort||bc?.textContent||'';
     const res=numeric?(parseNum(at)-parseNum(bt)):(at.trim().localeCompare(bt.trim()));
     return st.asc?res:-res;
   });
