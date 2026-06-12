@@ -228,7 +228,7 @@ function makeSortable(tableId,numericCols=[]){
   const table=document.getElementById(tableId);
   if(!table)return;
   table.querySelectorAll('th').forEach((th,i)=>{
-    const si=document.createElement('span');si.className='sort-icon';th.appendChild(si);
+    if(!th.querySelector('.sort-icon')){const si=document.createElement('span');si.className='sort-icon';th.appendChild(si);}
     th.style.cursor='pointer';
     th.onclick=()=>sortTable(tableId,i,numericCols.includes(i));
     addColResizer(th,tableId,i);

@@ -261,7 +261,8 @@ function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
   }
   const th=dimKey==='tipster'?'Tipster':'Esporte';
   const idAttr=tableId?` id="${tableId}"`:'';
-  return`<table class="tbl"${idAttr}><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
+  const oddTh='<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>';
+  return`<table class="tbl"${idAttr}><thead><tr>${mkTh(th,'','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+oddTh}</tr></thead><tbody>${tRows}</tbody></table>`;
 }
 
 function renderCasaDrill(rows){
@@ -319,7 +320,7 @@ function renderCasaDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
-      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="casaDrillTblMensal"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="casaDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+'<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>'}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Tipster</div>`+
@@ -661,7 +662,7 @@ function renderTipsterDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
-      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="tipDrillTblMensal"><thead><tr><th style="text-align:left">Mês</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="tipDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+'<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>'}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Casa</div>`+
@@ -914,7 +915,8 @@ function _tipBreakdownTbl(rows,dimKey,labelFn,tableId=''){
   }).join('');
   const th=dimKey==='casa'?'Casa':'Esporte';
   const idAttr=tableId?` id="${tableId}"`:'';
-  return`<table class="tbl"${idAttr}><thead><tr><th style="text-align:left">${th}</th><th>Bets</th><th>P/L</th><th>Turnover</th><th>ROI</th><th>Win Rate%</th><th>Stake Média</th><th style="width:88px">Odd Média Pond.</th></tr></thead><tbody>${tRows}</tbody></table>`;
+  const oddTh='<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>';
+  return`<table class="tbl"${idAttr}><thead><tr>${mkTh(th,'','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+oddTh}</tr></thead><tbody>${tRows}</tbody></table>`;
 }
 
 // Tipsters
@@ -997,7 +999,7 @@ function renderTipsters(){
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
     return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td><td>${fmtR(avgStake)}</td></tr>`;
   }).join('');
-  document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr><th>Tipster<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th><th>Stake Média<span class="sort-icon"></span></th></tr></thead><tbody>${compRows}</tbody></table>`;
+  document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr><th>Tipster</th><th style="text-align:right">Bets</th><th style="text-align:right">Win Rate</th><th style="text-align:right">Turnover</th><th style="text-align:right">P/L</th><th style="text-align:right">ROI</th><th style="text-align:right">Odd média</th><th style="text-align:right">Stake média</th></tr></thead><tbody>${compRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblTipComp',[1,3,4,5,6,7]),100);
 }
 
@@ -1055,6 +1057,6 @@ function renderResultadosCasa(){
     return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--green)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--red)">L:${d.l2}</span> <span style="color:var(--text3)">V:${d.v}</span></td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc};font-weight:600">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tblEl=document.getElementById('resultadosCasaTable');
-  if(tblEl)tblEl.innerHTML=`<table class="tbl" id="tblResCasa"><thead><tr><th>Casa<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Resultados</th><th>Win Rate%<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>P/L<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>Odd Média Pond.<span class="sort-icon"></span></th></tr></thead><tbody>${tblRows}</tbody></table>`;
+  if(tblEl)tblEl.innerHTML=`<table class="tbl" id="tblResCasa"><thead><tr><th>Casa</th><th style="text-align:right">Bets</th><th>Resultados</th><th style="text-align:right">Win Rate</th><th style="text-align:right">Turnover</th><th style="text-align:right">P/L</th><th style="text-align:right">ROI</th><th style="text-align:right">Odd média</th></tr></thead><tbody>${tblRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblResCasa',[1,3,4,5,6,7]),100);
 }
