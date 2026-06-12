@@ -8,7 +8,7 @@ function _mkTipAnchor(label,formula,desc,bench){
 function _mkOddMediaTh(align='r',width=''){
   const cls=align==='r'?'th-r':align==='l'?'th-l':'th-c';
   const wS=width?` style="width:${width}"`:'';
-  const anchor=_mkTipAnchor('Odd média pond.','<span class="lbl">Odd média</span> <span class="op">=</span> Σ(odd <span class="op">×</span> stake) <span class="op">÷</span> Σ(stake)','Média ponderada pelo valor apostado — apostas com <b>stake maior</b> têm mais peso no resultado.','');
+  const anchor=_mkTipAnchor('Odd média pond.','<span class="lbl">Odd média ponderada</span> <span class="op">=</span> Σ(odd <span class="op">×</span> stake) <span class="op">÷</span> Σ(stake)','','');
   return`<th class="${cls}"${wS}><span class="th-k">Odd média ${anchor}<span class="sort-icon"></span></span></th>`;
 }
 

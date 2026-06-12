@@ -343,7 +343,7 @@ html[data-theme="light"].t-page-gradient .page-title {
   padding: var(--space-3) var(--space-4);
   background: var(--bg3);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   backdrop-filter: blur(8px);
 }
 .filter-group { display: flex; flex-direction: column; gap: 4px; }
@@ -373,8 +373,8 @@ html[data-theme="light"].t-page-gradient .page-title {
 .row2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
   align-items: stretch;
 }
 .row2 > .card { margin-bottom: 0; display: flex; flex-direction: column; }
@@ -393,9 +393,9 @@ html[data-theme="light"].t-page-gradient .page-title {
 
 /* ── Daily / month blocks ────────────────────────────────────────────────── */
 .month-block {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-4);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 .month-hdr {
@@ -493,9 +493,9 @@ html[data-theme="light"].t-page-gradient .page-title {
 
 
 /* ── Aparência — densidade compacta (item 13) ─────────────────────────────── */
-[data-density="compact"] .card-hdr  { min-height: 38px; padding: 0.55rem 1rem; }
-[data-density="compact"] .card-body { padding: 0.1rem 0.9rem 0.75rem; }
-[data-density="compact"] .kpi       { padding: 0.65rem 0.85rem; }
+[data-density="compact"] .card-hdr  { min-height: 38px; padding: 0.55rem 14px; }
+[data-density="compact"] .card-body { padding: 0.1rem 14px 12px; }
+[data-density="compact"] .kpi       { padding: 10px 14px; }
 [data-density="compact"] .kpi-val   { font-size: 22px; }
 [data-density="compact"] .nav-item  { height: 28px; }
 [data-density="compact"] .tbl th,

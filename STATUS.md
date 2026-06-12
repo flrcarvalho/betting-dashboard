@@ -1,5 +1,42 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: padrao de spacing aplicado em todo o documento — COMPLETO (2026-06-11 sessao 22)
+
+## Sessao 2026-06-11 (sessao 22) — Padronizacao de spacing e border-radius
+
+### Mudancas
+
+**assets/css/components.css**
+- `.card`: border-radius `var(--radius-lg)` 12px -> `var(--r-lg)` 18px; margin-bottom 12px -> 16px
+- `.card-hdr`: padding horizontal 16px -> 22px
+- `.card-body`: padding lateral 16px -> 22px; bottom 17.6px -> 20px
+- `.kpi`: border-radius 8px -> `var(--r-md)` 12px; padding 14px 17.6px -> 16px 20px
+- `.stat-card`: border-radius 10px -> `var(--r-md)` 12px; padding lateral 16px -> 18px
+- `.tcard`: border-radius `var(--r-md)` 12px -> `var(--r-lg)` 18px; padding 13/14/11 -> 16/18/14
+- `.analise-card`: border-radius 12px -> `var(--r-lg)` 18px; padding 1.1rem -> 20px 22px
+- `.analise-popup-section`: border-radius 12px -> `var(--r-lg)` 18px; padding -> 20px 22px
+- `.analise-popup-hdr`: padding 1.25rem 1.5rem -> 20px 22px
+- `#tipsterDrillBody`: padding 1rem 1.5rem -> 16px 22px; gap 12px -> 16px
+- Modo compacto: `.card-hdr` 0.55rem 1rem -> 0.55rem 14px; `.card-body` -> 0.1rem 14px 12px; `.kpi` -> 10px 14px; `.tcard` -> 12px 14px 10px
+
+**assets/css/layout.css**
+- `.filters`: border-radius `var(--radius)` 8px -> `var(--r-md)` 12px
+- `.row2`: gap e margin-bottom 12px -> `var(--space-4)` 16px
+- `.month-block`: border-radius 7px -> `var(--r-sm)` 8px; margin-bottom 0.75rem -> `var(--space-4)` 16px
+- Modo compacto card-hdr/card-body/kpi: alinhado com os novos valores normais
+
+**assets/js/charts/performance.js**
+- `_mkOddMediaTh`: tooltip da coluna Odd media simplificado -- so formula, sem descricao
+
+### Commits desta sessao
+- (pendente)
+
+## Proximo passo
+- Verificar visual das paginas principais (overview, tipsters, casas) com novo spacing
+- Pendentes anteriores: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+
+---
+
 ## Estado atual: sub-labels removidos + tooltip Odd Media — COMPLETO (2026-06-11 sessao 21)
 
 ## Sessao 2026-06-11 (sessao 21) — Limpeza de cabecalhos de tabela
