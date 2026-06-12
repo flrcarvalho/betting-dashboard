@@ -1,5 +1,42 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: sub-labels removidos + tooltip Odd Media — COMPLETO (2026-06-11 sessao 21)
+
+## Sessao 2026-06-11 (sessao 21) — Limpeza de cabecalhos de tabela
+
+### Mudancas
+
+**assets/js/charts/shared.js** (buildSummaryTable)
+- Sub-labels (R$, %, qtd) removidos de todos os mkTh calls
+- Alinhamento das colunas numericas ajustado para 'r'
+
+**assets/js/charts/temporal.js** (4 tabelas)
+- tblConsAnual, tblMensalTip, tblDiarioTip, tblSemanaTip: sub-labels removidos
+- Odd Media Pond. substituido por `_mkOddMediaTh('r')` nas 3 tabelas que a tem
+- tblSemanaTip nao tem Odd Media: apenas sub-labels removidos
+
+**assets/js/charts/performance.js** (6 locais)
+- Helper `_mkOddMediaTh(align, width)` criado logo apos `_mkTipAnchor`
+- _casaBreakdownTbl: oddTh vira `_mkOddMediaTh('r','88px')`, R$/% removidos
+- _tipBreakdownTbl: idem
+- casaDrillTblMensal: thead atualizado (R$/% removidos, oddTh via helper)
+- tipDrillTblMensal: idem
+- tblTipComp: header literal substituido por mkTh() + `_mkOddMediaTh('r')`
+- tblResCasa: idem
+
+### Commits desta sessao
+- 484cb03 feat(tabelas): remove sub-labels R$/% e adiciona tooltip Odd media
+
+### Notas
+- `_mkOddMediaTh` e definida em performance.js mas usada em temporal.js (sem problema: todos os scripts sao `defer`, chamados apenas em runtime)
+- `_tipBreakdownTbl` e `_casaBreakdownTbl` eram identicas na parte afetada: replace_all cobriu as duas
+
+## Proximo passo
+- Testar visual: todas as tabelas devem mostrar cabecalhos sem sub-labels; botao (i) de Odd Media funciona em todos os popups
+- Pendente historico: gestao.js — tblCost, tblForn, tblCross, tblCG, tblCT (ainda com formato antigo)
+
+---
+
 ## Estado atual: aba Bookies migrada para padrao .tcard + popup drill-down — COMPLETO (2026-06-11 sessao 20)
 
 ## Sessao 2026-06-11 (sessao 20) — Migracao aba Casas (Bookies)
