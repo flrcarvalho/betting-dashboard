@@ -5,6 +5,13 @@ function _mkTipAnchor(label,formula,desc,bench){
   return `<span class="tip-anchor"><button class="metric-info" type="button" aria-label="Sobre ${label}">i</button><div class="metric-tip" role="tooltip" hidden><span class="metric-tip__caret"></span>${formula?`<div class="metric-tip__formula">${formula}</div>`:''}<div class="metric-tip__desc">${desc}</div>${bench?`<div class="metric-tip__bench">${bench}</div>`:''}</div></span>`;
 }
 
+function _mkOddMediaTh(align='r',width=''){
+  const cls=align==='r'?'th-r':align==='l'?'th-l':'th-c';
+  const wS=width?` style="width:${width}"`:'';
+  const anchor=_mkTipAnchor('Odd média pond.','<span class="lbl">Odd média</span> <span class="op">=</span> Σ(odd <span class="op">×</span> stake) <span class="op">÷</span> Σ(stake)','Média ponderada pelo valor apostado — apostas com <b>stake maior</b> têm mais peso no resultado.','');
+  return`<th class="${cls}"${wS}><span class="th-k">Odd média ${anchor}<span class="sort-icon"></span></span></th>`;
+}
+
 function rodapePValue(pv){
   const ativo=pv<0.001?'robusto':pv<0.05?'significativo':'inconclusivo';
   const corAtivo=ativo==='inconclusivo'?'var(--d-proj)':'var(--d-pos)';
@@ -261,8 +268,8 @@ function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
   }
   const th=dimKey==='tipster'?'Tipster':'Esporte';
   const idAttr=tableId?` id="${tableId}"`:'';
-  const oddTh='<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>';
-  return`<table class="tbl"${idAttr}><thead><tr>${mkTh(th,'','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+oddTh}</tr></thead><tbody>${tRows}</tbody></table>`;
+  const oddTh=_mkOddMediaTh('r','88px');
+  return`<table class="tbl"${idAttr}><thead><tr>${mkTh(th,'','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','','r')+mkTh('ROI','','r')+mkTh('Win Rate','','r')+mkTh('Stake média','','r')+oddTh}</tr></thead><tbody>${tRows}</tbody></table>`;
 }
 
 function renderCasaDrill(rows){
@@ -320,7 +327,7 @@ function renderCasaDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
-      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="casaDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+'<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>'}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="casaDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','','r')+mkTh('ROI','','r')+mkTh('Win Rate','','r')+mkTh('Stake média','','r')+_mkOddMediaTh('r','88px')}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Tipster</div>`+
@@ -662,7 +669,7 @@ function renderTipsterDrill(rows){
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Análise Mensal</div>`+
-      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="tipDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+'<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>'}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="tipDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','','r')+mkTh('ROI','','r')+mkTh('Win Rate','','r')+mkTh('Stake média','','r')+_mkOddMediaTh('r','88px')}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Casa</div>`+
@@ -915,8 +922,8 @@ function _tipBreakdownTbl(rows,dimKey,labelFn,tableId=''){
   }).join('');
   const th=dimKey==='casa'?'Casa':'Esporte';
   const idAttr=tableId?` id="${tableId}"`:'';
-  const oddTh='<th class="th-r" style="width:88px"><span class="th-k">Odd média<span class="sort-icon"></span></span><span class="th-u">pond.</span></th>';
-  return`<table class="tbl"${idAttr}><thead><tr>${mkTh(th,'','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','R$','r')+mkTh('ROI','%','r')+mkTh('Win Rate','%','r')+mkTh('Stake média','R$','r')+oddTh}</tr></thead><tbody>${tRows}</tbody></table>`;
+  const oddTh=_mkOddMediaTh('r','88px');
+  return`<table class="tbl"${idAttr}><thead><tr>${mkTh(th,'','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','','r')+mkTh('ROI','','r')+mkTh('Win Rate','','r')+mkTh('Stake média','','r')+oddTh}</tr></thead><tbody>${tRows}</tbody></table>`;
 }
 
 // Tipsters
@@ -999,7 +1006,7 @@ function renderTipsters(){
     const rc=roi>=0?'color:var(--green)':'color:var(--red)';
     return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td><td>${fmtR(avgStake)}</td></tr>`;
   }).join('');
-  document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr><th>Tipster</th><th style="text-align:right">Bets</th><th style="text-align:right">Win Rate</th><th style="text-align:right">Turnover</th><th style="text-align:right">P/L</th><th style="text-align:right">ROI</th><th style="text-align:right">Odd média</th><th style="text-align:right">Stake média</th></tr></thead><tbody>${compRows}</tbody></table>`;
+  document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr>${mkTh('Tipster','','l')+mkTh('Bets','','r')+mkTh('Win Rate','','r')+mkTh('Turnover','','r')+mkTh('P/L','','r')+mkTh('ROI','','r')+_mkOddMediaTh('r')+mkTh('Stake média','','r')}</tr></thead><tbody>${compRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblTipComp',[1,3,4,5,6,7]),100);
 }
 
@@ -1057,6 +1064,6 @@ function renderResultadosCasa(){
     return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--green)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--red)">L:${d.l2}</span> <span style="color:var(--text3)">V:${d.v}</span></td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc};font-weight:600">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tblEl=document.getElementById('resultadosCasaTable');
-  if(tblEl)tblEl.innerHTML=`<table class="tbl" id="tblResCasa"><thead><tr><th>Casa</th><th style="text-align:right">Bets</th><th>Resultados</th><th style="text-align:right">Win Rate</th><th style="text-align:right">Turnover</th><th style="text-align:right">P/L</th><th style="text-align:right">ROI</th><th style="text-align:right">Odd média</th></tr></thead><tbody>${tblRows}</tbody></table>`;
+  if(tblEl)tblEl.innerHTML=`<table class="tbl" id="tblResCasa"><thead><tr>${mkTh('Casa','','l')+mkTh('Bets','','r')+'<th>Resultados</th>'+mkTh('Win Rate','','r')+mkTh('Turnover','','r')+mkTh('P/L','','r')+mkTh('ROI','','r')+_mkOddMediaTh('r')}</tr></thead><tbody>${tblRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblResCasa',[1,3,4,5,6,7]),100);
 }

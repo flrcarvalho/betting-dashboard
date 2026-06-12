@@ -86,7 +86,7 @@ function renderConsolidado(){
   const resumoAnualHTML=mkCard('cons_resumo',
     `Resumo Anual <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${tlc};margin-left:10px">${fmtPL(totPL)}</span>`,
     `<div style="overflow-x:auto"><table class="tbl" id="tblConsAnual" style="width:100%;font-size:11px">
-      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}${mkTh('Odd média','ponderada','c')}${mkTh('Stake média','R$','r')}</tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}${_mkOddMediaTh('r')}${mkTh('Stake média','','r')}</tr></thead>
       <tbody>${totalAnnualRow}${anualRows}</tbody>
     </table></div>`);
   // Heatmap mensal
@@ -314,7 +314,7 @@ function renderMensal(){
   const wr=setTot>0?((W+HW)/setTot*100):0;
   const tipTableHTML=mkCard('mensal_tiptable','Tipsters — Comparativo do Mês',
     `<div class="tbl-wrap"><table class="tbl" id="tblMensalTip">
-      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('Resultados','','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}${mkTh('Odd média','ponderada','c')}</tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('Resultados','','c')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}${_mkOddMediaTh('r')}</tr></thead>
       <tbody>
         <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${fmtOdd(calcAvgOdd(rows))}</td></tr>
         ${tipTableRows}
@@ -424,7 +424,7 @@ function renderDiario(){
   const tipRc=roi>=0?'color:var(--green)':'color:var(--red)';
   const tipTableHTML=mkCard('diario_tips','Tipsters — Resultados do Dia',
     `<div class="tbl-wrap"><table class="tbl" id="tblDiarioTip">
-      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('Resultados','','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}${mkTh('Odd média','ponderada','c')}</tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('Resultados','','c')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}${_mkOddMediaTh('r')}</tr></thead>
       <tbody>
         <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${fmtOdd(calcAvgOdd(rows))}</td></tr>
         ${tipTableRows}
@@ -695,7 +695,7 @@ function renderSemana(){
   const tipRcW=roi>=0?'color:var(--green)':'color:var(--red)';
   const tipTableHTML2=mkCard('semana_tips','Tipsters — Comparativo da Semana',
     `<div class="tbl-wrap"><table class="tbl" id="tblSemanaTip">
-      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','qtd','c')}${mkTh('Resultados','','c')}${mkTh('P/L','R$','r')}${mkTh('Turnover','R$','r')}${mkTh('ROI','%','c')}${mkTh('Win Rate','%','c')}</tr></thead>
+      <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('Resultados','','c')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}</tr></thead>
       <tbody>
         <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLcW};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRcW}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td></tr>
         ${tipTableRows2}

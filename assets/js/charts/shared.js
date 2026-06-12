@@ -191,7 +191,7 @@ function buildSummaryTable(tableId,label,ents,isCasa=false){
   const tot=ents.reduce((a,[,d])=>({n:a.n+d.n,w:a.w+d.w,t:a.t+d.t,s:a.s+d.s,l:a.l+d.l}),{n:0,w:0,t:0,s:0,l:0});
   const tRoi=tot.s>0?(tot.l/tot.s*100):0,tWr=tot.t>0?(tot.w/tot.t*100):0;
   const tlc=tot.l>=0?'color:var(--green)':'color:var(--red)';const trc=tRoi>=0?'color:var(--green)':'color:var(--red)';
-  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr>${mkTh(label,'','l')}${mkTh('Bets','qtd','c')}${mkTh('Win Rate','%','c')}${mkTh('Turnover','R$','r')}${mkTh('P/L','R$','r')}${mkTh('ROI','%','c')}</tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td class="td-c">${tot.n}</td><td class="td-c">${mkWRC(tWr)}</td><td class="td-num">${fmtR(tot.s)}</td><td class="td-num" style="${tlc}">${fmtPL(tot.l)}</td><td class="td-c" style="${trc}">${fmtPct(tRoi,2)}</td></tr></tbody></table></div>`;
+  return`<div class="tbl-wrap" style="margin-top:.75rem"><table class="tbl" id="${tableId}"><thead><tr>${mkTh(label,'','l')}${mkTh('Bets','','r')}${mkTh('Win Rate','','r')}${mkTh('Turnover','','r')}${mkTh('P/L','','r')}${mkTh('ROI','','r')}</tr></thead><tbody>${rows}<tr class="total-row"><td>Total</td><td class="td-c">${tot.n}</td><td class="td-c">${mkWRC(tWr)}</td><td class="td-num">${fmtR(tot.s)}</td><td class="td-num" style="${tlc}">${fmtPL(tot.l)}</td><td class="td-c" style="${trc}">${fmtPct(tRoi,2)}</td></tr></tbody></table></div>`;
 }
 
 
