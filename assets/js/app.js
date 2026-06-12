@@ -487,7 +487,7 @@ function buildHTML(){
         ${buildFilters('apostas',sports,casas,tipsters)}
         <div id="apostasKPI" style="margin-bottom:1rem"></div>
         <!-- Filter + sort bar -->
-        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:.75rem;flex-wrap:wrap;padding:.75rem 1rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;padding:16px 22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg)">
           <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1">
             ${[['Data',0],['Esporte',1],['Tipster',2],['Casa',3],['Parceiro',4],['Aposta',5],['Descrição',6]].map(([lbl,i])=>`<input class="apostas-filter-inp acf" type="text" placeholder="${lbl}..." oninput="apostasFilter(${i},this.value)">`).join('')}
           </div>

@@ -340,7 +340,7 @@ html[data-theme="light"].t-page-gradient .page-title {
   flex-wrap: wrap;
   align-items: flex-start;
   margin-bottom: var(--space-4);
-  padding: 16px 22px;
+  padding: 20px 22px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);

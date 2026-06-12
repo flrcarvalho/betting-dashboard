@@ -278,7 +278,7 @@ function renderOvCusto(){
     const nContas=allForns.reduce((a,f)=>a+(contaCount[f+'||'+c]||0),0);
     const nPago=allForns.reduce((a,f)=>{const k=f+'||'+c;return a+((custoData[k]||0)>0?(contaCount[k]||0):0);},0);
     const avg=nPago>0?casaTots[c]/nPago:0;
-    return`<div style="background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;display:flex;align-items:center;gap:12px;min-width:220px">
+    return`<div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 22px;display:flex;align-items:center;gap:12px;min-width:220px">
       <div style="flex-shrink:0;transform:scale(1.3)">${casaImg(c,16)||''}</div>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">${c}</div>
@@ -311,7 +311,7 @@ function renderOvCusto(){
       </div>`;
     }).join('');
     const moreCount=casasComCustoF.length-5;
-    return`<div style="background:var(--bg4);border:1px solid var(--border);border-top:2px solid ${color};border-radius:8px;padding:1rem;flex:1;min-width:200px;max-width:340px">
+    return`<div style="background:var(--surface);border:1px solid var(--line);border-top:2px solid ${color};border-radius:var(--r-lg);padding:20px 22px;flex:1;min-width:200px;max-width:340px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
         <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
         <div style="font-size:13px;font-weight:700;color:var(--text)">${f}</div>

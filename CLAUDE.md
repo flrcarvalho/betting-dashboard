@@ -140,6 +140,34 @@ O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de prefer
 - `index.html` tem init script inline que aplica `aparencia_v1` antes do primeiro render (evita FOUC).
 - **Defaults:** gradient, azul, compact, dark.
 
+## Padrão Panelbox — regra de marca obrigatória
+
+Todo container visual (painel, caixa, card de seção, card de entidade) usa:
+
+| Propriedade | Standalone (página) | Dentro de modal/popup |
+|---|---|---|
+| `background` | `var(--surface)` #12161D | `var(--surface-2)` #161B22 |
+| `border` | `1px solid var(--line)` | `1px solid var(--line)` |
+| `border-radius` | `var(--r-lg)` 18px | `var(--r-lg)` 18px |
+| `padding` | `20px 22px` | `20px 22px` |
+| `margin-bottom` | `16px` | — (gap:16px no flex pai) |
+
+**Header de seção:** `display:flex; justify-content:space-between; align-items:center; margin-bottom:16px`
+
+**Tokens proibidos em containers:** `var(--border)` (=line-2, 5%), `var(--bg4)`, `var(--bg3)`, `border-radius:8px` fixo, `border:2px`
+
+**Exceções documentadas (não alterar):**
+- `.card-hdr` / `.card-body` — sub-elementos de `.card`, padding próprio
+- `.stat-card` padding `16px 20px` — `height:130px` fixo impede 20px vertical
+- `.bet-card` — item de scroll virtual, compact intencional
+- `.month-block` — linha colapsável, `var(--r-sm)` intencional
+- `.term-card` — definição de métrica, compact intencional
+- Células do calendário heatmap — componente visual específico
+- Botões 32×32px — `border-radius:8px` é intencional (não são containers)
+- Sticky headers de tabela em `gestao.js` — `var(--bg4)` para adesão ao scroll
+
+---
+
 ## Design system aplicado
 
 - **Topbar:** Manrope 800 22px tracking -0.035em (título) + JetBrains Mono 9px uppercase tracking 0.18em (eyebrow/sub).

@@ -211,7 +211,7 @@ function renderCustoCards(allForns,allCasas,contaCount){
   const avgCostPago=contasComPreco>0?grandCost/contasComPreco:0;
 
   // Card total consolidado
-  const totalCard=`<div style="background:var(--bg4);border:2px solid var(--border2);border-radius:8px;padding:1rem 1.25rem;min-width:200px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center">
+  const totalCard=`<div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 22px;min-width:200px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center">
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace">Total</div>
     <div style="font-size:26px;font-weight:700;color:var(--amber);font-family:'JetBrains Mono',monospace;letter-spacing:-.02em">R$ ${fmt(grandCost,0)}</div>
     <div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-top:4px">${contasComPreco} contas · R$${fmt(avgCostPago,0)}/conta</div>
@@ -239,7 +239,7 @@ function renderCustoCards(allForns,allCasas,contaCount){
       </div>`;
     }).join('');
     const moreCount=casasComCusto.length-5;
-    return`<div style="background:var(--bg4);border:1px solid var(--border);border-top:2px solid ${color};border-radius:8px;padding:1rem;flex:1;min-width:220px;max-width:340px">
+    return`<div style="background:var(--surface);border:1px solid var(--line);border-top:2px solid ${color};border-radius:var(--r-lg);padding:20px 22px;flex:1;min-width:220px;max-width:340px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
         <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
         <div style="font-size:13px;font-weight:700;color:var(--text)">${f}</div>
