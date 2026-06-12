@@ -1,6 +1,36 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: padrao de spacing aplicado em todo o documento — COMPLETO (2026-06-11 sessao 22)
+## Estado atual: spacing unificado em todos os containers — COMPLETO (2026-06-11 sessao 23)
+
+## Sessao 2026-06-11 (sessao 23) — Padronizacao global de panelbox
+
+### Mudancas
+
+**assets/css/components.css**
+- `.card`: bg `--bg3` -> `--surface`; border `--border` -> `--line`
+- `.card-hdr`: padding `0.85rem 22px` -> `16px 22px`; border-bottom `--border` -> `--line`
+- `.kpi`: bg/border idem; radius `--r-md` -> `--r-lg`; padding `16px 20px` -> `20px 22px`
+- `.analise-card`: bg/border padronizados para `--surface` / `--line`
+- `.analise-popup-modal`: `border-radius: 12px` hardcoded -> `var(--r-lg)`
+- `.analise-popup-section`: bg/border padronizados
+- `.stat-card`: bg `--bg4` -> `--surface`; border `--border` -> `--line`; radius `--r-md` -> `--r-lg`; padding `14px 18px` -> `16px 20px`
+- `.tcard`: bg `--surface-2` -> `--surface`; padding `16px 18px 14px` -> `20px 22px 16px`
+
+**assets/css/layout.css**
+- `.filters`: bg/border padronizados; radius `--r-md` -> `--r-lg`; padding `12px 16px` -> `16px 22px`
+- compact `.card-hdr`: `0.55rem 14px` -> `10px 14px`
+- compact `.kpi`: `10px 14px` -> `12px 14px`
+
+### Commits desta sessao
+- 61f62b6 style(spacing): padroniza bg, borda e radius em todos os containers
+
+## Proximo passo
+- Verificar visual das paginas principais (overview, tipsters, casas, esportes) com novo spacing
+- Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+
+---
+
+## Estado anterior: padrao de spacing aplicado em todo o documento — COMPLETO (2026-06-11 sessao 22)
 
 ## Sessao 2026-06-11 (sessao 22) — Padronizacao de spacing e border-radius
 
@@ -29,9 +59,9 @@
 - `_mkOddMediaTh`: tooltip da coluna Odd media simplificado -- so formula, sem descricao
 
 ### Commits desta sessao
-- (pendente)
+- 111e1b0 style(spacing): padroniza padding/radius em todos os containers do documento
 
-## Proximo passo
+## Proximo passo (era)
 - Verificar visual das paginas principais (overview, tipsters, casas) com novo spacing
 - Pendentes anteriores: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
 
