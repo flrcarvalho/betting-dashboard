@@ -139,10 +139,10 @@
 
 /* ── KPI cards ───────────────────────────────────────────────────────────── */
 .kpi {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 20px 22px;
   backdrop-filter: blur(8px);
 }
 .kpi-label {
@@ -185,8 +185,8 @@
 
 /* ── Cards ───────────────────────────────────────────────────────────────── */
 .card {
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
   padding: 0;
   margin-bottom: var(--space-4);
@@ -198,12 +198,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 22px;
+  padding: 16px 22px;
   cursor: pointer;
   user-select: none;
   gap: var(--space-2);
   min-height: 44px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line);
   background: rgba(255,255,255,.012);
 }
 .card-hdr:hover { background: rgba(46,139,255,0.06); }
@@ -441,8 +441,8 @@
   margin-bottom: 1.25rem;
 }
 .analise-card {
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
   padding: 20px 22px;
   cursor: pointer;
@@ -485,7 +485,7 @@
   margin: 0 auto;
   background: var(--bg2);
   border: 1px solid var(--border2);
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   max-height: 85vh;
   overflow-y: auto;
 }
@@ -515,8 +515,8 @@
   gap: 16px;
 }
 .analise-popup-section {
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
   padding: 20px 22px;
   backdrop-filter: blur(8px);
@@ -895,10 +895,10 @@
 
 /* ── Stat cards (performance: esporte / casa / tipster) ─────────────────── */
 .stat-card {
-  background: var(--bg4);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
   height: 130px;
   box-sizing: border-box;
   display: flex;
@@ -1041,10 +1041,10 @@
 @media (max-width: 680px)  { .tcard-grid { grid-template-columns: 1fr; } }
 
 .tcard {
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  padding: 16px 18px 14px;
+  padding: 20px 22px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
