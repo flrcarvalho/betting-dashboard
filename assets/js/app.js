@@ -649,7 +649,7 @@ function buildHTML(){
           <button class="no-export save-drill-btn" onclick="saveDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;flex-shrink:0" title="Baixar PNG"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2v8"/><path d="M4.5 7l3 3 3-3"/><path d="M2 13h11"/></svg></button>
           <button class="no-export" onclick="closeTipsterDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;font-size:15px;flex-shrink:0" title="Fechar">✕</button>
         </div>
-        <div id="tipsterDrillPeriodBar" class="no-export" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+        <div id="tipsterDrillPeriodBar" class="no-export" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
           <button class="qbtn" data-qt="hoje" onclick="setDrillType('hoje')">Hoje</button>
           <button class="qbtn" data-qt="wtd" onclick="setDrillType('wtd')">WTD</button>
           <button class="qbtn" data-qt="mtd" onclick="setDrillType('mtd')">MTD</button>
@@ -683,7 +683,7 @@ function buildHTML(){
           <button class="no-export save-casa-drill-btn" onclick="saveCasaDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;flex-shrink:0" title="Baixar PNG"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 2v8"/><path d="M4.5 7l3 3 3-3"/><path d="M2 13h11"/></svg></button>
           <button class="no-export" onclick="closeCasaDrill()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--fdc-steel);border:1px solid var(--line);color:var(--ink-soft);border-radius:8px;cursor:pointer;font-size:15px;flex-shrink:0" title="Fechar">✕</button>
         </div>
-        <div id="casaDrillPeriodBar" class="no-export" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+        <div id="casaDrillPeriodBar" class="no-export" style="padding:.6rem 1.5rem;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
           <button class="qbtn" data-qt="hoje" onclick="setDrillCasaType('hoje')">Hoje</button>
           <button class="qbtn" data-qt="wtd" onclick="setDrillCasaType('wtd')">WTD</button>
           <button class="qbtn" data-qt="mtd" onclick="setDrillCasaType('mtd')">MTD</button>

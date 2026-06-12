@@ -508,7 +508,8 @@
   color: #fff;
   flex-shrink: 0;
 }
-#tipsterDrillBody {
+#tipsterDrillBody,
+#casaDrillBody {
   padding: 16px 22px;
   display: flex;
   flex-direction: column;
