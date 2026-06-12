@@ -1,6 +1,52 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: spacing unificado em todos os containers — COMPLETO (2026-06-11 sessao 23)
+## Estado atual: padrao panelbox formalizado e aplicado em todos os ambientes — COMPLETO (2026-06-12 sessao 24)
+
+## Sessao 2026-06-12 (sessao 24) — Panelbox como regra de marca + correcoes de popup + varredura global
+
+### Mudancas
+
+**CLAUDE.md (Betting Dashboard)**
+- Secao "Padrao Panelbox" adicionada: tabela canonica (bg/border/radius/padding/mb), tokens proibidos, lista de excecoes documentadas
+
+**assets/css/components.css**
+- `.analise-popup-section`: bg `--surface` -> `--surface-2` (restaura hierarquia visual dentro de modal)
+- `.analise-popup-hdr`: border-bottom `--border` -> `--line`
+- `#casaDrillBody`: regra adicionada (igual ao `#tipsterDrillBody`): padding 16/22, flex col, gap 16px
+- `.tcard`: padding `20px 22px 16px` -> `20px 22px` (uniform)
+
+**assets/css/layout.css**
+- `.filters`: padding `16px 22px` -> `20px 22px`
+
+**assets/js/app.js**
+- `casaDrillPeriodBar` e `tipsterDrillPeriodBar`: border `--border` -> `--line`
+- Barra de filtros da aba Apostas (L490): surface+line+r-lg+16/22 (era bg3+border+8px)
+
+**assets/js/charts/gestao.js**
+- `totalCard` (L214): surface+1px line+r-lg+20/22 (era bg4+2px+8px+1rem)
+- `fornCards` (L242): surface+line+r-lg+20/22 (era bg4+border+8px+1rem)
+
+**assets/js/charts/overview.js**
+- `casaCards` (L281): surface+line+r-lg+16/22 (era bg4+border+8px+.75/1)
+- `fornCards` (L314): surface+line+r-lg+20/22 (era bg4+border+8px+1rem)
+
+### Commits desta sessao
+- 19831dc fix(bookies): aplica padding/gap do panelbox no popup drill-down
+- c91f062 fix(popup): restaura hierarquia de superficie nas secoes dos popups
+- 82b712e feat(brand): formaliza padrao panelbox e aplica em todos os containers
+
+### Excecoes documentadas (nao alterar)
+- `.stat-card` padding 16/20: height 130px fixo
+- `.bet-card`, `.month-block`, `.term-card`: componentes compact intencionais
+- Celulas de calendario, botoes 32px, sticky headers de tabela em gestao.js
+
+## Proximo passo
+- Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+- Visual check: abrir Parceiros, Custos, Apostas e Overview para confirmar cards com novo padrao
+
+---
+
+## Estado anterior: spacing unificado em todos os containers — COMPLETO (2026-06-11 sessao 23)
 
 ## Sessao 2026-06-11 (sessao 23) — Padronizacao global de panelbox
 
@@ -24,7 +70,7 @@
 ### Commits desta sessao
 - 61f62b6 style(spacing): padroniza bg, borda e radius em todos os containers
 
-## Proximo passo
+## Proximo passo (era)
 - Verificar visual das paginas principais (overview, tipsters, casas, esportes) com novo spacing
 - Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
 
