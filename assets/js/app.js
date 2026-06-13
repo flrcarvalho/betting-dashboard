@@ -832,6 +832,72 @@ document.addEventListener('focusout',function(e){
   const btn=e.target.closest('.metric-info');if(!btn)return;_gTip.style.display='none';
 });
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape')_gTip.style.display='none';
+  if(e.key==='Escape'){ _gTip.style.display='none'; _calTip.style.display='none'; }
+});
+
+// Tooltip para células do calendário — segue o cursor, visual idêntico ao .metric-tip
+const _calTip=(()=>{const d=document.createElement('div');d.className='cal-tip';document.body.appendChild(d);return d;})();
+function _showCalTip(cell,cx,cy){
+  const pl  =parseFloat(cell.dataset.pl||0);
+  const n   =parseInt(cell.dataset.n||0);
+  const tv  =parseFloat(cell.dataset.turnover||0);
+  const W   =parseInt(cell.dataset.wins||0);
+  const HW  =parseInt(cell.dataset.hw||0);
+  const L   =parseInt(cell.dataset.losses||0);
+  const HL  =parseInt(cell.dataset.hl||0);
+  const date=cell.dataset.date||'';
+  const roi =tv>0?pl/tv*100:0;
+  const settled=W+HW+L+HL;
+  const wr  =settled>0?(W+HW)/settled*100:0;
+  const sm  =n>0?tv/n:0;
+  const[y,m,d2]=date.split('-');
+  const DIAS_SHORT=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+  const dow=new Date(parseInt(y),parseInt(m)-1,parseInt(d2)).getDay();
+  const dateFmt=`${DIAS_SHORT[dow]}, ${d2} ${(MESES_CURTOS[parseInt(m)-1]||'').toUpperCase()}`;
+  const plSign=pl>0?'+':pl<0?'−':'';
+  const plCls =pl>0?'pos':pl<0?'neg':'';
+  const roiSign=roi>0?'+':roi<0?'−':'';
+  const roiCls=roi>=0?'pos':'neg';
+  const nf=v=>Math.abs(Math.round(v)).toLocaleString('pt-BR');
+  _calTip.innerHTML=`
+    <div class="ct-date">${dateFmt}</div>
+    <div class="ct-pl ${plCls}"><span class="cur">${plSign}R$</span>${nf(pl)}</div>
+    <div class="ct-row">
+      <div class="ct-item"><span class="lbl">ROI</span><span class="val ${roiCls}">${roiSign}${Math.abs(roi).toFixed(2).replace('.',',')}%</span></div>
+      <div class="ct-item"><span class="lbl">Winrate</span><span class="val">${wr.toFixed(1).replace('.',',')}%</span></div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-item"><span class="lbl">Apostas</span><span class="val">${n}</span></div>
+      <div class="ct-item"><span class="lbl">Turnover</span><span class="val"><span class="cur">R$</span>${nf(tv)}</span></div>
+    </div>
+    <div class="ct-row">
+      <div class="ct-item"><span class="lbl">Stake Méd.</span><span class="val"><span class="cur">R$</span>${nf(sm)}</span></div>
+      <div class="ct-item"><span class="lbl">W / L</span><span class="val"><b style="color:var(--pos)">${W}</b> · <b style="color:var(--neg)">${L}</b></span></div>
+    </div>`;
+  _calTip.style.display='block';
+  _calTip.style.visibility='hidden';
+  const tw=_calTip.offsetWidth,th=_calTip.offsetHeight;
+  _calTip.style.visibility='';
+  let left=cx+14;
+  if(left+tw>window.innerWidth-8)left=cx-tw-14;
+  if(left<8)left=8;
+  let top=cy+14;
+  if(top+th>window.innerHeight-8)top=cy-th-14;
+  if(top<8)top=8;
+  _calTip.style.left=left+'px';
+  _calTip.style.top=top+'px';
+}
+document.addEventListener('mouseover',function(e){
+  const cell=e.target.closest('.cal__cell.has');if(!cell)return;
+  _showCalTip(cell,e.clientX,e.clientY);
+});
+document.addEventListener('mousemove',function(e){
+  if(!_calTip.style.display||_calTip.style.display==='none')return;
+  const cell=e.target.closest('.cal__cell.has');
+  if(!cell){_calTip.style.display='none';return;}
+  _showCalTip(cell,e.clientX,e.clientY);
+});
+document.addEventListener('mouseout',function(e){
+  if(e.target.closest('.cal__cell'))_calTip.style.display='none';
 });
 

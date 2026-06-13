@@ -1243,4 +1243,132 @@
                                    background: rgba(255,255,255,.12); }
 .metric-tip__bench .scale i.on  { background: var(--pos); }
 
+/* ── Calendar Heatmap ─────────────────────────────────────────── */
+
+/* Toolbar */
+.cal__bar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.cal__nav {
+  width:32px; height:32px; display:grid; place-items:center;
+  border:1px solid var(--line); border-radius:var(--r-sm);
+  background:var(--surface-2); color:var(--ink-soft);
+  cursor:pointer; font-size:15px; transition:.18s;
+  font-family:var(--font-mono);
+}
+.cal__nav:hover:not(:disabled) { border-color:rgba(46,139,255,.45); color:var(--ink); }
+.cal__nav:disabled { opacity:.32; cursor:default; }
+.cal__month {
+  font-family:var(--font-mono); font-size:13px; font-weight:600;
+  padding:7px 14px; border:1px solid var(--line); border-radius:var(--r-sm);
+  background:var(--surface-2); letter-spacing:.02em;
+  min-width:148px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  color:var(--ink); position:relative;
+}
+.cal__month .caret { color:var(--ink-mute); font-size:10px; pointer-events:none; }
+.cal__legend {
+  margin-left:auto; display:flex; align-items:center; gap:9px;
+  font-family:var(--font-mono); font-size:10px; color:var(--ink-mute); letter-spacing:.05em;
+}
+.cal__legend i {
+  width:120px; height:8px; border-radius:var(--r-pill); display:inline-block;
+  background:linear-gradient(90deg,
+    rgba(229,82,75,.85), rgba(229,82,75,.2) 38%,
+    rgba(255,255,255,.05) 50%,
+    rgba(43,192,126,.2) 62%, rgba(43,192,126,.85));
+}
+
+/* Faixa de resumo */
+.cal__sum { display:flex; align-items:stretch; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+.cal__hero {
+  flex:0 0 auto; min-width:200px;
+  border:1px solid var(--line); border-radius:var(--r-md);
+  background:var(--surface-2); padding:13px 18px;
+  position:relative; overflow:hidden;
+}
+.cal__hero::before {
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent);
+}
+.cal__hero .k {
+  font-family:var(--font-mono); font-size:9px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-mute);
+}
+.cal__hero .v {
+  font-family:var(--font-mono); font-size:28px; font-weight:700;
+  margin-top:8px; letter-spacing:-.02em; line-height:1;
+}
+.cal__hero .v .cur { font-size:.5em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
+.cal__kpis { flex:1 1 400px; display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+.cal__kpi {
+  border:1px solid var(--line); border-radius:var(--r-md);
+  background:var(--surface-2); padding:11px 13px;
+  display:flex; flex-direction:column; gap:4px; min-height:64px;
+}
+.cal__kpi .k {
+  font-family:var(--font-mono); font-size:8.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-mute);
+}
+.cal__kpi .v {
+  font-family:var(--font-mono); font-size:16px; font-weight:600;
+  letter-spacing:-.01em; margin-top:auto;
+}
+.cal__kpi .v .cur { font-size:.65em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
+
+/* Barra de winrate no KPI de Apostas */
+.cal__wr { margin-top:4px; }
+.cal__wr .track { height:4px; border-radius:var(--r-pill); background:rgba(255,255,255,.08); overflow:hidden; }
+.cal__wr .fill { height:100%; border-radius:var(--r-pill); background:var(--accent-2); }
+.cal__wr .brk { font-family:var(--font-mono); font-size:8px; letter-spacing:.04em; color:var(--ink-mute); margin-top:4px; }
+.cal__wr .brk b.w { color:var(--pos); } .cal__wr .brk b.l { color:var(--neg); } .cal__wr .brk b.m { color:var(--ink-soft); }
+
+/* Cabeçalho dias da semana */
+.cal__wk { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:8px; }
+.cal__wk span {
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.1em;
+  color:var(--ink-mute); text-align:center;
+}
+.cal__wk span.we { color:var(--ink-soft); }
+
+/* Grade */
+.cal__grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; grid-auto-rows:62px; }
+
+/* Célula base */
+.cal__cell {
+  border:1px solid var(--line); border-radius:var(--r-sm);
+  position:relative; transition:.16s var(--ease);
+  padding:8px 11px; display:flex; flex-direction:column; justify-content:space-between;
+}
+.cal__cell:not(.empty):not(.offset):hover { border-color:rgba(46,139,255,.5); cursor:pointer; }
+.cal__cell.we { background-color:rgba(255,255,255,.02); }
+.cal__cell.empty { background:transparent !important; border-color:var(--line-2); }
+.cal__cell.offset { background:transparent !important; border-color:transparent; }
+.cal__cell.today { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset; }
+
+/* Conteúdo da célula */
+.cal__cell .top { display:flex; align-items:center; justify-content:space-between; }
+.cal__cell .dn { font-family:var(--font-mono); font-weight:600; font-size:12px; color:var(--ink-soft); }
+.cal__cell.empty .dn { color:var(--ink-mute); }
+.cal__cell .hoje { font-family:var(--font-mono); font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); }
+.cal__cell .pl { font-family:var(--font-mono); font-weight:700; font-size:14px; text-align:right; letter-spacing:-.01em; }
+.cal__cell .pl .cur { font-size:.66em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
+
+/* Tooltip do calendário */
+.cal-tip {
+  display:none; position:fixed; z-index:99999; pointer-events:none;
+  background:var(--elevated); border:1px solid var(--line);
+  border-radius:var(--r-md); padding:12px 14px;
+  min-width:210px; box-shadow:var(--shadow-md);
+  font-family:var(--font-mono);
+}
+.cal-tip .ct-date { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-mute); margin-bottom:6px; }
+.cal-tip .ct-pl { font-size:22px; font-weight:700; letter-spacing:-.02em; margin-bottom:10px; font-variant-numeric:tabular-nums; }
+.cal-tip .ct-pl .cur { font-size:.55em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
+.cal-tip .ct-row { display:flex; gap:16px; margin-bottom:6px; flex-wrap:wrap; }
+.cal-tip .ct-item { display:flex; flex-direction:column; gap:1px; }
+.cal-tip .ct-item .lbl { font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-mute); }
+.cal-tip .ct-item .val { font-size:12px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
+.cal-tip .ct-item .val .cur { font-size:.75em; color:var(--ink-soft); margin-right:1px; }
+.cal-tip .ct-item .val.pos { color:var(--pos); } .cal-tip .ct-item .val.neg { color:var(--neg); }
+
+/* Responsivo */
+@media(max-width:900px) { .cal__kpis { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:620px) { .cal__hero { flex:1 1 100%; } .cal__kpis { grid-template-columns:repeat(2,1fr); } }
 

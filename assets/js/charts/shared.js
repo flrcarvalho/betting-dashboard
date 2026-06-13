@@ -2,7 +2,7 @@
 
 // ── Calendar Heatmap Helper ─────────────────────────────────────────────────
 function mkCalendarHeatmap(selMonth, allDados, opts){
-  // opts: {showNav, onPrev, onNext, onSelect, compact}
+  // opts: {showNav, onPrev, onNext, onSelect}  — compact ignorado (design único)
   opts = opts || {};
   const months = [...new Set(allDados.map(r=>r.data.slice(0,7)))].sort().reverse();
   if(!months.length) return mkEmpty('Sem dados de apostas');
@@ -10,12 +10,21 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const [yr, mo] = cur.split('-');
   const moLabel = MESES[parseInt(mo)-1] + ' ' + yr;
 
-  // Build day→{pl,n} map
+  // Build day→{pl,n,turnover,wins,hw,losses,hl,voids} map
   const dayMap = {};
   allDados.filter(r=>r.data.slice(0,7)===cur).forEach(r=>{
     const d = r.data.slice(0,10);
-    if(!dayMap[d]) dayMap[d]={pl:0,n:0};
-    dayMap[d].pl+=r.lucro; dayMap[d].n++;
+    if(!dayMap[d]) dayMap[d]={pl:0,n:0,turnover:0,wins:0,hw:0,losses:0,hl:0,voids:0};
+    const dm = dayMap[d];
+    dm.pl += r.lucro;
+    dm.n++;
+    dm.turnover += (r.stake||0);
+    const res = r.resultado;
+    if(res==='W') dm.wins++;
+    else if(res==='HW') dm.hw++;
+    else if(res==='L') dm.losses++;
+    else if(res==='HL') dm.hl++;
+    else if(res==='V') dm.voids++;
   });
 
   // Month stats
@@ -24,104 +33,140 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const mN = mRows.length;
   const mTurnover = mRows.reduce((a,r)=>a+(r.stake||0),0);
   const mROI = mTurnover>0 ? mPL/mTurnover*100 : 0;
-  const mSettled = mRows.filter(r=>r.resultado!=='V');
-  const mWins = mSettled.filter(r=>['W','HW'].includes(r.resultado)).length;
-  const mWR = mSettled.length>0 ? mWins/mSettled.length*100 : 0;
-  const mWCount = mRows.filter(r=>r.resultado==='W').length;
+  const mWCount  = mRows.filter(r=>r.resultado==='W').length;
   const mHWCount = mRows.filter(r=>r.resultado==='HW').length;
-  const mLCount = mRows.filter(r=>r.resultado==='L').length;
+  const mLCount  = mRows.filter(r=>r.resultado==='L').length;
   const mHLCount = mRows.filter(r=>r.resultado==='HL').length;
+  const mSettled = mWCount + mHWCount + mLCount + mHLCount;
+  const mWR = mSettled>0 ? (mWCount+mHWCount)/mSettled*100 : 0;
   const mSumOddStake = mRows.reduce((a,r)=>a+((r.odd||0)*(r.stake||0)),0);
-  const mAvgOdd = mTurnover>0 ? mSumOddStake/mTurnover : 0;
+  const mAvgOdd   = mTurnover>0 ? mSumOddStake/mTurnover : 0;
   const mAvgStake = mN>0 ? mTurnover/mN : 0;
-  const plColor = mPL>=0?'var(--green)':'var(--red)';
-  const roiColor = mROI>=0?'var(--green)':'var(--red)';
-  const wrColor = 'var(--ink-soft)';
 
-  // Calendar grid
-  const firstDay = new Date(parseInt(yr), parseInt(mo)-1, 1);
-  const lastDay = new Date(parseInt(yr), parseInt(mo), 0);
-  const daysInMonth = lastDay.getDate();
-  let startDow = firstDay.getDay();
-  startDow = (startDow + 6) % 7; // 0=Mon
-
-  // Proportional opacity: intensity ∝ |P/L| relative to month max
-  const maxAbs=Math.max(...Object.values(dayMap).map(d=>Math.abs(d.pl)),1);
-  const cellStyle=(d)=>{
-    const key=`${yr}-${mo}-${String(d).padStart(2,'0')}`;
-    const data=dayMap[key];
-    if(!data) return {bg:'var(--bg4)',border:'var(--border)',clr:'var(--text3)',pl:null,n:0};
-    const pl=data.pl;
-    const intensity=Math.min(Math.abs(pl)/maxAbs,1)*0.78+0.15;
-    const a=intensity.toFixed(2),ab=(intensity*0.6).toFixed(2);
-    let bg,border,clr='#fff';
-    if(pl>=0){bg=`rgba(43,192,126,${a})`;border=`rgba(43,192,126,${ab})`;}
-    else     {bg=`rgba(229,82,75,${a})`;  border=`rgba(229,82,75,${ab})`;}
-    return{bg,border,clr,pl,n:data.n};
+  // Heatmap: opacidade proporcional ao |P/L|, escala 0.07→0.49
+  const maxAbs = Math.max(1, ...Object.values(dayMap).map(d=>Math.abs(d.pl)));
+  const heatBg = pl => {
+    if(!pl) return '';
+    const t = Math.min(Math.abs(pl)/maxAbs, 1);
+    const op = (0.07 + t*0.42).toFixed(3);
+    const rgb = pl>0 ? '43,192,126' : '229,82,75';
+    return `background:rgba(${rgb},${op})`;
   };
 
-  const compact = opts.compact;
-  const cellH = compact ? '58px' : '76px';
-  const cellFS = compact ? '13px' : '15px';
-  const subFS = compact ? '9px' : '10px';
-
-  const DAYS_SHORT = ['S','T','Q','Q','S','S','D'];
-
-  let cells = '';
-  for(let i=0;i<startDow;i++) cells+=`<div style="background:var(--bg2);border-radius:8px;opacity:.3"></div>`;
+  // Calendário: alinhamento começa na segunda
+  const firstDay = new Date(parseInt(yr), parseInt(mo)-1, 1);
+  const daysInMonth = new Date(parseInt(yr), parseInt(mo), 0).getDate();
+  const startDow = (firstDay.getDay() + 6) % 7; // 0=Seg … 6=Dom
   const today = new Date();
+
+  // Cabeçalho dias da semana
+  const WK_LABELS = ['S','T','Q','Q','S','S','D'];
+  const wkHeader = WK_LABELS.map((l,i)=>`<span${i>=5?' class="we"':''}>${l}</span>`).join('');
+
+  // Células
+  let cells = '';
+  for(let i=0;i<startDow;i++) cells+=`<div class="cal__cell offset"></div>`;
   for(let d=1;d<=daysInMonth;d++){
-    const s=cellStyle(d);
-    const key=`${yr}-${mo}-${String(d).padStart(2,'0')}`;
-    const isToday=(today.getFullYear()===parseInt(yr)&&today.getMonth()===parseInt(mo)-1&&today.getDate()===d);
-    const todayBorder=isToday?'2px solid var(--blue)':'1px solid '+s.border;
-    const plTxt=s.pl!=null?`<div style="font-weight:700;font-size:${cellFS};color:${s.clr};font-variant-numeric:tabular-nums;text-align:right;line-height:1.15;font-family:'JetBrains Mono',monospace">${s.pl>=0?'+':''}${fmtK(s.pl)}</div>`:'';
-    const nTxt=s.n>0?`<div style="font-size:${subFS};color:${s.clr};opacity:.7;text-align:right;line-height:1;font-family:'JetBrains Mono',monospace">${s.n}b</div>`:'';
-    cells+=`<div style="background:${s.bg};border:${todayBorder};border-radius:8px;padding:5px 6px;cursor:${s.n?'pointer':'default'};display:flex;flex-direction:column;justify-content:space-between;min-height:${cellH};position:relative;transition:opacity .1s" ${s.n?`onclick="if(window._calHeatCb)window._calHeatCb('${key}')" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"`:''}>
-      <div style="font-size:${subFS};color:${s.pl!=null?s.clr:'var(--text3)'};font-family:'JetBrains Mono',monospace;font-weight:${isToday?700:500}">${d}</div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">${plTxt}${nTxt}</div>
-    </div>`;
+    const key = `${yr}-${mo}-${String(d).padStart(2,'0')}`;
+    const dm = dayMap[key];
+    const isToday = today.getFullYear()===parseInt(yr) && today.getMonth()===parseInt(mo)-1 && today.getDate()===d;
+    const colIdx = (startDow + d - 1) % 7;
+    const isWE = colIdx >= 5;
+    let cls = 'cal__cell';
+    if(isWE) cls += ' we';
+    if(isToday) cls += ' today';
+    if(dm) {
+      cls += ' has';
+      const plSign = dm.pl>0?'+':dm.pl<0?'−':'';
+      const plCls  = dm.pl>0?'pos':dm.pl<0?'neg':'';
+      const plAbs  = Math.abs(dm.pl);
+      const plFmt  = plAbs>=1000 ? (plAbs/1000).toFixed(1).replace('.',',')+'k' : Math.round(plAbs).toLocaleString('pt-BR');
+      cells += `<div class="${cls}" style="${heatBg(dm.pl)}"
+        data-date="${key}" data-pl="${dm.pl.toFixed(2)}" data-n="${dm.n}"
+        data-turnover="${dm.turnover.toFixed(2)}" data-wins="${dm.wins}"
+        data-hw="${dm.hw}" data-losses="${dm.losses}" data-hl="${dm.hl}" data-voids="${dm.voids}"
+        onclick="if(window._calHeatCb)window._calHeatCb('${key}')">
+        <div class="top">
+          <span class="dn">${d}</span>${isToday?'<span class="hoje">hoje</span>':''}
+        </div>
+        <div class="pl ${plCls}"><span class="cur">${plSign}R$</span>${plFmt}</div>
+      </div>`;
+    } else {
+      cls += ' empty';
+      cells += `<div class="${cls}">
+        <div class="top"><span class="dn">${d}</span>${isToday?'<span class="hoje">hoje</span>':''}</div>
+        ${isToday?'<div class="pl" style="color:var(--ink-mute)">—</div>':''}
+      </div>`;
+    }
   }
 
-  // Nav
-  const idxCur=months.indexOf(cur);
-  const navHTML=opts.showNav?`
-    <div style="display:flex;align-items:center;gap:10px">
-      <button onclick="${opts.onPrev||''}" style="padding:4px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px" ${idxCur>=months.length-1?'disabled':''}>‹</button>
-      <select onchange="${opts.onSelect||''}" style="font-size:13px;font-weight:700;padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:5px;font-family:var(--font-sans)">
-        ${months.map(m=>{const[y2,m2]=m.split('-');return`<option value="${m}"${m===cur?' selected':''}>${MESES[parseInt(m2)-1]} ${y2}</option>`;}).join('')}
-      </select>
-      <button onclick="${opts.onNext||''}" style="padding:4px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px" ${idxCur<=0?'disabled':''}>›</button>
-    </div>
-  `:'<div style="font-size:15px;font-weight:700;color:var(--text)">' + moLabel + '</div>';
+  // Toolbar
+  const idxCur = months.indexOf(cur);
+  let toolbarHTML;
+  if(opts.showNav){
+    const selectOpts = months.map(m=>{
+      const[y2,m2]=m.split('-');
+      return `<option value="${m}"${m===cur?' selected':''}>${MESES[parseInt(m2)-1]} ${y2}</option>`;
+    }).join('');
+    toolbarHTML = `<div class="cal__bar">
+      <button class="cal__nav" onclick="${opts.onPrev||''}" aria-label="Mês anterior"${idxCur>=months.length-1?' disabled':''}>‹</button>
+      <div class="cal__month">
+        ${moLabel}<span class="caret">▾</span>
+        <select onchange="${opts.onSelect||''}" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">${selectOpts}</select>
+      </div>
+      <button class="cal__nav" onclick="${opts.onNext||''}" aria-label="Próximo mês"${idxCur<=0?' disabled':''}>›</button>
+      <div class="cal__legend"><span>perda</span><i></i><span>lucro</span></div>
+    </div>`;
+  } else {
+    toolbarHTML = `<div class="cal__bar"><div class="cal__month" style="pointer-events:none">${moLabel}</div></div>`;
+  }
 
-  // Mini-cards row
-  const mkMini=(label,val,valColor,sub)=>`<div class="kpi" style="padding:.6rem .75rem">
-    <div class="kpi-label" style="font-size:9px">${label}</div>
-    <div class="kpi-val" style="font-size:${compact?'13px':'15px'};color:${valColor||'var(--text)'}">${val}</div>
-    ${sub?`<div class="kpi-sub" style="font-size:8px;line-height:1.3">${sub}</div>`:''}
+  // Hero P/L
+  const heroSign = mPL>0?'+':mPL<0?'−':'';
+  const heroCls  = mPL>0?'pos':mPL<0?'neg':'';
+  const heroAbs  = Math.abs(Math.round(mPL)).toLocaleString('pt-BR');
+  const heroHTML = `<div class="cal__hero">
+    <div class="k">P/L DO MÊS</div>
+    <div class="v ${heroCls}"><span class="cur">${heroSign}R$</span>${heroAbs}</div>
   </div>`;
 
-  const miniCardsHTML=mN>0?`
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:2px">
-      ${mkMini('P/L',fmtPL(mPL),plColor,'')}
-      ${mkMini('Turnover',fmtR(mTurnover),'var(--text)','')}
-      ${mkMini('ROI',fmtPct(mROI,2),roiColor,'')}
-      ${mkMini('Apostas',mN,'var(--text)',`WR: <span style="color:${wrColor}">${fmtPct(mWR,1,false)}</span> · <span class="res-w">W:${mWCount}</span> <span class="res-hw">HW:${mHWCount}</span> <span class="res-l">L:${mLCount}</span> <span class="res-hl">HL:${mHLCount}</span>`)}
-      ${mkMini('Odd Média Pond.',mAvgOdd>0?fmtOdd(mAvgOdd):'—','var(--text)','')}
-      ${mkMini('Stake Média',mAvgStake>0?fmtR(mAvgStake):'—','var(--text)','')}
+  // 5 KPI cards
+  const roiSign = mROI>0?'+':mROI<0?'−':'';
+  const roiCls  = mROI>=0?'pos':'neg';
+  const roiFmt  = Math.abs(mROI).toFixed(2).replace('.',',')+'%';
+  const wrFill  = Math.min(100,Math.max(0,mWR)).toFixed(1);
+  const kpisHTML = mN>0 ? `<div class="cal__kpis">
+    <div class="cal__kpi">
+      <div class="k">Apostas</div>
+      <div class="v">${mN}</div>
+      <div class="cal__wr">
+        <div class="track"><div class="fill" style="width:${wrFill}%"></div></div>
+        <div class="brk">WR ${mWR.toFixed(1).replace('.',',')}% · <b class="w">W:${mWCount}</b>${mHWCount?` <b class="m">HW:${mHWCount}</b>`:''} <b class="l">L:${mLCount}</b>${mHLCount?` <b class="m">HL:${mHLCount}</b>`:''}</div>
+      </div>
     </div>
-  `:'';
+    <div class="cal__kpi">
+      <div class="k">Turnover</div>
+      <div class="v"><span class="cur">R$</span>${Math.round(mTurnover).toLocaleString('pt-BR')}</div>
+    </div>
+    <div class="cal__kpi">
+      <div class="k">ROI</div>
+      <div class="v ${roiCls}">${roiSign}${roiFmt}</div>
+    </div>
+    <div class="cal__kpi">
+      <div class="k">Odd Média Pond.</div>
+      <div class="v">${mAvgOdd>0?fmtOdd(mAvgOdd):'—'}</div>
+    </div>
+    <div class="cal__kpi">
+      <div class="k">Stake Média</div>
+      <div class="v"><span class="cur">R$</span>${mAvgStake>0?Math.round(mAvgStake).toLocaleString('pt-BR'):'—'}</div>
+    </div>
+  </div>` : '';
 
-  return`<div style="display:flex;flex-direction:column;gap:10px;height:100%">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      ${navHTML}
-    </div>
-    ${miniCardsHTML}
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex:1">
-      ${DAYS_SHORT.map(d=>`<div style="text-align:center;font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-weight:700;padding-bottom:2px">${d}</div>`).join('')}
-      ${cells}
-    </div>
+  return `<div style="display:flex;flex-direction:column;gap:0">
+    ${toolbarHTML}
+    ${mN>0?`<div class="cal__sum">${heroHTML}${kpisHTML}</div>`:''}
+    <div class="cal__wk">${wkHeader}</div>
+    <div class="cal__grid">${cells}</div>
   </div>`;
 }
 
