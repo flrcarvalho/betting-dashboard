@@ -1,6 +1,44 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: limpeza de graficos redundantes na pagina Diario — COMPLETO (2026-06-13 sessao 25)
+## Estado atual: redesign do calendario heatmap — COMPLETO (2026-06-13 sessao 26)
+
+## Sessao 2026-06-13 (sessao 26) — Redesign completo do mkCalendarHeatmap
+
+### Mudancas
+
+**assets/js/charts/shared.js**
+- Rewrite de mkCalendarHeatmap: estrutura nova com hero P/L + 5 KPIs (Apostas+WR, Turnover, ROI, Odd Media Pond., Stake Media)
+- Opacidade calibrada 0.07-0.49 (era 0.15-0.93); maxAbs calculado por mes
+- Celulas 62px mostrando so P/L (sem contador "Nb"); data-* attributes para tooltip
+- Toolbar estilizada: botoes .cal__nav + pill .cal__month (select nativo transparente sobreposto) + legend perda/lucro
+- Estado "hoje": borda --accent + anel inset + label "hoje"; celulas vazias: transparente + --line-2; fim de semana: fundo rgba sutil
+- compact ignorado (design unico para as 4 instancias)
+
+**assets/css/components.css**
+- Classes .cal__bar, .cal__nav, .cal__month, .cal__legend adicionadas (toolbar)
+- Classes .cal__sum, .cal__hero, .cal__kpis, .cal__kpi, .cal__wr (resumo)
+- Classes .cal__wk, .cal__grid, .cal__cell e variantes (.we, .empty, .offset, .today, .has)
+- Classe .cal-tip: tooltip fixed com visual identico ao .metric-tip
+
+**assets/js/app.js**
+- _calTip: singleton div .cal-tip appendado ao body
+- _showCalTip(cell, cx, cy): le data-* da celula, calcula ROI/WR/stake-media, formata e posiciona
+- Event delegation: mouseover/mousemove (follow-cursor) + mouseout em .cal__cell
+- Esc fecha _calTip junto com _gTip
+
+### Callers sem mudanca
+- renderOvHeatmap (overview.js), renderConsolidado, renderMensal, renderSemana (temporal.js)
+
+### Commits desta sessao
+- 72af7ce feat(calendar): redesign completo do heatmap mensal
+
+## Proximo passo
+- Verificar na UI real: navegar Mensal e hover nas celulas para confirmar tooltip
+- Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+
+---
+
+## Estado anterior: limpeza de graficos redundantes na pagina Diario — COMPLETO (2026-06-13 sessao 25)
 
 ## Sessao 2026-06-13 (sessao 25) — Remocao de graficos da pagina Diario
 
