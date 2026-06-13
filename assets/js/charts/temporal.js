@@ -431,14 +431,6 @@ function renderDiario(){
       </tbody>
     </table></div>`);
 
-  // Gráfico de barras: P/L por tipster
-  const chartHTML=mkCard('diario_chart','P/L por Tipster',
-    `<div class="chart-wrap" style="height:280px"><canvas id="chartDiarioPL"></canvas></div>`);
-
-  // Gráfico distribuição de resultados (stacked)
-  const chartResHTML=mkCard('diario_res','Distribuição de Resultados',
-    `<div class="chart-wrap" style="height:220px"><canvas id="chartDiarioRes"></canvas></div>`);
-
   // Lista de apostas do dia — card style
   const RES_LABELS_D={W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'};
   const apostasCardsD=rows.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(r=>{
@@ -468,55 +460,9 @@ function renderDiario(){
   }).join('');
   const apostasHTML=mkCard('diario_apostas','Apostas do Dia',`<div>${apostasCardsD}</div>`);
 
-  cont.innerHTML=selectorHTML+kpiHTML+tipTableHTML+chartHTML+chartResHTML+apostasHTML;
+  cont.innerHTML=selectorHTML+kpiHTML+tipTableHTML+apostasHTML;
   setTimeout(()=>{
     makeSortable('tblDiarioTip',[1,3,4,5,6,7]);
-    // tblDiarioApostas replaced with cards
-    // Gráfico P/L por tipster — barras com ROI% e WR% visíveis nas barras
-    const tLabels=tipEnts.map(e=>e[0]);
-    const tVals=tipEnts.map(e=>parseFloat(e[1].pl.toFixed(2)));
-    const tRois=tipEnts.map(e=>e[1].s>0?parseFloat((e[1].pl/e[1].s*100).toFixed(2)):0);
-    const tWrs=tipEnts.map(e=>{const s=e[1].w+e[1].hw+e[1].l+e[1].hl;return s>0?parseFloat(((e[1].w+e[1].hw)/s*100).toFixed(1)):0;});
-    const diarioLabels={id:'diarioLabels',afterDatasetsDraw(chart){
-      const{ctx}=chart;
-      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
-        const pl=tVals[i];const roi=tRois[i];const wr=tWrs[i];
-        if(Math.abs(pl)<0.01)return;
-        ctx.save();
-        ctx.font='bold 11px JetBrains Mono, monospace';
-        ctx.fillStyle='rgba(255,255,255,.92)';
-        ctx.textAlign=pl>=0?'left':'right';
-        ctx.textBaseline='middle';
-        const x=pl>=0?bar.x+6:bar.x-6;
-        ctx.fillText(`ROI ${fmtPct(roi,1)}  WR ${fmtPct(wr,0,false)}`,x,bar.y);
-        ctx.restore();
-      });
-    }};
-    mkChart('chartDiarioPL',{type:'bar',data:{labels:tLabels,datasets:[
-      {type:'bar',data:tVals,backgroundColor:tVals.map(v=>v>=0?'rgba(0,214,143,.75)':'rgba(240,80,110,.75)'),borderRadius:4,label:'P/L (R$)'},
-    ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      layout:{padding:{right:180}},
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>`P/L: ${fmtPL(ctx.raw)}  ROI: ${fmtPct(tRois[ctx.dataIndex],2)}  WR: ${fmtPct(tWrs[ctx.dataIndex],1,false)}`}}},
-      scales:{
-        x:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false}},
-        y:{ticks:{color:tc(),font:{size:11,weight:'600'}},grid:{display:false},border:{display:false}},
-      }},plugins:[diarioLabels]});
-    // Gráfico distribuição resultados por tipster (stacked)
-    const resLabels=tipEnts.map(e=>e[0]);
-    mkChart('chartDiarioRes',{type:'bar',data:{labels:resLabels,datasets:[
-      {label:'W',data:tipEnts.map(e=>e[1].w||0),backgroundColor:'rgba(0,214,143,.8)',borderRadius:2,stack:'s'},
-      {label:'HW',data:tipEnts.map(e=>e[1].hw||0),backgroundColor:'rgba(52,211,153,.7)',borderRadius:2,stack:'s'},
-      {label:'HL',data:tipEnts.map(e=>e[1].hl||0),backgroundColor:'rgba(248,113,113,.7)',borderRadius:2,stack:'s'},
-      {label:'L',data:tipEnts.map(e=>e[1].l||0),backgroundColor:'rgba(240,80,110,.8)',borderRadius:2,stack:'s'},
-      {label:'V',data:tipEnts.map(e=>e[1].v||0),backgroundColor:'rgba(128,128,160,.4)',borderRadius:2,stack:'s'},
-    ]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'top',labels:{color:isDark()?'#eeedf0':'#0f0f18',font:{size:11},boxWidth:10,padding:12}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw}}},
-      scales:{
-        x:{stacked:true,ticks:{color:tc(),font:{size:10}},grid:{color:gc()},border:{display:false}},
-        y:{stacked:true,ticks:{color:tc(),font:{size:11,weight:'600'}},grid:{display:false},border:{display:false}}
-      }}});
   },100);
 }
 window.selectDiario=function(v){window._diarioSelDay=v;renderDiario();}

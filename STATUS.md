@@ -1,6 +1,31 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: padrao panelbox formalizado e aplicado em todos os ambientes — COMPLETO (2026-06-12 sessao 24)
+## Estado atual: limpeza de graficos redundantes na pagina Diario — COMPLETO (2026-06-13 sessao 25)
+
+## Sessao 2026-06-13 (sessao 25) — Remocao de graficos da pagina Diario
+
+### Mudancas
+
+**assets/js/charts/temporal.js**
+- Removido card e canvas `chartDiarioPL` ("P/L por Tipster") — grafico de barras horizontais com labels ROI/WR
+- Removido card e canvas `chartDiarioRes` ("Distribuicao de Resultados") — grafico stacked por resultado
+- Removido codigo de render de ambos os graficos dentro do `setTimeout` (~55 linhas)
+- Mantidos: seletor de dia, KPIs, tabela "Tipsters - Resultados do Dia", lista de apostas
+
+### Commits desta sessao
+- (ver step 4)
+
+### Notas
+- `byTipster` e `tipEnts` preservados — alimentam a tabela que ficou
+- `makeSortable('tblDiarioTip',...)` preservado no setTimeout
+
+## Proximo passo
+- Continuar limpeza de areas nao importantes (a definir na proxima sessao)
+- Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+
+---
+
+## Estado anterior: padrao panelbox formalizado e aplicado em todos os ambientes — COMPLETO (2026-06-12 sessao 24)
 
 ## Sessao 2026-06-12 (sessao 24) — Panelbox como regra de marca + correcoes de popup + varredura global
 
