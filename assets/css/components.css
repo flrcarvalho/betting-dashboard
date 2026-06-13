@@ -1280,40 +1280,45 @@
 .cal__sum { display:flex; align-items:stretch; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
 .cal__hero {
   flex:0 0 auto; min-width:200px;
-  border:1px solid var(--line); border-radius:var(--r-md);
-  background:var(--surface-2); padding:13px 18px;
+  border:1px solid var(--line); border-radius:var(--r-lg);
+  background:var(--surface); padding:13px 18px;
 }
 .cal__hero .k {
-  font-family:var(--font-mono); font-size:9px; letter-spacing:.18em;
+  font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.08em;
   text-transform:uppercase; color:var(--ink-mute);
-  display:flex; align-items:center; gap:6px;
+  display:flex; align-items:center; gap:8px;
 }
 .cal__hero .v {
   font-family:var(--font-mono); font-size:28px; font-weight:700;
   margin-top:8px; letter-spacing:-.02em; line-height:1;
 }
 .cal__hero .v .cur { font-size:.5em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
+.cal__hero .v.pos { color:var(--pos); }
+.cal__hero .v.neg { color:var(--neg); }
 .cal__kpis { flex:1 1 400px; display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
 .cal__kpi {
-  border:1px solid var(--line); border-radius:var(--r-md);
-  background:var(--surface-2); padding:11px 13px;
-  display:flex; flex-direction:column; gap:4px; min-height:64px;
+  border:1px solid var(--line); border-radius:var(--r-lg);
+  background:var(--surface); padding:14px 16px;
+  display:flex; flex-direction:column; gap:4px; min-height:72px;
 }
 .cal__kpi .k {
-  font-family:var(--font-mono); font-size:9px; letter-spacing:.18em;
+  font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.08em;
   text-transform:uppercase; color:var(--ink-mute);
-  display:flex; align-items:center; gap:6px;
+  display:flex; align-items:center; gap:8px;
 }
 .cal__kpi .v {
-  font-family:var(--font-mono); font-size:16px; font-weight:600;
-  letter-spacing:-.01em; margin-top:auto;
+  font-family:var(--font-mono); font-size:22px; font-weight:700;
+  letter-spacing:-.03em; margin-top:auto;
 }
 .cal__kpi .v .cur { font-size:.65em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
+.cal__kpi .v.pos { color:var(--pos); }
+.cal__kpi .v.neg { color:var(--neg); }
+.cal__kpi .v.neu { color:var(--ink); }
 
 /* Barra de winrate no KPI de Apostas */
 .cal__wr { margin-top:4px; }
-.cal__wr .track { height:4px; border-radius:var(--r-pill); background:rgba(255,255,255,.08); overflow:hidden; }
-.cal__wr .fill { height:100%; border-radius:var(--r-pill); background:var(--accent-2); }
+.cal__wr .track { height:5px; border-radius:var(--r-pill); background:rgba(255,255,255,.08); overflow:hidden; }
+.cal__wr .fill { height:100%; border-radius:var(--r-pill); background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
 .cal__wr .brk { font-family:var(--font-mono); font-size:8px; letter-spacing:.04em; color:var(--ink-mute); margin-top:4px; }
 .cal__wr .brk b.w { color:var(--pos); } .cal__wr .brk b.l { color:var(--neg); } .cal__wr .brk b.m { color:var(--ink-soft); }
 
@@ -1347,6 +1352,8 @@
 .cal__cell .hoje { font-family:var(--font-mono); font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-2); }
 .cal__cell .pl { font-family:var(--font-mono); font-weight:700; font-size:14px; text-align:right; letter-spacing:-.01em; }
 .cal__cell .pl .cur { font-size:.66em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
+.cal__cell .pl.pos { color:var(--pos); }
+.cal__cell .pl.neg { color:var(--neg); }
 
 /* Tooltip do calendário */
 .cal-tip {
