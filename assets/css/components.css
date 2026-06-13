@@ -1319,8 +1319,7 @@
 .cal__wr { margin-top:4px; }
 .cal__wr .track { height:5px; border-radius:var(--r-pill); background:rgba(255,255,255,.08); overflow:hidden; }
 .cal__wr .fill { height:100%; border-radius:var(--r-pill); background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
-.cal__wr .brk { font-family:var(--font-mono); font-size:8px; letter-spacing:.04em; color:var(--ink-mute); margin-top:4px; }
-.cal__wr .brk b.w { color:var(--pos); } .cal__wr .brk b.l { color:var(--neg); } .cal__wr .brk b.m { color:var(--ink-soft); }
+.cal__sub { font-family:var(--font-mono); font-size:10px; color:var(--ink-mute); margin-top:4px; letter-spacing:.02em; }
 
 /* Cabeçalho dias da semana */
 .cal__wk { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:8px; }

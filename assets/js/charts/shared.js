@@ -115,7 +115,6 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
         <select onchange="${opts.onSelect||''}" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">${selectOpts}</select>
       </div>
       <button class="cal__nav" onclick="${opts.onNext||''}" aria-label="Próximo mês"${idxCur<=0?' disabled':''}>›</button>
-      <div class="cal__legend"><span>perda</span><i></i><span>lucro</span></div>
     </div>`;
   } else {
     toolbarHTML = `<div class="cal__bar"><div class="cal__month" style="pointer-events:none">${moLabel}</div></div>`;
@@ -128,6 +127,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const heroHTML = `<div class="cal__hero">
     <div class="k"><span class="kpi-pipe"></span> P/L DO MÊS</div>
     <div class="v ${heroCls}"><span class="cur">${heroSign}R$</span>${heroAbs}</div>
+    <div class="cal__sub">${mN} apostas</div>
   </div>`;
 
   // 5 KPI cards
@@ -141,24 +141,28 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
       <div class="v neu">${mWR.toFixed(1).replace('.',',')}%</div>
       <div class="cal__wr">
         <div class="track"><div class="fill" style="width:${wrFill}%"></div></div>
-        <div class="brk">${mN} apostas</div>
       </div>
+      <div class="cal__sub">taxa de acerto</div>
     </div>
     <div class="cal__kpi">
       <div class="k"><span class="kpi-pipe"></span> Turnover</div>
       <div class="v"><span class="cur">R$</span>${Math.round(mTurnover).toLocaleString('pt-BR')}</div>
+      <div class="cal__sub">no mês</div>
     </div>
     <div class="cal__kpi">
       <div class="k"><span class="kpi-pipe"></span> ROI</div>
       <div class="v ${roiCls}">${roiSign}${roiFmt}</div>
+      <div class="cal__sub">Σ(P/L)/Σ(turnover)</div>
     </div>
     <div class="cal__kpi">
       <div class="k"><span class="kpi-pipe"></span> Odd Média Pond.</div>
       <div class="v">${mAvgOdd>0?fmtOdd(mAvgOdd):'—'}</div>
+      <div class="cal__sub">ponderada</div>
     </div>
     <div class="cal__kpi">
       <div class="k"><span class="kpi-pipe"></span> Stake Média</div>
       <div class="v"><span class="cur">R$</span>${mAvgStake>0?Math.round(mAvgStake).toLocaleString('pt-BR'):'—'}</div>
+      <div class="cal__sub">por aposta</div>
     </div>
   </div>` : '';
 
