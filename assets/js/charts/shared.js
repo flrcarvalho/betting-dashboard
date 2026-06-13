@@ -80,7 +80,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
       const plSign = dm.pl>0?'+':dm.pl<0?'−':'';
       const plCls  = dm.pl>0?'pos':dm.pl<0?'neg':'';
       const plAbs  = Math.abs(dm.pl);
-      const plFmt  = plAbs>=1000 ? (plAbs/1000).toFixed(1).replace('.',',')+'k' : Math.round(plAbs).toLocaleString('pt-BR');
+      const plFmt  = Math.round(plAbs).toLocaleString('pt-BR');
       cells += `<div class="${cls}" style="${heatBg(dm.pl)}"
         data-date="${key}" data-pl="${dm.pl.toFixed(2)}" data-n="${dm.n}"
         data-turnover="${dm.turnover.toFixed(2)}" data-wins="${dm.wins}"
@@ -126,7 +126,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const heroCls  = mPL>0?'pos':mPL<0?'neg':'';
   const heroAbs  = Math.abs(Math.round(mPL)).toLocaleString('pt-BR');
   const heroHTML = `<div class="cal__hero">
-    <div class="k">P/L DO MÊS</div>
+    <div class="k"><span class="kpi-pipe"></span> P/L DO MÊS</div>
     <div class="v ${heroCls}"><span class="cur">${heroSign}R$</span>${heroAbs}</div>
   </div>`;
 
@@ -137,27 +137,27 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const wrFill  = Math.min(100,Math.max(0,mWR)).toFixed(1);
   const kpisHTML = mN>0 ? `<div class="cal__kpis">
     <div class="cal__kpi">
-      <div class="k">Apostas</div>
-      <div class="v">${mN}</div>
+      <div class="k"><span class="kpi-pipe"></span> WIN RATE</div>
+      <div class="v neu">${mWR.toFixed(1).replace('.',',')}%</div>
       <div class="cal__wr">
         <div class="track"><div class="fill" style="width:${wrFill}%"></div></div>
-        <div class="brk">WR ${mWR.toFixed(1).replace('.',',')}% · <b class="w">W:${mWCount}</b>${mHWCount?` <b class="m">HW:${mHWCount}</b>`:''} <b class="l">L:${mLCount}</b>${mHLCount?` <b class="m">HL:${mHLCount}</b>`:''}</div>
+        <div class="brk">${mN} apostas</div>
       </div>
     </div>
     <div class="cal__kpi">
-      <div class="k">Turnover</div>
+      <div class="k"><span class="kpi-pipe"></span> Turnover</div>
       <div class="v"><span class="cur">R$</span>${Math.round(mTurnover).toLocaleString('pt-BR')}</div>
     </div>
     <div class="cal__kpi">
-      <div class="k">ROI</div>
+      <div class="k"><span class="kpi-pipe"></span> ROI</div>
       <div class="v ${roiCls}">${roiSign}${roiFmt}</div>
     </div>
     <div class="cal__kpi">
-      <div class="k">Odd Média Pond.</div>
+      <div class="k"><span class="kpi-pipe"></span> Odd Média Pond.</div>
       <div class="v">${mAvgOdd>0?fmtOdd(mAvgOdd):'—'}</div>
     </div>
     <div class="cal__kpi">
-      <div class="k">Stake Média</div>
+      <div class="k"><span class="kpi-pipe"></span> Stake Média</div>
       <div class="v"><span class="cur">R$</span>${mAvgStake>0?Math.round(mAvgStake).toLocaleString('pt-BR'):'—'}</div>
     </div>
   </div>` : '';
