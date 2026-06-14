@@ -73,7 +73,7 @@ body::before {
   line-height: 1.2;
 }
 .logo-sub {
-  font-size: 10px;
+  font-size: var(--text-xxs);
   color: var(--text3);
   font-family: var(--font-mono);
   margin-top: 2px;
@@ -83,7 +83,7 @@ body::before {
 
 .nav-group {
   padding: var(--space-2) var(--space-4) var(--space-1);
-  font-size: 9.5px;
+  font-size: var(--text-nano);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -155,7 +155,7 @@ body::before {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  font-size: 10px;
+  font-size: var(--text-xxs);
   color: var(--text3);
   text-align: center;
   margin-top: var(--space-1);
@@ -222,7 +222,7 @@ body::before {
 .aparencia-panel.open { display: flex; }
 .ap-section { display: flex; flex-direction: column; gap: 7px; }
 .ap-label {
-  font-size: 9px;
+  font-size: var(--text-nano);
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -310,7 +310,7 @@ body::before {
   color: var(--text);
 }
 .page-sub {
-  font-size: 9px;
+  font-size: var(--text-nano);
   color: var(--ink-mute);
   margin-top: 0;
   font-family: var(--font-mono);
@@ -340,7 +340,7 @@ html[data-theme="light"].t-page-gradient .page-title {
   flex-wrap: wrap;
   align-items: flex-start;
   margin-bottom: var(--space-4);
-  padding: 20px 22px;
+  padding: var(--sp-5) var(--sp-6);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
@@ -348,7 +348,7 @@ html[data-theme="light"].t-page-gradient .page-title {
 }
 .filter-group { display: flex; flex-direction: column; gap: 4px; }
 .filter-label {
-  font-size: 9px;
+  font-size: var(--text-nano);
   color: var(--text3);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -409,7 +409,7 @@ html[data-theme="light"].t-page-gradient .page-title {
   font-weight: var(--weight-semibold);
 }
 .month-hdr:hover { background: var(--bg5); }
-.month-tog { font-size: 10px; color: var(--text3); transition: transform 0.2s; }
+.month-tog { font-size: var(--text-xxs); color: var(--text3); transition: transform 0.2s; }
 .month-body { display: none; overflow-x: auto; }
 .month-body.open { display: block; }
 

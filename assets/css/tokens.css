@@ -83,8 +83,11 @@
   --font-sans: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
 
+  --text-nano: 9px;
+  --text-xxs:  10px;
   --text-xs:   11px;
   --text-sm:   13px;
+  --text-md:   14px;
   --text-base: 15px;
   --text-lg:   18px;
   --text-xl:   22px;
@@ -97,25 +100,27 @@
   --weight-bold:      700;
   --weight-extrabold: 800;
 
-  /* ---- Espaçamento (escala 4px) ---- */
-  --space-1:  4px;  --space-2:  8px;  --space-3: 12px; --space-4: 16px;
-  --space-6: 24px;  --space-8: 32px;  --space-12: 48px; --space-16: 64px;
+  /* ---- Espaçamento (escala 4px) — canônico: --sp-* ---- */
   --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px;
   --sp-5: 20px; --sp-6: 24px;  --sp-8: 32px; --sp-10: 40px;
   --sp-14: 56px; --sp-20: 80px;
+  /* deprecated — usar --sp-* em código novo */
+  --space-1:  4px;  --space-2:  8px;  --space-3: 12px; --space-4: 16px;
+  --space-6: 24px;  --space-8: 32px;  --space-12: 48px; --space-16: 64px;
 
-  /* ---- Raio ---- */
-  --radius-sm:   4px;
-  --radius:      8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-pill: 100px;
+  /* ---- Raio — canônico: --r-* ---- */
   --r-xs:  4px;
   --r-sm:  8px;
   --r-md:  12px;
   --r-lg:  18px;
   --r-xl:  26px;
   --r-pill: 999px;
+  /* deprecated — usar --r-* em código novo */
+  --radius-sm:   4px;
+  --radius:      8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 100px;
 
   /* ---- Diagnóstico / camada de risco (--d-*) ---- */
   --d-pos:         #4FC79A;
