@@ -85,6 +85,46 @@ function renderSport(rows){
   _sportEnts=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined');
   _sportDays=dayMap;
   _sportAllDays=[...new Set(rows.map(r=>r.data.slice(0,10)))].sort();
+
+  // Portfolio KPIs
+  const portPL=rows.reduce((a,r)=>a+r.lucro,0);
+  const portS=rows.reduce((a,r)=>a+r.stake,0);
+  const portROI=portS>0?(portPL/portS*100):0;
+  const posCount=_sportEnts.filter(([,d])=>d.l>0).length;
+  const negCount=_sportEnts.filter(([,d])=>d.l<0).length;
+  const totalSp=_sportEnts.length;
+  const portDayMap={};rows.forEach(r=>{const dk=r.data.slice(0,10);portDayMap[dk]=(portDayMap[dk]||0)+r.lucro;});
+  const portDays=Object.keys(portDayMap).sort();
+  let pCum=0;const portVals=portDays.map(d=>{pCum+=portDayMap[d];return parseFloat(pCum.toFixed(2));});
+  const portSpark=portVals.length>=2?mkSparkline(portVals,96,26):'';
+  const plCls=portPL>=0?'pos':'neg';
+  const roiCls=portROI>=0?'pos':'neg';
+  const kpiEl=document.getElementById('sportPortfolioKPIs');
+  if(kpiEl){
+    kpiEl.innerHTML=
+      `<div class="kpi" style="position:relative">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> P/L Total</div>`+
+        `<div class="kpi-val ${plCls}">${fmtPL(portPL)}</div>`+
+        `<div class="kpi-sub">resultado total</div>`+
+        (portSpark?`<div class="kpi-sparkline">${portSpark}</div>`:'')+
+      `</div>`+
+      `<div class="kpi">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> ROI</div>`+
+        `<div class="kpi-val ${roiCls}">${fmtPct(portROI,2)}</div>`+
+        `<div class="kpi-sub">Σ(P/L) / Σ(turnover)</div>`+
+      `</div>`+
+      `<div class="kpi">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> Esportes Positivos</div>`+
+        `<div class="kpi-val neu">${posCount} / ${totalSp}</div>`+
+        `<div class="kpi-sub">▲ ${posCount} · ▼ ${negCount} no vermelho</div>`+
+      `</div>`+
+      `<div class="kpi">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span> Turnover Total</div>`+
+        `<div class="kpi-val neu">${fmtR(portS)}</div>`+
+        `<div class="kpi-sub">${rows.length.toLocaleString('pt-BR')} apostas</div>`+
+      `</div>`;
+  }
+
   _renderSportCards();
 
   const ents=[..._sportEnts].sort((a,b)=>b[1].l-a[1].l);
