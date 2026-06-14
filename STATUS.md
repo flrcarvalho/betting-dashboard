@@ -33,11 +33,28 @@
 - c19db49 feat(sports): fase 3 -- migracao .stat-card -> .tcard
 - dd1b8d8 feat(sports): KPIs de portfolio acima dos cards
 
-### Proximo passo (sessao 29)
-- Fase 4: KPI summary nas paginas de Gestao (Custos de Contas, Custo de Tipsters, Fornecedores)
-- Fase 5: migrar aliases JS legados (--blue -> --accent, --text2 -> --ink-soft, etc.)
-- Fase 6: screenshots pos-implementacao (rodar docs/screenshot_pages.js e atualizar UI_REFERENCE_BOARD.md)
-- Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+### Sessao 29 (2026-06-14) — Design System: KPIs de Gestao, aliases e screenshots — COMPLETO
+
+#### Fase 4 — KPI summary nas paginas de Gestao
+- Fase 4: KPI strips em Fornecedores & Parceiros (8 KPIs, mkKpiGrid), Custos de Contas (4 KPIs, _renderCustosKpi, tempo real), Custo de Tipsters (4 KPIs, prepend no innerHTML)
+- Ancoras #parcKpiGrid e #custosKpi adicionadas em app.js
+
+#### Fase 5 — Aliases legados migrados
+- 10 arquivos (JS + CSS): 381 substituicoes, zero aliases legados remanescentes
+- --blue->--accent, --green->--pos, --red->--neg, --amber->--warn, --text->--ink, --text2->--ink-soft, --text3->--ink-mute, --bg3->--surface-2, --bg4->--field, --bg5->--elevated, --border->--line-2, --border2->--line
+
+#### Fase 6 — Screenshots e documentacao
+- 14 screenshots recapturados via docs/screenshot_pages.js (Playwright)
+- UI_REFERENCE_BOARD.md atualizado com estado pos-implementacao
+- CLAUDE.md e STATUS.md atualizados (sessao 29, auditoria pos-implementacao)
+
+### Commits da sessao 29
+- 7505c03 feat(gestao): fase 4 -- KPI strips nas paginas de gestao
+- 93dfa97 refactor(tokens): fase 5 -- aliases legados para tokens canonicos
+- 2a4a252 docs(screenshots): fase 6 -- board e screenshots pos-implementacao
+
+### Pendente historico (nao prioritario)
+- gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
 
 ---
 

@@ -25,14 +25,18 @@ assets/js/
   filters.js            → lógica de filtros (data, período rápido, multiselect por esporte/casa/tipster)
   charts/
     shared.js           → mkCalendarHeatmap, mkSparkline, mkKpiGrid, toggleBlock, buildSummaryTable,
-                          mkStatCards, mkOneStatCard, mkWRC(wr), mkEmpty(msg), constantes APOSTAS_COLS/CARD_H
+                          mkWRC(wr), mkEmpty(msg), constantes APOSTAS_COLS/CARD_H
     gestao.js           → custoData, buildCostState, renderParceiros, renderCustos,
                           renderCustoTipster, renderCustoCards, renderMetrics
+                          + _renderCustosKpi — faixa de 4 KPIs em #custosKpi (atualiza em tempo real)
     overview.js         → renderKPI, renderBankroll, renderROIMonthly, renderOddsDist,
                           renderHeatmap, renderOvHeatmap, renderOvStreaks, renderOvCusto
     temporal.js         → renderConsolidado, renderMensal, renderDiario, renderSemana
                           (+ getAvailableMonths/Days/Weeks e helpers de navegação)
     performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
+                          + _sportEnts, _sportDays, _sportAllDays, _sportSort (estado sort Esportes)
+                          + _mkSportCard, _renderSportCards — grid .tcard para esportes
+                          + window.sportSortBy(k), window.sportSortDir() — sort bar Esportes
                           + _casaEnts, _casaDays, _casaAllDays, _casaSort (estado sort Bookies)
                           + _mkCasaCard, _renderCasaCards — grid .tcard para casas
                           + window.casaSortBy(k), window.casaSortDir() — sort bar Bookies
@@ -154,11 +158,27 @@ Todo container visual (painel, caixa, card de seção, card de entidade) usa:
 
 **Header de seção:** `display:flex; justify-content:space-between; align-items:center; margin-bottom:16px`
 
-**Tokens proibidos em containers:** `var(--border)` (=line-2, 5%), `var(--bg4)`, `var(--bg3)`, `border-radius:8px` fixo, `border:2px`
+**Tokens proibidos em containers:** `var(--line-2)` (=border sutil, 5%), `border-radius:8px` fixo, `border:2px`
+
+**Aliases legados — NÃO usar em código novo** (existem em `tokens.css` apenas como backward-compat):
+
+| Alias legado | Token canônico |
+|---|---|
+| `--blue` | `--accent` |
+| `--green` | `--pos` |
+| `--red` | `--neg` |
+| `--amber` | `--warn` |
+| `--text` | `--ink` |
+| `--text2` | `--ink-soft` |
+| `--text3` | `--ink-mute` |
+| `--bg3` | `--surface-2` |
+| `--bg4` | `--field` |
+| `--bg5` | `--elevated` |
+| `--border` | `--line-2` |
+| `--border2` | `--line` |
 
 **Exceções documentadas (não alterar):**
 - `.card-hdr` / `.card-body` — sub-elementos de `.card`, padding próprio
-- `.stat-card` padding `16px 20px` — `height:130px` fixo impede 20px vertical
 - `.bet-card` — item de scroll virtual, compact intencional
 - `.month-block` — linha colapsável, `var(--r-sm)` intencional
 - `.term-card` — definição de métrica, compact intencional
@@ -189,8 +209,7 @@ Todo container visual (painel, caixa, card de seção, card de entidade) usa:
 - **`.sport-emoji`**: classe legada com `filter: grayscale(1)` — ainda usada em chart labels do `performance.js`. Em todos os outros contextos (tabelas, cards, apostas) usar `.sp-chip` via `mkSpChip()`.
 - **`.wrc`** (`mkWRC(wr)` em `shared.js`): componente de Win Rate — número em cima + barra proporcional azul (`--accent-2`) abaixo. Largura fixa 76px em tabelas. Em cards KPI, override `.kpi .wrc { width:100% }` e `.kpi .wrc .t { width:100% }` fazem a barra ocupar toda a largura sem repetir o número (já está no `.kpi-val`).
 - **`.empty-state`** (`mkEmpty(msg)` em `shared.js`): estado vazio reutilizável — ícone inbox SVG neutro + mensagem JetBrains Mono. Usar em toda view/tabela que pode ficar sem dados no período selecionado.
-- **`.stat-card-*`**: classes CSS para os cards de resumo por entidade (esporte/casa). Rodapé em 3 colunas — ROI (colorido) · Turnover (neutro) · WR (neutro) — com `border-right` como divisória. P/L é o elemento hero do card. Callers: `renderSport`, `renderCasa` em `performance.js`. **`renderTipsters` migrou para `.tcard` (T-1).**
-- **`.tcard` / `.nametag`** (`components.css`, T-1): card redesenhado para a aba Tipsters. Estrutura: `.tcard__top` (`.nametag` steel neutro + volume), `.tcard__hero` (P/L 22px + badge ROI), `.tcard__spark` (sparkline SVG real via `_tipSparkSVG`), `.tcard__foot` (4 colunas: Turnover · Stake Média · Odd Média Pond. · Win Rate com mini-barra `--ink-mute`). Odd Média Pond. = `Σ(odd×stake)/Σ(stake)` — acumulada em `tipMap[t].wt` e `tipMap[t].stk` no loop de `renderTipsters`. Grid 3 colunas (`.tcard-grid`); sort segmentado por `.tcard-seg` (P/L · ROI · Turnover · Win Rate · Volume). Sort state em `_tipsterSort` module-level — persiste entre re-renders de filtro. Win Rate sempre neutro (`--ink-mute`). `R$` sinal: `.tcard__cur` com `color: var(--ink-soft)` mesmo dentro de `.tcard__pl.pos/.neg`. Cada card tem `data-name` com o nome do tipster; clique abre `openTipsterDrill(name)` via event delegation no container `#tipsterKpiCards`.
+- **`.tcard` / `.nametag`** (`components.css`): card canônico para cards de entidade — usado em **Esportes, Bookies e Tipsters**. Estrutura: `.tcard__top` (`.nametag` steel neutro + volume), `.tcard__hero` (P/L 22px + badge ROI), `.tcard__spark` (sparkline SVG real via `_tipSparkSVG`), `.tcard__foot` (4 colunas: Turnover · Stake Média · Odd Média Pond. · Win Rate com mini-barra `--ink-mute`). Grid 3 colunas (`.tcard-grid`); sort bar (`.tcard-seg`) com P/L · ROI · Turnover · Win Rate · Volume. Sort state module-level persiste entre re-renders. Win Rate sempre neutro (`--ink-mute`). `R$` sinal: `.tcard__cur` com `color: var(--ink-soft)`. Clique no card abre drill-down do tipster/casa via event delegation. **`.stat-card-*` foi removido** (Fase 3, commit c19db49) — não reintroduzir.
 - **Popup drill-down de tipster** (`#tipsterDrillOverlay` / `#tipsterDrillModal`, T-6): overlay usa classes `.analise-popup-overlay` + `.analise-popup-modal` já existentes. `openTipsterDrill` faz `overlay.style.display='flex'` (não `'block'`). Canvas `tipsterDrillLine` criado APÓS `display='flex'`. Fecha por `‹ Tipsters`, clique no overlay e Esc. `.analise-popup-modal` tem `max-height:85vh; overflow-y:auto` — não criar modal novo, reusar padrão.
 - **`.analise-popup-overlay`** (posicionamento): NÃO usar `display='block'` — usar `display='flex'`. `.analise-popup-modal` tem `max-height:85vh; overflow-y:auto; width:100%`.
 - **Cabeçalho do popup drill-down** (T-6.5+): logo 28px (mesmo nível do topbar) + botão `‹ Tipsters` (pill steel, fecha o popup) + nome 22px bold + badge DRILL-DOWN (pill borda azul) + `#tipsterDrillMeta` (linha mono muted: "N apostas · jan-jun 2026 · atualizado há X min"). O `#tipsterDrillMeta` é populado em `openTipsterDrill` usando `window._dataLoadMs` (armazenado em `loadData`) e `MESES_CURTOS` para o range de meses.
