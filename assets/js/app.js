@@ -472,7 +472,7 @@ function buildHTML(){
       <!-- ESPORTES -->
       <div class="page" id="page-sports">
         ${buildFilters('sports',sports,casas)}
-        ${mkCard('sport_kpi','Resumo por Esporte','<div id="sportKpiCards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.5rem"></div>')}
+        ${mkCard('sport_kpi','Resumo por Esporte','<div class="tcard-sort"><span class="tcard-sort__lbl">Ordenar</span><div class="tcard-seg" id="sportSeg"><button data-k="pl" class="active" onclick="sportSortBy(this.dataset.k)">P/L</button><button data-k="roi" onclick="sportSortBy(this.dataset.k)">ROI</button><button data-k="to" onclick="sportSortBy(this.dataset.k)">Turnover</button><button data-k="wr" onclick="sportSortBy(this.dataset.k)">Win Rate</button><button data-k="vol" onclick="sportSortBy(this.dataset.k)">Volume</button></div><button class="tcard-dir" id="sportDir" onclick="sportSortDir()">↓</button></div><div class="tcard-grid" id="sportKpiCards"></div>')}
         ${mkCard('sport_chart','P/L por Esporte','<div id="sportTable"></div><div class="chart-wrap" style="min-height:300px;margin-top:.75rem"><canvas id="chartSport" role="img" aria-label="Esportes"></canvas></div>')}
       </div>
 

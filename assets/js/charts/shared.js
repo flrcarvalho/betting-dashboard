@@ -244,56 +244,6 @@ function buildSummaryTable(tableId,label,ents,isCasa=false){
 }
 
 
-// ── Shared stat card builder (6-per-row grids) ──────────────────────────────
-function mkStatCards(items, containerId){
-  const el = document.getElementById(containerId);
-  if(!el) return;
-  if(!items.length){el.style.display='block';el.innerHTML=mkEmpty();return;}
-  // Single flat grid — 6 equal columns always — browser handles wrapping
-  // Placeholder divs on last row keep all cards the same size
-  const COLS = 6;
-  const remainder = items.length % COLS;
-  const placeholders = remainder === 0 ? 0 : COLS - remainder;
-  let html = items.join('');
-  for(let i=0;i<placeholders;i++){
-    // Invisible placeholder — same structure as a card but transparent
-    html += `<div style="height:130px;box-sizing:border-box;visibility:hidden"></div>`;
-  }
-  el.style.display = 'grid';
-  el.style.gridTemplateColumns = 'repeat(6,1fr)';
-  el.style.gap = '10px';
-  el.innerHTML = html;
-}
-
-function mkOneStatCard(icon, name, pl, roi, turnover, bets, wr){
-  const plColor = pl>=0 ? 'var(--green)' : 'var(--red)';
-  const roiColor = roi>=0 ? 'var(--green)' : 'var(--red)';
-  const roiStr = fmtPct(roi,1);
-  const wrVal = typeof wr === 'number' ? fmtPct(wr,1,false) : (wr||'—');
-  return `<div class="stat-card">
-    <div class="stat-card-hdr">
-      ${icon}
-      <span class="stat-card-name">${name}</span>
-      <span class="stat-card-bets">${bets}b</span>
-    </div>
-    <div class="stat-card-pl" style="color:${plColor}">${fmtPL(pl)}</div>
-    <div class="stat-card-footer">
-      <div class="stat-card-col">
-        <span class="stat-card-lbl">ROI</span>
-        <span class="stat-card-val" style="color:${roiColor}">${roiStr}</span>
-      </div>
-      <div class="stat-card-col">
-        <span class="stat-card-lbl">Turnover</span>
-        <span class="stat-card-val">${fmtR(turnover)}</span>
-      </div>
-      <div class="stat-card-col">
-        <span class="stat-card-lbl">WR</span>
-        <span class="stat-card-val">${wrVal}</span>
-      </div>
-    </div>
-  </div>`;
-}
-
 // Apostas — constantes globais (devem vir antes do buildHTML)
 // ── Sparkline ────────────────────────────────────────────────────────────────
 function mkSparkline(data,w=88,h=28){

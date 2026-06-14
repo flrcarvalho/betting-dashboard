@@ -21,18 +21,73 @@ function rodapePValue(pv){
   return seg('&gt;&nbsp;0,05','inconclusivo')+' · '+seg('&lt;&nbsp;0,05','significativo')+' · '+seg('&lt;&nbsp;0,001','robusto');
 }
 
-function renderSport(rows){
-  const map={};rows.forEach(r=>{if(!map[r.esporte])map[r.esporte]={l:0,s:0,n:0,w:0,t:0};map[r.esporte].l+=r.lucro;map[r.esporte].s+=r.stake;map[r.esporte].n++;if(r.resultado!=='V'){map[r.esporte].t++;if(['W','HW'].includes(r.resultado))map[r.esporte].w++;}});
-  const ents=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined').sort((a,b)=>b[1].l-a[1].l);
+// ── Sport tcard helpers ──────────────────────────────────────────────────────
+let _sportEnts=null,_sportDays=null,_sportAllDays=null;
+let _sportSort={k:'pl',dir:1};
 
-  // KPI cards sorted by turnover, 6/row
-  const entsByTurnover = [...ents].sort((a,b)=>b[1].s-a[1].s);
-  const sportCards = entsByTurnover.map(([sport,d])=>{
-    const roi=d.s>0?(d.l/d.s*100):0;
-    const wr=d.t>0?(d.w/d.t*100):0;
-    return mkOneStatCard(mkSpChip(sport), sport, d.l, roi, d.s, d.n, wr);
+function _mkSportCard(sport,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
+  const plSign=pl>=0?'+':'−';
+  const plCls=pl>=0?'pos':'neg';
+  const roiCls=roi>=0?'pos':'neg';
+  const plAmt=Math.abs(pl).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const stakeInt=Math.round(stake).toLocaleString('pt-BR');
+  const avgStakeStr=Math.round(avgStake||0).toLocaleString('pt-BR');
+  const avgOddStr=fmtOdd(avgOdd);
+  const betsStr=bets.toLocaleString('pt-BR');
+  const roiStr=fmtPct(roi,1);
+  const wrStr=fmtPct(wr,1,false);
+  const wrPct=Math.min(wr,100).toFixed(1);
+  const esc=sport.replace(/"/g,'&quot;');
+  return`<div class="tcard">`
+    +`<div class="tcard__top"><span class="tcard__casa-hdr">${mkSpChip(sport)}<span class="nametag__nm" title="${esc}">${sport}</span></span><span class="tcard__vol"><b>${betsStr}</b>apostas</span></div>`
+    +`<div class="tcard__hero"><span class="tcard__pl ${plCls}"><span class="tcard__cur">${plSign} R$</span>${plAmt}</span><div class="tcard__roi"><span class="tcard__roi-lbl">ROI</span><span class="tcard__roi-val ${roiCls}">${roiStr}</span></div></div>`
+    +sparkSVG
+    +`<div class="tcard__foot">`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Stake Média</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${avgStakeStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div>`
+    +`</div>`
+    +`</div>`;
+}
+
+function _renderSportCards(){
+  const el=document.getElementById('sportKpiCards');
+  if(!el||!_sportEnts)return;
+  if(!_sportEnts.length){el.innerHTML=mkEmpty('Nenhum esporte no período');return;}
+  const{k,dir}=_sportSort;
+  const fns={pl:([,d])=>d.l,roi:([,d])=>d.s>0?d.l/d.s*100:0,to:([,d])=>d.s,wr:([,d])=>d.t>0?d.w/d.t*100:0,vol:([,d])=>d.n};
+  const fn=fns[k]||fns.pl;
+  const sorted=[..._sportEnts].sort((a,b)=>dir*(fn(b)-fn(a)));
+  el.innerHTML=sorted.map(([sport,d])=>{
+    const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
+    const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
+    return _mkSportCard(sport,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_sportDays[sport]||{},_sportAllDays),avgStake,avgOdd);
+  }).join('');
+  document.querySelectorAll('#sportSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
+  const dirBtn=document.getElementById('sportDir');
+  if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
+}
+window.sportSortBy=function(k){_sportSort.k=k;_sportSort.dir=1;_renderSportCards();};
+window.sportSortDir=function(){_sportSort.dir*=-1;_renderSportCards();};
+
+function renderSport(rows){
+  const map={},dayMap={};
+  rows.forEach(r=>{
+    if(!map[r.esporte])map[r.esporte]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
+    map[r.esporte].l+=r.lucro;map[r.esporte].s+=r.stake;map[r.esporte].n++;
+    if(r.resultado!=='V'){map[r.esporte].t++;if(['W','HW'].includes(r.resultado))map[r.esporte].w++;}
+    if(r.odd>0&&r.stake>0){map[r.esporte].wt+=r.odd*r.stake;map[r.esporte].stk+=r.stake;}
+    const dk=r.data.slice(0,10);
+    if(!dayMap[r.esporte])dayMap[r.esporte]={};
+    dayMap[r.esporte][dk]=(dayMap[r.esporte][dk]||0)+r.lucro;
   });
-  mkStatCards(sportCards, 'sportKpiCards');
+  _sportEnts=Object.entries(map).filter(e=>e[0]&&e[0]!=='undefined');
+  _sportDays=dayMap;
+  _sportAllDays=[...new Set(rows.map(r=>r.data.slice(0,10)))].sort();
+  _renderSportCards();
+
+  const ents=[..._sportEnts].sort((a,b)=>b[1].l-a[1].l);
 
   // Tabela ACIMA do gráfico
   document.getElementById('sportTable').innerHTML=buildSummaryTable('tblSport','Esporte',ents);
