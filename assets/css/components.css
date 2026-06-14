@@ -1281,16 +1281,16 @@
 .cal__hero {
   flex:0 0 auto; min-width:200px;
   border:1px solid var(--line); border-radius:var(--r-lg);
-  background:var(--surface); padding:13px 18px;
+  background:var(--surface); padding:20px 22px;
 }
 .cal__hero .k {
   font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.08em;
   text-transform:uppercase; color:var(--ink-mute);
-  display:flex; align-items:center; gap:8px;
+  display:flex; align-items:center; margin-bottom:5px;
 }
 .cal__hero .v {
-  font-family:var(--font-mono); font-size:28px; font-weight:700;
-  margin-top:8px; letter-spacing:-.02em; line-height:1;
+  font-family:var(--font-mono); font-size:28px; font-weight:800;
+  letter-spacing:-.03em; line-height:1; text-align:right;
 }
 .cal__hero .v .cur { font-size:.5em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
 .cal__hero .v.pos { color:var(--pos); }
@@ -1298,17 +1298,17 @@
 .cal__kpis { flex:1 1 400px; display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
 .cal__kpi {
   border:1px solid var(--line); border-radius:var(--r-lg);
-  background:var(--surface); padding:14px 16px;
-  display:flex; flex-direction:column; gap:4px; min-height:72px;
+  background:var(--surface); padding:20px 22px;
+  display:flex; flex-direction:column; min-height:0;
 }
 .cal__kpi .k {
   font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.08em;
   text-transform:uppercase; color:var(--ink-mute);
-  display:flex; align-items:center; gap:8px;
+  display:flex; align-items:center; margin-bottom:5px;
 }
 .cal__kpi .v {
-  font-family:var(--font-mono); font-size:22px; font-weight:700;
-  letter-spacing:-.03em; margin-top:auto;
+  font-family:var(--font-mono); font-size:28px; font-weight:800;
+  letter-spacing:-.03em; line-height:1; text-align:right; margin-top:auto;
 }
 .cal__kpi .v .cur { font-size:.65em; color:var(--ink-soft); font-weight:600; margin-right:2px; }
 .cal__kpi .v.pos { color:var(--pos); }
