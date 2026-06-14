@@ -23,22 +23,18 @@
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
 
-  <!-- Aparência init: aplica preferências antes do render para evitar flash -->
+  <!-- Aparência init: aplica tema antes do render para evitar flash -->
   <script>
     (function() {
-      var defaults={titlePage:'gradient',titlePanel:'blue',kpiStyle:'azul',density:'compact',theme:'dark'};
-      var a=defaults;
-      try{var s=localStorage.getItem('aparencia_v1');if(s)a=Object.assign({},defaults,JSON.parse(s));}catch(e){}
+      var theme='dark';
+      try{var s=localStorage.getItem('aparencia_v1');if(s){var p=JSON.parse(s);if(p.theme)theme=p.theme;}}catch(e){}
       // legacy fallback
-      if(!localStorage.getItem('aparencia_v1')){var t=localStorage.getItem('theme');if(t)a.theme=t;}
+      if(!localStorage.getItem('aparencia_v1')){var t=localStorage.getItem('theme');if(t)theme=t;}
       var h=document.documentElement;
-      h.setAttribute('data-theme',a.theme);
-      if(a.density==='compact')h.setAttribute('data-density','compact');
-      if(a.titlePage==='blue')h.classList.add('t-page-blue');
-      else if(a.titlePage==='gradient')h.classList.add('t-page-gradient');
-      if(a.titlePanel==='accent2')h.classList.add('panel-title-accent2');
-      else if(a.titlePanel==='blue')h.classList.add('panel-title-blue');
-      if(a.kpiStyle==='azul')h.classList.add('kpi-azul');
+      h.setAttribute('data-theme',theme);
+      h.setAttribute('data-density','compact');
+      h.classList.add('t-page-gradient');
+      h.classList.add('kpi-azul');
     })();
   </script>
 </head>

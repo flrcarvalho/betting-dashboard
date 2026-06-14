@@ -322,8 +322,7 @@ body::before {
   letter-spacing: 0.18em;
 }
 
-/* ── Aparência — page-title variants ──────────────────────────────────────── */
-html.t-page-blue .page-title { color: var(--accent); }
+/* ── Aparência — page-title (gradiente fixo) ──────────────────────────────── */
 html.t-page-gradient .page-title {
   background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
   -webkit-background-clip: text;

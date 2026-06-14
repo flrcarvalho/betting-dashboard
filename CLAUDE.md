@@ -129,20 +129,23 @@ brand/                  → logos e favicons FDC Capital
 
 ## Sistema de Aparência
 
-O topbar contém um painel dropdown (`#aparenciaPanel`) com 4 seções de preferências visuais:
+O topbar contém um painel dropdown (`#aparenciaPanel`) com **apenas o toggle de tema** — as demais
+propriedades visuais são fixas (hardcoded como padrão de marca):
 
-| Chave | Opções | Efeito |
-|-------|--------|--------|
-| `titlePage` | neutro / blue / **gradient** | Classe `t-page-*` no `<html>` |
-| `kpiStyle` | neutro / **azul** | Classe `kpi-azul` no `<html>` |
-| `density` | comfortable / **compact** | Atributo `data-density="compact"` no `<html>` |
+| Propriedade | Valor fixo | Efeito |
+|---|---|---|
+| Título da página | `t-page-gradient` | Gradiente azul no título do topbar |
+| Cards KPI | `kpi-azul` | Classe aplicada ao `<html>` (referenciada por JS) |
+| Densidade | `data-density="compact"` | Layout compacto em cards, tabelas e nav |
+
+| Chave configurável | Opções | Efeito |
+|---|---|---|
 | `theme` | **dark** / light | Atributo `data-theme` no `<html>` |
 
-- `titlePanel` foi removido — `.card-title { color: var(--accent-2) }` é hardcoded na CSS base.
-- Persiste em `localStorage` como JSON na chave `aparencia_v1`.
-- `applyAparencia()` aplica todas as preferências. Deve ser chamado após `buildHTML()`.
-- `index.html` tem init script inline que aplica `aparencia_v1` antes do primeiro render (evita FOUC).
-- **Defaults:** gradient, azul, compact, dark.
+- Persiste em `localStorage` como JSON na chave `aparencia_v1` (apenas `{theme}` é lido).
+- `applyAparencia()` aplica o tema e garante os valores fixos. Deve ser chamado após `buildHTML()`.
+- `index.html` tem init script inline que aplica tema + valores fixos antes do primeiro render (evita FOUC).
+- `toggleTheme()` foi removido — usar `setAparencia('theme', val)` via painel.
 
 ## Padrão Panelbox — regra de marca obrigatória
 
@@ -192,7 +195,7 @@ Todo container visual (painel, caixa, card de seção, card de entidade) usa:
 
 - **Topbar:** Manrope 800 22px tracking -0.035em (título) + JetBrains Mono 9px uppercase tracking 0.18em (eyebrow/sub).
 - **KPI labels** (`.kpi-label`): JetBrains Mono — tudo que é dado usa mono, não sans.
-- **P/L Líquido:** realce azul `rgba(46,139,255,.08)` + borda azul + sparkline de 90d. Os demais ficam neutros (a menos que `kpi-azul` esteja ativo no painel Aparência).
+- **P/L Líquido:** realce azul `rgba(46,139,255,.08)` + borda azul + sparkline de 90d. Os demais ficam neutros. A classe `kpi-azul` é sempre aplicada no `<html>` (valor fixo de marca).
 - **Sparkline** (`mkSparkline` em `shared.js`): SVG inline, linha `--ink-soft`, ponto final `--accent`. Ultimos 90 dias de P/L acumulado.
 - **Calendário** (`mkCalendarHeatmap` em `shared.js`): opacidade proporcional ao P/L do mês (0.15–0.93). Mini-cards acima do grid. O título inline do `ovHeatmapCard` em `app.js` usa `color:var(--accent-2)` (nunca `--text2`).
 - **Gráfico Resultado Geral** (`renderBankroll`): linha acumulada `#2E8BFF` com gradient fill, barras `--pos`/`--neg`. Legenda em `position:'bottom'`, `align:'center'`, eixo X oculto (`display:false`). `generateLabels` deve incluir `fontColor` em cada item (Chart.js v4 não herda `labels.color` em callbacks customizados) — usar `isDark()?'#AEB7C2':'#666E7A'`.

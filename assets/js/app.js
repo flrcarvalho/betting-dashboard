@@ -1,32 +1,20 @@
 ﻿// ── Aparência system ──────────────────────────────────────────────────────────
-const APARENCIA_DEFAULTS={titlePage:'gradient',kpiStyle:'azul',density:'compact',theme:'dark'};
+// Apenas o tema é configurável; gradiente, kpi-azul e compact são fixos.
+const APARENCIA_DEFAULTS={theme:'dark'};
 let APARENCIA={...APARENCIA_DEFAULTS};
-try{const s=localStorage.getItem('aparencia_v1');if(s)APARENCIA={...APARENCIA_DEFAULTS,...JSON.parse(s)};}catch(e){}
-
-const APARENCIA_PAGE_CLASSES=['t-page-neutro','t-page-blue','t-page-gradient'];
-const APARENCIA_KPI_CLASSES=['kpi-neutro','kpi-azul'];
+try{const s=localStorage.getItem('aparencia_v1');if(s)APARENCIA={...APARENCIA_DEFAULTS,theme:JSON.parse(s).theme||'dark'};}catch(e){}
 
 function applyAparencia(){
   const h=document.documentElement;
-  // theme
   h.setAttribute('data-theme',APARENCIA.theme);
-  // density
-  if(APARENCIA.density==='compact')h.setAttribute('data-density','compact');
-  else h.removeAttribute('data-density');
-  // page title
-  APARENCIA_PAGE_CLASSES.forEach(c=>h.classList.remove(c));
-  if(APARENCIA.titlePage==='blue')h.classList.add('t-page-blue');
-  else if(APARENCIA.titlePage==='gradient')h.classList.add('t-page-gradient');
-  // kpi style
-  APARENCIA_KPI_CLASSES.forEach(c=>h.classList.remove(c));
-  if(APARENCIA.kpiStyle==='azul')h.classList.add('kpi-azul');
-  // sync button states in panel (if rendered)
+  h.setAttribute('data-density','compact');
+  h.classList.add('t-page-gradient');
+  h.classList.add('kpi-azul');
+  // sync button states in tema panel
   document.querySelectorAll('.ap-btn[data-ap-key]').forEach(btn=>{
     const key=btn.dataset.apKey,val=btn.dataset.apVal;
     btn.classList.toggle('active',APARENCIA[key]===val);
   });
-  // sync logos
-  const lbl=document.getElementById('themeLabel');if(lbl)lbl.textContent=APARENCIA.theme==='dark'?'Claro':'Escuro';
 }
 
 function setAparencia(key,val){
@@ -48,8 +36,6 @@ document.addEventListener('click',e=>{
   const w=document.getElementById('aparenciaWrap');
   if(p&&p.classList.contains('open')&&!w?.contains(e.target))p.classList.remove('open');
 });
-
-function toggleTheme(){const h=document.documentElement;const t=h.getAttribute('data-theme')==='dark'?'light':'dark';APARENCIA.theme=t;localStorage.setItem('aparencia_v1',JSON.stringify(APARENCIA));h.setAttribute('data-theme',t);const lbl=document.getElementById('themeLabel');if(lbl)lbl.textContent=t==='dark'?'Claro':'Escuro';const active=document.querySelector('.page.active')?.id?.replace('page-','');if(active)renderPage(active);}
 
 // Helpers
 function fmt(v,d=2){return Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
@@ -375,31 +361,6 @@ function buildHTML(){
         Aparência
       </div>
       <div class="aparencia-panel" id="aparenciaPanel">
-        <div class="ap-section">
-          <div class="ap-label">Título da Página</div>
-          <div class="ap-btns">
-            <button class="ap-btn" data-ap-key="titlePage" data-ap-val="neutro"   onclick="setAparencia('titlePage','neutro')">Neutro</button>
-            <button class="ap-btn" data-ap-key="titlePage" data-ap-val="blue"     onclick="setAparencia('titlePage','blue')">Azul</button>
-            <button class="ap-btn" data-ap-key="titlePage" data-ap-val="gradient" onclick="setAparencia('titlePage','gradient')">Gradiente</button>
-          </div>
-        </div>
-        <div class="ap-divider"></div>
-        <div class="ap-section">
-          <div class="ap-label">Cards (KPI)</div>
-          <div class="ap-btns">
-            <button class="ap-btn" data-ap-key="kpiStyle" data-ap-val="neutro" onclick="setAparencia('kpiStyle','neutro')">Sem destaque</button>
-            <button class="ap-btn" data-ap-key="kpiStyle" data-ap-val="azul"   onclick="setAparencia('kpiStyle','azul')">| azul</button>
-          </div>
-        </div>
-        <div class="ap-divider"></div>
-        <div class="ap-section">
-          <div class="ap-label">Densidade</div>
-          <div class="ap-btns">
-            <button class="ap-btn" data-ap-key="density" data-ap-val="comfortable" onclick="setAparencia('density','comfortable')">Confortável</button>
-            <button class="ap-btn" data-ap-key="density" data-ap-val="compact"     onclick="setAparencia('density','compact')">Compacto</button>
-          </div>
-        </div>
-        <div class="ap-divider"></div>
         <div class="ap-section">
           <div class="ap-label">Tema</div>
           <div class="ap-btns">
