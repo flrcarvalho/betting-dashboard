@@ -522,6 +522,7 @@ function buildHTML(){
       <!-- FORNECEDORES & PARCEIROS -->
       <div class="page" id="page-parceiros">
         ${buildFilters('parceiros',sports,casas)}
+        <div id="parcKpiGrid"></div>
         ${mkCard('forn_custo_cards','Custo de Contas por Fornecedor','<div id="fornCustoCards"></div>')}
         <div class="row2">
           ${mkCard('forn_chart','Lucro por Fornecedor','<div class="chart-wrap" style="min-height:220px"><canvas id="chartForn" role="img" aria-label="Fornecedores"></canvas></div>')}
@@ -533,6 +534,7 @@ function buildHTML(){
 
       <!-- CUSTOS DE CONTAS -->
       <div class="page" id="page-custos">
+        <div id="custosKpi"></div>
         <div id="custosContent">
           ${mkCard('custos_table','Tabela de Custos por Casa × Fornecedor',`
             <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem;font-family:var(--font-sans)">💡 Insira o custo de cada conta por fornecedor/casa. O total é calculado pelo nº de contas. Valores salvos permanentemente no navegador.</p>

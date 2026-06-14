@@ -74,6 +74,28 @@ function recalcCustos(){
   });
   const gt=document.getElementById('cost-grand-total');
   if(gt)gt.textContent=grandTot>0?'R$ '+fmt(grandTot,0):'—';
+  _renderCustosKpi();
+}
+
+function _renderCustosKpi(){
+  const el=document.getElementById('custosKpi');
+  if(!el)return;
+  const{allForns,allCasas,contaCount}=_costState;
+  if(!allForns||!allForns.length){el.innerHTML='';return;}
+  const fornTots={};
+  allForns.forEach(f=>{fornTots[f]=allCasas.reduce((a,c)=>{const k=f+'||'+c;return a+(custoData[k]||0)*(contaCount[k]||0);},0);});
+  const grandCost=Object.values(fornTots).reduce((a,v)=>a+v,0);
+  const totalContas=allForns.reduce((a,f)=>a+allCasas.reduce((b,c)=>b+(contaCount[f+'||'+c]||0),0),0);
+  const contasComPreco=allForns.reduce((a,f)=>a+allCasas.reduce((b,c)=>{const k=f+'||'+c;return b+((custoData[k]||0)>0?(contaCount[k]||0):0);},0),0);
+  const avgCost=contasComPreco>0?grandCost/contasComPreco:0;
+  const fornsAtivos=allForns.filter(f=>fornTots[f]>0).length;
+  const mkK=(l,v,c,s)=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${l}</div><div class="kpi-val ${c}">${v}</div><div class="kpi-sub">${s}</div></div>`;
+  el.innerHTML=`<div class="kpi-grid" style="margin-bottom:1.25rem">
+    ${mkK('Total de Custos',grandCost>0?'R$ '+fmt(grandCost,0):'—','neu',contasComPreco+' contas com custo')}
+    ${mkK('Custo Médio/Conta',avgCost>0?'R$ '+fmt(avgCost,0):'—','neu','entre contas com custo')}
+    ${mkK('Contas Ativas',totalContas||'—','neu',contasComPreco+' com preço definido')}
+    ${mkK('Fornecedores',fornsAtivos||'—','neu',allForns.length+' no total')}
+  </div>`;
 }
 
 function renderCostPies(){
@@ -146,6 +168,8 @@ function renderParceiros(rows){
   const byForn={};
   normRows.forEach(r=>{const f=r.fornecedor;if(!byForn[f])byForn[f]={l:0,s:0,n:0,contas:new Set()};byForn[f].l+=r.lucro;byForn[f].s+=r.stake;byForn[f].n++;byForn[f].contas.add(r.conta);});
   const fornEnts=Object.entries(byForn).sort((a,b)=>b[1].l-a[1].l);
+  const parcKpiEl=document.getElementById('parcKpiGrid');
+  if(parcKpiEl)parcKpiEl.innerHTML=mkKpiGrid(normRows,{plLabel:'P/L dos Parceiros',contextLabel:'Fornecedores',contextVal:fornEnts.length,contextSub:fornEnts.map(e=>e[0]).join(' · ')});
   const fornNames=fornEnts.map(e=>e[0]);const fornVals=fornEnts.map(e=>parseFloat(e[1].l.toFixed(2)));
   mkChart('chartForn',{type:'bar',data:{labels:fornNames,datasets:[{data:fornVals,backgroundColor:fornVals.map(v=>v>=0?'rgba(0,214,143,.65)':'rgba(240,80,110,.65)'),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'R$ '+fmt(ctx.raw)}}},scales:{x:{ticks:{color:tc(),font:{size:10},callback:v=>'R$'+fmt(v,0)},grid:{color:gc()},border:{display:false}},y:{ticks:{color:tc(),font:{size:11}},grid:{display:false},border:{display:false}}}}});
   const{allForns,allCasas,contaCount}=buildCostState(rows);
@@ -268,7 +292,7 @@ function renderCustos(rows){
   buildCostState(DADOS.length?DADOS:fonte);
   const{allForns,allCasas,contaCount}=_costState;
   buildCostTable(allForns,allCasas,contaCount);
-  // Sem gráficos de pizza — apenas tabela de preenchimento
+  _renderCustosKpi();
 }
 
 // Metrics knowledge base
@@ -346,7 +370,19 @@ function renderCustoTipster(){
 
   const monthHdrs=months.map(m=>`<th style="text-align:center;min-width:90px">${ctFmtMonth(m)}</th>`).join('');
 
-  cont.innerHTML=`
+  const _ctTotal=Object.values(ctData).reduce((a,m)=>a+Object.values(m).reduce((b,v)=>b+(parseFloat((v||'').toString().replace(',','.'))||0),0),0);
+  const _cgTotal=cgData.reduce((a,r)=>a+Object.values(r.values||{}).reduce((b,v)=>b+(parseFloat((v||'').toString().replace(',','.'))||0),0),0);
+  const _ctGrand=_ctTotal+_cgTotal;
+  const _tipsCom=Object.keys(ctData).filter(t=>Object.values(ctData[t]||{}).some(v=>(parseFloat((v||'').toString().replace(',','.'))||0)>0)).length;
+  const _mkKt=(l,v,c,s)=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${l}</div><div class="kpi-val ${c}">${v}</div><div class="kpi-sub">${s}</div></div>`;
+  const _ctKpiHTML=`<div class="kpi-grid" style="margin-bottom:1.25rem">
+    ${_mkKt('Total Geral',_ctGrand>0?'R$ '+fmt(_ctGrand,0):'—','neu','tipsters + gerais')}
+    ${_mkKt('Custo Tipsters',_ctTotal>0?'R$ '+fmt(_ctTotal,0):'—','neu',_tipsCom+' tipster(s) com custo')}
+    ${_mkKt('Custos Gerais',_cgTotal>0?'R$ '+fmt(_cgTotal,0):'—','neu',cgData.length+' categori'+(cgData.length===1?'a':'as'))}
+    ${_mkKt('Tipsters com Custo',_tipsCom||'—','neu',tipsters.length+' tipsters no total')}
+  </div>`;
+
+  cont.innerHTML=_ctKpiHTML+`
     <div style="margin-bottom:1rem">
       ${mkCard('cg_table','Custos Gerais',`
         <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem">💡 Adicione qualquer custo fixo ou variável: VPN, ferramentas, taxas, etc. Preencha mensalmente. Valores salvos no navegador.</p>
