@@ -1,6 +1,53 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: redesign do calendario heatmap — COMPLETO (2026-06-13 sessao 26)
+## Estado atual: mini-cards do calendario alinhados ao padrao .kpi da marca — COMPLETO (2026-06-14 sessao 27)
+
+## Sessao 2026-06-14 (sessao 27) — Reforma visual dos mini-cards do calendario heatmap
+
+### Mudancas
+
+**assets/js/charts/shared.js**
+- Remove abreviacao `k` nos valores das celulas do grid (plAbs >= 1000 usava sufixo `k`)
+- Hero card: label com `<span class="kpi-pipe"></span>`; remove `::before` azul
+- Card "Apostas" -> "WIN RATE": exibe percentual + barra + "N apostas"
+- Todos os 5 mini-cards com pipe nos labels
+- Hero: adiciona sub-texto "N apostas"
+- WIN RATE: sub-texto "taxa de acerto"; barra sem `.brk`
+- TURNOVER: sub-texto "no mes"
+- ROI: sub-texto "Σ(P/L)/Σ(turnover)"
+- ODD MEDIA POND.: sub-texto "ponderada"
+- STAKE MEDIA: sub-texto "por aposta"
+- Remove legenda "perda -> lucro" da toolbar
+
+**assets/css/components.css**
+- `.cal__hero`: remove `::before` (borda azul); `r-md` -> `r-lg`; `surface-2` -> `surface`; padding `20px 22px`
+- Labels `.cal__hero .k` e `.cal__kpi .k`: `letter-spacing .18em` -> `.08em` (correcao critica); `font-size 9px` -> `11px`; `font-weight` -> `700`; remove `gap`, usa `margin-bottom:5px`
+- `.cal__kpi .v`: `font-size 16px` -> `28px`; `font-weight 600` -> `800`; `text-align:right`; `line-height:1`
+- `.cal__kpi`: padding `14/16` -> `20px 22px`; `r-md` -> `r-lg`; `surface-2` -> `surface`
+- Adiciona regras de cor: `.cal__hero .v.pos/.neg` e `.cal__kpi .v.pos/.neg/.neu`
+- `.cal__cell .pl.pos/.neg`: valores das celulas agora verdes/vermelhos (marca)
+- WR bar: `height 4px` -> `5px`; fill solid -> `linear-gradient(accent, accent-2)`
+- Substitui `.cal__wr .brk` por `.cal__sub` (10px mono muted, igual a `.kpi-sub`)
+- `.cal-tip` reformulado: `r-md` -> `r-lg`; padding `16/18`; P/L `22px/700` -> `28px/800`; grid 2 colunas + hairline; labels `8px/.1em` -> `9px/.08em`; valores `12px` -> `14px/700`
+
+**assets/js/app.js**
+- Tooltip do dia: substitui 3x `ct-row` por `ct-grid` (grid 2x3) + `ct-sep` (hairline)
+- "Winrate" -> "WIN RATE"; W/L usa classes `.w/.l` em vez de `style` inline
+
+### Commits desta sessao
+- 6840df2 fix(calendar): reforma mini-cards do heatmap para padrao de marca
+- 08764ff fix(calendar): alinhamento milimetrico dos mini-cards ao padrao .kpi da marca
+- 39ba02d feat(calendar): adiciona sub-textos nos mini-cards e remove legenda de cores
+- 264a7a0 fix(calendar): alinha mini-cards ao .kpi real da pagina (fontes e tamanhos)
+- a463ffb fix(calendar): reformula tooltip do dia para padrao visual dos metric-tips
+
+## Proximo passo
+- Verificar calendario no browser: hover nas celulas (tooltip), mini-cards e cores pos/neg
+- Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+
+---
+
+## Estado anterior: redesign do calendario heatmap — COMPLETO (2026-06-13 sessao 26)
 
 ## Sessao 2026-06-13 (sessao 26) — Redesign completo do mkCalendarHeatmap
 
