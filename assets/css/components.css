@@ -30,13 +30,36 @@
   transition: all 0.1s;
 }
 .qbtn:hover {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: var(--accent);
+  color: var(--accent);
   background: rgba(46,139,255,0.08);
 }
 .qbtn.active {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Seg button (canônico — substitui .qbtn, .ap-btn, .tcard-seg button) ─── */
+.seg-btn {
+  font-size: var(--text-xs);
+  padding: 3px var(--sp-2);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  border-radius: var(--r-xs);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: all 0.1s;
+}
+.seg-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(46,139,255,0.08);
+}
+.seg-btn.active {
+  border-color: var(--accent);
+  background: var(--accent);
   color: #fff;
 }
 
@@ -999,27 +1022,31 @@
 }
 .tcard-seg {
   display: flex;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  background: var(--surface-2);
+  gap: 4px;
 }
 .tcard-seg button {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: .03em;
-  color: var(--ink-mute);
+  color: var(--text3);
   background: transparent;
-  border: 0;
+  border: 1px solid var(--border);
   cursor: pointer;
-  padding: 5px 11px;
-  border-radius: var(--r-pill);
-  transition: color .18s var(--ease), background .18s var(--ease);
+  padding: 3px var(--sp-2);
+  border-radius: var(--r-xs);
+  transition: all 0.1s;
   white-space: nowrap;
 }
-.tcard-seg button:hover { color: var(--ink); }
-.tcard-seg button.active { background: var(--accent); color: #fff; }
+.tcard-seg button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(46,139,255,0.08);
+}
+.tcard-seg button.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
 .tcard-dir {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
