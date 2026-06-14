@@ -33,7 +33,52 @@ function saveCusto(forn,casa,val){
 }
 let _costState={allForns:[],allCasas:[],contaCount:{}};
 
+// Mapa de primeira aposta por conta: _firstBetMap["forn||casa"]["conta"] = "YYYY-MM-DD"
+let _firstBetMap=null;
+function _buildFirstBetMap(){
+  _firstBetMap={};
+  if(typeof DADOS==='undefined'||!DADOS.length)return;
+  DADOS.forEach(r=>{
+    const k=normForn(r.fornecedor)+'||'+r.casa;
+    if(!_firstBetMap[k])_firstBetMap[k]={};
+    const c=r.conta||'__default__';
+    if(!_firstBetMap[k][c]||r.data<_firstBetMap[k][c])_firstBetMap[k][c]=r.data;
+  });
+}
+
+// Custo filtrado por data: só contas cuja primeira aposta esteja em [minDate, maxDate]
+function calcCostFiltered(rows){
+  if(!rows||!rows.length)return{costConta:0};
+  if(!_firstBetMap)_buildFirstBetMap();
+  const minDate=rows.reduce((m,r)=>r.data<m?r.data:m,'9999-99-99');
+  const maxDate=rows.reduce((m,r)=>r.data>m?r.data:m,'0000-00-00');
+  let total=0;
+  Object.entries(custoData).forEach(([k,custoPorConta])=>{
+    const contaMap=_firstBetMap[k]||{};
+    Object.values(contaMap).forEach(firstDate=>{
+      if(firstDate>=minDate&&firstDate<=maxDate)total+=custoPorConta;
+    });
+  });
+  return{costConta:total};
+}
+
+// Custo filtrado para uma casa específica: para uso no popup drill-down de Bookies
+function calcCasaCost(nomeCasa,minDate,maxDate){
+  if(!_firstBetMap)_buildFirstBetMap();
+  let total=0,nContas=0;
+  Object.entries(custoData).forEach(([k,custoPorConta])=>{
+    const[,casa]=k.split('||');
+    if(casa!==nomeCasa)return;
+    const contaMap=_firstBetMap[k]||{};
+    Object.values(contaMap).forEach(firstDate=>{
+      if(firstDate>=minDate&&firstDate<=maxDate){total+=custoPorConta;nContas++;}
+    });
+  });
+  return{total,nContas};
+}
+
 function buildCostState(rows){
+  if(typeof DADOS!=='undefined'&&DADOS.length)_buildFirstBetMap();
   const normRows=rows.map(r=>({...r,fornecedor:normForn(r.fornecedor)}));
   const allForns=[...new Set(normRows.map(r=>r.fornecedor))].sort();
   const allCasasRaw=[...new Set(normRows.map(r=>r.casa).filter(Boolean))];

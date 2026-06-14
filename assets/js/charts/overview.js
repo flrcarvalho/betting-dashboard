@@ -11,8 +11,7 @@ function renderKPI(rows){
   const settled=rows.filter(r=>r.resultado!=='V').length;
   const wins=W+HW;
   const wr=settled>0?(wins/settled*100):0;
-  const{allForns:cF,allCasas:cA,contaCount:cC}=_costState.allForns&&_costState.allForns.length?_costState:buildCostState(DADOS);
-  const costConta=Object.values(Object.fromEntries(cF.map(f=>[f,cA.reduce((a,c)=>{const k=f+'||'+c;return a+(custoData[k]||0)*(cC[k]||0);},0)]))).reduce((a,v)=>a+v,0);
+  const{costConta}=calcCostFiltered(rows);
   // Custo de tipster — soma todos os valores mensais de ctData
   ctLoad();
   const costTipster=Object.values(ctData).reduce((total,monthsObj)=>{

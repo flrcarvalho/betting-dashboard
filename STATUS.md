@@ -1,6 +1,40 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: Design System Fases 1-3 concluidas — COMPLETO (2026-06-14 sessao 28)
+## Estado atual: Custos de contas com data + popup Bookies reformulado — COMPLETO (2026-06-14 sessao 30)
+
+## Sessao 2026-06-14 (sessao 30) — Custos com consciencia de data + KPIs do popup de Bookies
+
+### O que foi feito
+
+**gestao.js — infraestrutura de custo por data**
+- `_firstBetMap`: mapa bidimensional `forn||casa -> {conta -> primeiraData}`, construido a partir de DADOS
+- `_buildFirstBetMap()`: percorre DADOS uma vez e popula o mapa
+- `buildCostState()`: chama `_buildFirstBetMap()` automaticamente a cada reconstrucao
+- `calcCostFiltered(rows)`: retorna `{costConta}` somando so contas cuja primeira aposta esta no intervalo de datas das rows
+- `calcCasaCost(nomeCasa, minDate, maxDate)`: retorna `{total, nContas}` para uma casa especifica no periodo
+
+**overview.js — P/L Liquido filtrado por periodo**
+- `renderKPI(rows)`: costConta agora vem de `calcCostFiltered(rows)` em vez do total all-time
+- P/L Liquido no KPI row da Visao Geral agora reflete so os custos do periodo filtrado
+
+**performance.js — popup de Bookies reformulado**
+- Dois blocos separados (5 cards brutos + 3 cards waterfall) fundidos em uma secao unica "Resultado Geral"
+- Linha 1 (5 cards): P/L Bruto, ROI Bruto, Custo, P/L Liquido, ROI Liquido (novo)
+- Linha 2 (5 cards): Turnover, Volume, Stake Media, Odd Media Pond., Win Rate
+- ROI Liquido: `plLiq / turnover * 100`
+- Custo: neg se > 0, neutro se = 0 (grid sempre com 10 slots)
+- Grafico renomeado para "Evolucao"
+- Recovery Factor: alinhamento a direita corrigido (`text-align:right` inline)
+
+### Commits desta sessao
+- (ver step 4)
+
+### Pendente historico (nao prioritario)
+- gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (migracao para mkTh)
+
+---
+
+## Estado anterior: Design System Fases 1-3 concluidas — COMPLETO (2026-06-14 sessao 28)
 
 ## Sessao 2026-06-14 (sessao 28) — Design System: tokens, seg-btn e migracao Esportes
 

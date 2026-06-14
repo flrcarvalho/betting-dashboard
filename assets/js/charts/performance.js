@@ -380,6 +380,11 @@ function renderCasaDrill(rows){
   const avgOdd=stk>0?wt/stk:0;
   const plCls=pl>=0?'pos':'neg';
   const roiCls=roi>=0?'pos':'neg';
+  const _minDate=rows.length?rows.reduce((m,r)=>r.data<m?r.data:m,'9999-99-99'):'';
+  const _maxDate=rows.length?rows.reduce((m,r)=>r.data>m?r.data:m,'0000-00-00'):'';
+  const{total:custoTotal,nContas:nContasCusto}=(_minDate&&typeof calcCasaCost==='function')?calcCasaCost(nome,_minDate,_maxDate):{total:0,nContas:0};
+  const plLiq=pl-custoTotal;
+  const roiLiq=s>0?plLiq/s*100:0;
 
   const _td=calcTopoDrawdown(rows),_rf=calcRecoveryFactor(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows);
   const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
@@ -392,18 +397,31 @@ function renderCasaDrill(rows){
   const sbS='margin-top:auto;padding-top:6px';
   const vS='font-size:16px';
 
+  const _custoCls=custoTotal>0?'neg':'neu';
+  const _custoVal=custoTotal>0?fmtPL(-custoTotal):fmtR(0);
+  const _custoSub=custoTotal>0?`${nContasCusto} conta${nContasCusto!==1?'s':''} no período`:'sem custo configurado';
+  const _roiLiqCls=roiLiq>=0?'pos':'neg';
+
   body.innerHTML=
     `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Resultado Geral</div>`+
+      `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:stretch;width:100%;margin-bottom:8px">`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L Bruto</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">antes dos custos</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI Bruto</div><div class="kpi-val ${roiCls}" style="${vS}">${fmtPct(roi,2)}</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Custo</div><div class="kpi-val ${_custoCls}" style="${vS}">${_custoVal}</div><div class="kpi-sub" style="${sbS}">${_custoSub}</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L Líquido</div><div class="kpi-val ${plLiq>=0?'pos':'neg'}" style="${vS}">${fmtPL(plLiq)}</div><div class="kpi-sub" style="${sbS}">após custos</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI Líquido</div><div class="kpi-val ${_roiLiqCls}" style="${vS}">${fmtPct(roiLiq,2)}</div><div class="kpi-sub" style="${sbS}">Σ(P/L líq)/Σ(turnover)</div></div>`+
+      `</div>`+
       `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:stretch;width:100%">`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">${rows.length.toLocaleString('pt-BR')} apostas</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${fmtPct(roi,2)}</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu" style="${vS}">${fmtR(s)}</div><div class="kpi-sub" style="${sbS}">volume apostado</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Volume</div><div class="kpi-val neu" style="${vS}">${rows.length.toLocaleString('pt-BR')}</div><div class="kpi-sub" style="${sbS}">apostas no período</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média</div><div class="kpi-val neu" style="${vS}">${fmtOdd(avgOdd)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média Pond.</div><div class="kpi-val neu" style="${vS}">${fmtOdd(avgOdd)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${fmtPct(wr,1,false)}</div><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px"><div style="height:100%;background:var(--accent-2);border-radius:3px;width:${Math.min(100,Math.max(0,wr)).toFixed(1)}%"></div></div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Resultado Geral</div>`+
+      `<div class="analise-popup-section-title">Evolução</div>`+
       `<div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:20px;height:2px;background:#2E8BFF;border-radius:1px;flex-shrink:0"></span>P/L acumulado</span>`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(43,192,126,.8);border-radius:2px;flex-shrink:0"></span>Dia positivo</span>`+
@@ -728,7 +746,7 @@ function renderTipsterDrill(rows){
         `</div>`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor ${_mkTipAnchor('Recovery Factor','<span class="lbl">RF</span> <span class="op">=</span> Lucro <span class="op">÷</span> Máx. Drawdown','Quantas vezes o lucro total <b>cobre a maior queda</b> da banca.','<span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="thr">&gt; 5</span> <span class="good">muito bom</span>')}</div>`+
-          `<div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div>`+
+          `<div class="fdc-kpi__value" data-state="info" style="${vS};text-align:right">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div>`+
           `<div class="kpi-sub" style="${sbS}">qualidade</div>`+
         `</div>`+
       `</div>`+
