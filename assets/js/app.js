@@ -862,17 +862,14 @@ function _showCalTip(cell,cx,cy){
   _calTip.innerHTML=`
     <div class="ct-date">${dateFmt}</div>
     <div class="ct-pl ${plCls}"><span class="cur">${plSign}R$</span>${nf(pl)}</div>
-    <div class="ct-row">
+    <div class="ct-sep"></div>
+    <div class="ct-grid">
       <div class="ct-item"><span class="lbl">ROI</span><span class="val ${roiCls}">${roiSign}${Math.abs(roi).toFixed(2).replace('.',',')}%</span></div>
-      <div class="ct-item"><span class="lbl">Winrate</span><span class="val">${wr.toFixed(1).replace('.',',')}%</span></div>
-    </div>
-    <div class="ct-row">
+      <div class="ct-item"><span class="lbl">WIN RATE</span><span class="val">${wr.toFixed(1).replace('.',',')}%</span></div>
       <div class="ct-item"><span class="lbl">Apostas</span><span class="val">${n}</span></div>
       <div class="ct-item"><span class="lbl">Turnover</span><span class="val"><span class="cur">R$</span>${nf(tv)}</span></div>
-    </div>
-    <div class="ct-row">
       <div class="ct-item"><span class="lbl">Stake Méd.</span><span class="val"><span class="cur">R$</span>${nf(sm)}</span></div>
-      <div class="ct-item"><span class="lbl">W / L</span><span class="val"><b style="color:var(--pos)">${W}</b> · <b style="color:var(--neg)">${L}</b></span></div>
+      <div class="ct-item"><span class="lbl">W / L</span><span class="val"><b class="w">${W}</b> · <b class="l">${L}</b></span></div>
     </div>`;
   _calTip.style.display='block';
   _calTip.style.visibility='hidden';
