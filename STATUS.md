@@ -1,5 +1,46 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: Design System Fases 1-3 concluidas — COMPLETO (2026-06-14 sessao 28)
+
+## Sessao 2026-06-14 (sessao 28) — Design System: tokens, seg-btn e migracao Esportes
+
+### O que foi feito
+
+**Fase 1 — Tokens semanticos (commit 5af6745)**
+- tokens.css: adicionados --text-nano (9px), --text-xxs (10px), --text-md (14px)
+- Secoes spacing e radius reorganizadas: --sp-* e --r-* como canonicos; --space-* e --radius-* deprecated
+- components.css: ~50 substituicoes de literais px por tokens --text-*, --sp-*, --r-*
+- layout.css: 8 substituicoes cirurgicas (mesmos tokens)
+
+**Fase 2 — Botoes pill unificados (commit 5ff9229)**
+- Criado .seg-btn como componente canonico em components.css
+- .qbtn: var(--blue) substituido por var(--accent)
+- .tcard-seg button: migrado de pill-sem-borda para visual identico ao .qbtn (borda individual, r-xs)
+- .ap-btn: 11px hardcoded -> var(--text-xs); var(--radius-pill) -> var(--r-pill); visual alinhado
+
+**Fase 3 — Aba Esportes migrada para .tcard (commits c19db49 + dd1b8d8)**
+- renderSport() reescrito: acumula wt/stk/dayMap por esporte (odd media e sparkline)
+- _mkSportCard(), _renderSportCards(), sportSortBy(), sportSortDir() adicionados em performance.js
+- Removidos mkOneStatCard() e mkStatCards() de shared.js (sem uso apos migracao)
+- Removido bloco .stat-card* de components.css (~40 linhas)
+- 4 KPIs de portfolio (P/L Total + sparkline, ROI, Esportes Positivos X/N, Turnover Total) acima do sort bar
+- Sort bar identico ao de Tipsters e Bookies (P/L, ROI, Turnover, Win Rate, Volume)
+- Grid de 3 colunas com sparkline e rodape 4 colunas (Turnover, Stake Media, Odd Media, Win Rate)
+
+### Commits desta sessao
+- 5af6745 refactor(tokens): fase 1
+- 5ff9229 refactor(ui): fase 2 -- seg-btn unificado
+- c19db49 feat(sports): fase 3 -- migracao .stat-card -> .tcard
+- dd1b8d8 feat(sports): KPIs de portfolio acima dos cards
+
+### Proximo passo (sessao 29)
+- Fase 4: KPI summary nas paginas de Gestao (Custos de Contas, Custo de Tipsters, Fornecedores)
+- Fase 5: migrar aliases JS legados (--blue -> --accent, --text2 -> --ink-soft, etc.)
+- Fase 6: screenshots pos-implementacao (rodar docs/screenshot_pages.js e atualizar UI_REFERENCE_BOARD.md)
+- Pendente historico: gestao.js tblCost/tblForn/tblCross/tblCG/tblCT (migracao para mkTh)
+
+---
+
 ## Estado atual: mini-cards do calendario alinhados ao padrao .kpi da marca — COMPLETO (2026-06-14 sessao 27)
 
 ## Sessao 2026-06-14 (sessao 27) — Reforma visual dos mini-cards do calendario heatmap
