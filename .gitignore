@@ -2,3 +2,8 @@
 _archive/
 
 _backups/
+
+# Dependências locais do script de screenshots
+docs/node_modules/
+docs/package.json
+docs/package-lock.json

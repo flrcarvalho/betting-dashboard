@@ -1,5 +1,6 @@
 # UI Reference Board — FDC Capital Betting Dashboard
-> Fase 0 | Screenshots capturadas em: 2026-06-14 | Viewport: 1440×900 | Tema: dark compact
+> Atualizado: 2026-06-14 (sessão 29) | Viewport: 1440×900 | Tema: dark compact
+> Screenshots anteriores: sessão 28 (Fase 0). Screenshots atuais capturam Fases 1–5 implementadas.
 
 Todas as imagens em: `docs/screenshots/`
 
@@ -55,42 +56,57 @@ Todas as imagens em: `docs/screenshots/`
 
 ---
 
-## PIORES TELAS
+## TELAS MELHORADAS (Fases 3–5)
 
-### ⚠️ 1. Custos de Contas (`custos.png`)
-![Custos de Contas](screenshots/custos.png)
-
-**Problemas:**
-- **Tabela horizontal sem contexto**: abre direto numa grade densa sem nenhum KPI summary no topo. O padrão de toda outra página é: filtros → KPIs → conteúdo
-- Colunas demais para a viewport (1440px) — já aparece scroll horizontal implícito
-- Os inputs inline (`0,00`) têm visual diferente dos inputs de filtro do resto do sistema
-- As duas linhas de instrução amarela (💡) acima da tabela parecem notas de rodapé, não UI
-- O título "TABELA DE CUSTOS POR CASA × FORNECEDOR" está em uppercase bold direto na tela sem o padrão `.card-title` + `.card-hdr`
-- **Parece uma planilha incorporada, não uma tela do dashboard**
-
----
-
-### ⚠️ 2. Esportes (`sports.png`)
+### Esportes — antes vs agora (`sports.png`)
 ![Esportes](screenshots/sports.png)
 
-**Problemas:**
-- Os cards `.stat-card` têm **130px de altura fixa** e **sem sparkline** — visualmente são de uma geração anterior aos cards de Bookies e Tipsters
-- Grid com muitas colunas na viewport — os cards ficam pequenos demais (minmax muito agressivo)
-- O P/L hero é menor (20px) e com peso diferente (700) vs. os 22px/600 dos `.tcard` e 28px/800 dos KPIs
-- Informação no footer dos cards é truncada visualmente — "TURNOVER", "ROI", "WR" empilhados de forma apertada
-- **É a tela que mais grita a inconsistência de 3 gerações de cards**
+**O que mudou (Fase 3):**
+- Migrado de `.stat-card` (130px fixo, sem sparkline) para `.tcard` — agora na mesma família visual de Bookies e Tipsters
+- Sparkline real de 90 dias para cada esporte
+- 4 KPIs de portfólio no topo (P/L · Turnover · ROI · Apostas)
+- Sort bar com os mesmos 4 critérios (P/L · ROI · Turnover · Win Rate)
+- Grid 3 colunas idêntico ao de Tipsters
+
+**Status: consistente com Bookies e Tipsters** ✅
 
 ---
 
-### ⚠️ 3. Custo de Tipsters (`custos_tipster.png`)
+### Fornecedores & Parceiros (`parceiros.png`)
+![Fornecedores](screenshots/parceiros.png)
+
+**O que mudou (Fase 4):**
+- Faixa de 8 KPIs em 2 rows adicionada no topo (P/L dos Parceiros, Turnover, ROI, Apostas, Win Rate, Odd Média, Stake Média, Fornecedores Ativos)
+- Agora segue o mesmo padrão de layout das páginas de análise
+
+---
+
+### Custos de Contas (`custos.png`)
+![Custos de Contas](screenshots/custos.png)
+
+**O que mudou (Fase 4):**
+- Faixa de 4 KPIs adicionada no topo: Total de Custos · Custo Médio/Conta · Contas Ativas · Fornecedores
+- KPIs atualizam em tempo real ao editar qualquer valor na tabela
+
+---
+
+### Custo de Tipsters (`custos_tipster.png`)
 ![Custo de Tipsters](screenshots/custos_tipster.png)
 
-**Problemas:**
-- Mesma ausência de KPIs summary no topo que Custos de Contas
-- A seção "CUSTOS GERAIS" está quase vazia (sem dados) e ocupa muito espaço antes do conteúdo real
-- Os inputs `0,00` em todas as células criam uma "neve visual" — padrão de formulário, não de dashboard
-- A lista de tipsters é longa e sem nenhum mecanismo de agrupamento ou resumo visual
-- **Melhor candidata a ter um redesign de estrutura (não só cosmético)**
+**O que mudou (Fase 4):**
+- Faixa de 4 KPIs adicionada no topo: Total Geral · Custo Tipsters · Custos Gerais · Tipsters com Custo
+- KPIs recalculados a cada save de input
+
+---
+
+## TELAS AINDA COM OPORTUNIDADES
+
+### Apostas (`apostas.png`)
+![Apostas](screenshots/apostas.png)
+
+**Problemas remanescentes:**
+- KPI cards no topo com alturas irregulares (valor com 3 linhas vs 1)
+- Os bet-cards de scroll virtual têm estrutura própria — compacto intencional, mas pode melhorar
 
 ---
 
@@ -104,69 +120,34 @@ Todas as imagens em: `docs/screenshots/`
 **Por quê são consistentes entre si:**
 - As três telas usam exatamente o mesmo componente de calendário mensal (`mkCalendarHeatmap`)
 - Os mini-cards acima do grid (P/L do Mês, Win Rate, Turnover, ROI, Odd Média) têm padding, fonte e hierarquia idênticos
-- As células do calendário com coloração proporcional funcionam da mesma forma nas três
-- A navegação de mês/semana está no mesmo posicionamento e com o mesmo visual
-- Os KPI cards abaixo do calendário (na Mensal e Semana) seguem o padrão `.kpi` perfeitamente
-
-**São a família mais coesa do dashboard inteiro.**
+- Os KPI cards seguem o padrão `.kpi` perfeitamente
+- **São a família mais coesa do dashboard inteiro.**
 
 ---
 
-### Dupla Bookies + Tipsters
+### Trinca Esportes + Bookies + Tipsters
+![Esportes](screenshots/sports.png)
 ![Bookies](screenshots/casas.png)
 ![Tipsters](screenshots/tipsters.png)
 
-**Por quê são consistentes entre si:**
-- Ambas usam `.tcard` com a mesma estrutura: nome → P/L hero → sparkline → footer de métricas
-- O sort bar em cima dos cards tem o mesmo visual pill-toggle em ambas
-- As sparklines têm a mesma altura e estilo nas duas abas
-- Os badges de ROI têm mesmo estilo nas duas
-
-**Problema apontado:** Esportes não pertence a esta família ainda.
+**Por quê são consistentes entre si (pós Fase 3):**
+- As três usam `.tcard` com a mesma estrutura: nome → P/L hero → sparkline → footer de métricas
+- Sort bar com visual pill-toggle idêntico nas três
+- Grid 3 colunas e 4 KPIs de portfólio no topo em todas
 
 ---
 
-## TELAS MAIS PROBLEMÁTICAS
-
-### Ranking de problemas visuais
-
-| Posição | Tela | Problema principal | Impacto TOC |
-|---|---|---|---|
-| 1 | **Esportes** | Cards de geração diferente de Bookies/Tipsters — 3 famílias na mesma seção de análise | 🔴 Alto |
-| 2 | **Custos de Contas** | Sem padrão de layout dashboard — parece planilha | 🔴 Alto |
-| 3 | **Fornecedores & Parceiros** | Cards de custo têm visual proprio, fora do sistema | 🟡 Médio |
-| 4 | **Custo de Tipsters** | Mesma quebra estrutural dos Custos + formulário denso | 🟡 Médio |
-| 5 | **Apostas** | KPI cards no topo com alturas irregulares (valor com 3 linhas vs 1) | 🟡 Médio |
-
----
-
-## OBSERVAÇÕES TRANSVERSAIS (válidas para todas as telas)
+## OBSERVAÇÕES TRANSVERSAIS
 
 ### O que é consistente em TODAS as telas ✅
 - Sidebar: 220px, logo, nav-groups em mono uppercase, active com borda azul esquerda
 - Topbar: 68px, título gradient azul, sub-título mono uppercase, botão Aparência
-- Paleta: dark base #0A0D12, azul #2E8BFF como único acento, verde/vermelho só em resultado
+- Paleta: dark base `#0A0D12`, azul `#2E8BFF` como único acento, verde/vermelho só em resultado
 - Scrollbar fina com thumb steel
 - Grid de fundo 44px (sutil mas presente)
 - Fontes: Manrope para UI, JetBrains Mono para dados
+- Tokens CSS: todos os arquivos JS e CSS usam tokens canônicos (`--ink`, `--pos`, `--neg`, `--accent`...) — zero aliases legados remanescentes (Fase 5)
 
-### O que varia entre telas ⚠️
+### O que ainda varia ⚠️
 - **Altura dos KPI cards**: Visão Geral/Apostas têm KPIs com alturas irregulares; Diário/Mensal/Semana são uniformes
-- **Família de card de entidade**: `.stat-card` (Esportes) vs `.tcard` (Bookies, Tipsters)
-- **Presença de KPI summary**: todas as páginas de análise têm; páginas de Gestão não têm
-- **Peso do P/L hero**: 700 em stat-card, 600 em tcard — nenhum usa 800 como o `.kpi-val`
-
----
-
-## USO COMO REFERÊNCIA
-
-Durante a implementação do design system, usar como **gabarito positivo**:
-- Diário → referência de grid de KPIs uniformes
-- Métricas → referência de seções colapsáveis e hierarquia de conteúdo
-- Mensal → referência do componente calendário e mini-cards
-- Por Casa (barras) → referência de componente visual único bem executado
-
-E como **gabarito negativo** (o que precisa mudar):
-- Esportes → migrar para `.tcard` (prioridade máxima)
-- Custos de Contas → adicionar KPI summary + revisar estrutura
-- Custo de Tipsters → revisar estrutura de layout
+- **Densidade dos cards de Gestão**: as tabelas de Custos são densas por natureza (formulário), diferente das telas de análise
