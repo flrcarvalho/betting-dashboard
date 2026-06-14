@@ -1,5 +1,38 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: painel Aparencia simplificado para apenas toggle de tema — COMPLETO (2026-06-14 sessao 31)
+
+## Sessao 2026-06-14 (sessao 31) — Limpeza do painel Aparencia
+
+### O que foi feito
+
+**assets/js/app.js**
+- `APARENCIA_DEFAULTS` reduzido para `{theme:'dark'}` (era 4 chaves)
+- `APARENCIA_PAGE_CLASSES` e `APARENCIA_KPI_CLASSES`: constantes removidas
+- `applyAparencia()`: simplificada — aplica fixos (t-page-gradient, kpi-azul, data-density=compact) + le tema do APARENCIA
+- `toggleTheme()`: removida (codigo morto, nao era chamada em nenhum lugar)
+- `buildHTML()`: painel dropdown reduzido a apenas a secao Tema (Escuro/Claro)
+
+**index.html**
+- Init script inline simplificado: so le `theme` do localStorage; demais valores aplicados como fixos
+
+**assets/css/layout.css**
+- Regra `.t-page-blue .page-title` removida (inacessivel apos remocao da opcao)
+
+**CLAUDE.md**
+- Secao "Sistema de Aparencia" atualizada: tabela reflete valores fixos vs. configuravel (so tema)
+
+### Commit desta sessao
+- 2766a62 refactor(aparencia): remove opcoes de titulo/KPI/densidade — apenas tema permanece configuravel
+
+### Pendente historico (nao prioritario)
+- gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (migracao para mkTh)
+
+## Proximo passo
+- Verificar no browser: painel Aparencia mostra apenas Escuro/Claro; titulo permanece com gradiente; densidade compacta ativa
+
+---
+
 ## Estado atual: Custos de contas com data + popup Bookies reformulado — COMPLETO (2026-06-14 sessao 30)
 
 ## Sessao 2026-06-14 (sessao 30) — Custos com consciencia de data + KPIs do popup de Bookies
