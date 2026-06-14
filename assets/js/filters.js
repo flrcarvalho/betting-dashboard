@@ -1,4 +1,4 @@
-// Filter state
+﻿// Filter state
 const FS={};
 function gfs(p){if(!FS[p])FS[p]={df:'',dt:'',qd:0,qt:''};return FS[p];}
 
@@ -87,7 +87,7 @@ function buildMS(id,items,ph,page,cb,withIcons=false){
       <svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
     </div>
     <div class="ms-dd" id="msd_${id}">
-      <input class="ms-search" style="margin:6px 10px 4px;font-size:11px;padding:4px 8px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:4px;font-family:'JetBrains Mono',monospace;outline:none;flex-shrink:0" type="text" placeholder="Buscar..." oninput="filterMSOpts('${id}')" onclick="event.stopPropagation()">
+      <input class="ms-search" style="margin:6px 10px 4px;font-size:11px;padding:4px 8px;background:var(--field);border:1px solid var(--line);color:var(--ink-soft);border-radius:4px;font-family:'JetBrains Mono',monospace;outline:none;flex-shrink:0" type="text" placeholder="Buscar..." oninput="filterMSOpts('${id}')" onclick="event.stopPropagation()">
       <div class="ms-opts-scroll" id="ms-opts-${id}">
         <div class="ms-opt ${!hs?'sel':''}" onclick="toggleMS('${id}','__all__','${page}','${cb||''}')"><span class="ms-chk">${!hs?'✓':''}</span><span>Todos</span></div>
         ${optItems}

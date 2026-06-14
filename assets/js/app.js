@@ -270,8 +270,8 @@ function resClass(r){
   return'res-v';
 }
 function resColor(r){
-  const m={'W':'var(--green)','HW':'var(--hw)','L':'var(--red)','HL':'var(--hl)','V':'var(--text3)'};
-  return m[r]||'var(--text2)';
+  const m={'W':'var(--pos)','HW':'var(--hw)','L':'var(--neg)','HL':'var(--hl)','V':'var(--ink-mute)'};
+  return m[r]||'var(--ink-soft)';
 }
 
 // Card collapse
@@ -449,7 +449,7 @@ function buildHTML(){
       <div class="page" id="page-overview">
         ${buildFilters('overview',sports,casas,tipsters)}
         <div class="kpi-grid" id="kpiGrid"></div>
-        ${mkCard('bankroll','Resultado Geral','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>','<span style="margin-left:auto;margin-right:8px;font-family:JetBrains Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--text2);opacity:.7">P/L diário · evolução acumulada</span>')}
+        ${mkCard('bankroll','Resultado Geral','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>','<span style="margin-left:auto;margin-right:8px;font-family:JetBrains Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-soft);opacity:.7">P/L diário · evolução acumulada</span>')}
         ${mkCard('ov_streaks','Sequências & Topo Histórico','<div id="ovStreaksContent"></div>')}
         ${mkCard('roi_monthly','ROI Mensal (%)','<div class="chart-wrap" style="min-height:220px"><canvas id="chartROI" role="img" aria-label="ROI mensal"></canvas></div>')}
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
@@ -491,11 +491,11 @@ function buildHTML(){
           <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1">
             ${[['Data',0],['Esporte',1],['Tipster',2],['Casa',3],['Parceiro',4],['Aposta',5],['Descrição',6]].map(([lbl,i])=>`<input class="apostas-filter-inp acf" type="text" placeholder="${lbl}..." oninput="apostasFilter(${i},this.value)">`).join('')}
           </div>
-          <button onclick="clearApostasFilters()" style="font-size:10px;padding:5px 10px;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0">✕ Limpar</button>
+          <button onclick="clearApostasFilters()" style="font-size:10px;padding:5px 10px;background:transparent;border:1px solid var(--line);color:var(--ink-mute);border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0">✕ Limpar</button>
         </div>
         <!-- Sort bar -->
         <div style="display:flex;gap:5px;align-items:center;margin-bottom:.75rem;flex-wrap:wrap">
-          <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-right:4px">Ordenar:</span>
+          <span style="font-size:9px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-right:4px">Ordenar:</span>
           ${[['Data',0],['Odd',8],['Stake',7],['P/L',10],['Resultado',9],['Tipster',2],['Casa',3]].map(([lbl,i])=>`<button class="apostas-sort-btn" data-col="${i}" onclick="apostasSort(${i})">${lbl} <span class="sort-arrow"></span></button>`).join('')}
         </div>
         <!-- Cards container -->
@@ -537,7 +537,7 @@ function buildHTML(){
         <div id="custosKpi"></div>
         <div id="custosContent">
           ${mkCard('custos_table','Tabela de Custos por Casa × Fornecedor',`
-            <p style="font-size:11px;color:var(--text3);margin-bottom:.75rem;font-family:var(--font-sans)">💡 Insira o custo de cada conta por fornecedor/casa. O total é calculado pelo nº de contas. Valores salvos permanentemente no navegador.</p>
+            <p style="font-size:11px;color:var(--ink-mute);margin-bottom:.75rem;font-family:var(--font-sans)">💡 Insira o custo de cada conta por fornecedor/casa. O total é calculado pelo nº de contas. Valores salvos permanentemente no navegador.</p>
             <div id="costTableWrap"></div>`)}
         </div>
       </div>

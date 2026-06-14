@@ -1,4 +1,4 @@
-// ── apostas.js — Espelho da base com virtual scroll ─────────────────────────────
+﻿// ── apostas.js — Espelho da base com virtual scroll ─────────────────────────────
 
 // Apostas — espelho da base de dados com virtual scroll
 let apostasFiltered=[], apostasSortCol=0, apostasSortAsc=false;
@@ -32,7 +32,7 @@ function renderApostas(){
   const avgStakeAp=apostasFiltered.length>0?stake/apostasFiltered.length:0;
   const kpiEl=document.getElementById('apostasKPI');
   if(kpiEl){
-    const mkKA=(l,v,c,sub,bar)=>`<div class="kpi" style="height:110px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;padding:14px 16px;overflow:hidden"><div class="kpi-label" style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:8px;white-space:nowrap;flex-shrink:0">${l}</div><div class="kpi-val ${c}" style="font-size:22px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0">${v}</div>${bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub" style="font-size:10px;margin-top:8px;font-family:'JetBrains Mono',monospace;display:flex;flex-wrap:wrap;gap:2px 5px;overflow:hidden">${sub||''}</div></div>`;
+    const mkKA=(l,v,c,sub,bar)=>`<div class="kpi" style="height:110px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;padding:14px 16px;overflow:hidden"><div class="kpi-label" style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-mute);margin-bottom:8px;white-space:nowrap;flex-shrink:0">${l}</div><div class="kpi-val ${c}" style="font-size:22px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0">${v}</div>${bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub" style="font-size:10px;margin-top:8px;font-family:'JetBrains Mono',monospace;display:flex;flex-wrap:wrap;gap:2px 5px;overflow:hidden">${sub||''}</div></div>`;
     const betsBreak=[
       apostasFiltered.filter(r=>r.resultado==='W').length?`<span class="res-w">W:${apostasFiltered.filter(r=>r.resultado==='W').length}</span>`:'',
       apostasFiltered.filter(r=>r.resultado==='HW').length?`<span class="res-hw">HW:${apostasFiltered.filter(r=>r.resultado==='HW').length}</span>`:'',
@@ -91,7 +91,7 @@ function renderApostasVirt(){
     const [yr,mo,dy]=d.split('-');
     const hora=r.data.length>10?r.data.slice(11,16):'';
     const dateStr=`${dy}/${mo}`;
-    const plC=r.lucro>0?'var(--green)':r.lucro<0?'var(--red)':'var(--text3)';
+    const plC=r.lucro>0?'var(--pos)':r.lucro<0?'var(--neg)':'var(--ink-mute)';
     const resLabel=RES_LABELS[r.resultado]||r.resultado;
     const resClass=`bet-res-${r.resultado}`;
     const cardClass=`bet-card res-${r.resultado}`;
@@ -99,10 +99,10 @@ function renderApostasVirt(){
       <div class="bet-card-main" style="min-width:0;overflow:hidden">
         <div class="bet-card-meta">
           <span class="bet-time">${dateStr}${hora?' · '+hora:''}</span>
-          <span class="bet-sport-tag">${mkSpChip(r.esporte)}<span style="color:var(--text3)">${r.esporte||''}</span></span>
+          <span class="bet-sport-tag">${mkSpChip(r.esporte)}<span style="color:var(--ink-mute)">${r.esporte||''}</span></span>
           ${r.tipster?`<span class="bet-tipster">${r.tipster}</span>`:''}
           <span class="bet-casa-pill">${mkHouseChip(r.casa)}<span>${r.casa||'—'}</span></span>
-          ${r.parceiro&&r.parceiro!=='—'?`<span style="font-size:9px;color:var(--text3);font-family:var(--font-sans)">${r.parceiro}</span>`:''}
+          ${r.parceiro&&r.parceiro!=='—'?`<span style="font-size:9px;color:var(--ink-mute);font-family:var(--font-sans)">${r.parceiro}</span>`:''}
         </div>
         <div class="bet-aposta">${r.aposta||'—'}</div>
         ${r.descricao?`<div class="bet-desc">${r.descricao}</div>`:''}
@@ -113,11 +113,11 @@ function renderApostasVirt(){
           <span class="bet-num-lbl">Resultado</span>
         </div>
         <div class="bet-num">
-          <span class="bet-num-val" style="color:var(--text)">${fmtOdd(r.odd)}</span>
+          <span class="bet-num-val" style="color:var(--ink)">${fmtOdd(r.odd)}</span>
           <span class="bet-num-lbl">Odd</span>
         </div>
         <div class="bet-num">
-          <span class="bet-num-val" style="color:var(--text)">${fmtR(r.stake)}</span>
+          <span class="bet-num-val" style="color:var(--ink)">${fmtR(r.stake)}</span>
           <span class="bet-num-lbl">Stake</span>
         </div>
         <div class="bet-num" style="width:90px;min-width:90px">

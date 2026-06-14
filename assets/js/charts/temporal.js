@@ -1,4 +1,4 @@
-// ── temporal.js — Views temporais: Consolidado, Mensal, Diário, Semana ──────────
+﻿// ── temporal.js — Views temporais: Consolidado, Mensal, Diário, Semana ──────────
 
 // Consolidado — KPIs + Resumo Anual + Heatmap mensal
 function renderConsolidado(){
@@ -33,9 +33,9 @@ function renderConsolidado(){
   });
   const ymKeys=Object.keys(byTYMD).sort().reverse();
   const sT='position:sticky;left:0;z-index:2;white-space:nowrap;';
-  const sA='position:sticky;left:130px;z-index:2;white-space:nowrap;border-right:1px solid var(--border2);';
-  const hBg='background:var(--bg4);';
-  const rBg='background:var(--bg3);';
+  const sA='position:sticky;left:130px;z-index:2;white-space:nowrap;border-right:1px solid var(--line);';
+  const hBg='background:var(--field);';
+  const rBg='background:var(--surface-2);';
   const totPL=allTipsters.reduce((a,t)=>a+(annualByT[t]?.pl||0),0);
   const totN=allTipsters.reduce((a,t)=>a+(annualByT[t]?.n||0),0);
   const totS=rows.reduce((a,r)=>a+r.stake,0);
@@ -45,14 +45,14 @@ function renderConsolidado(){
   const totL=allTipsters.reduce((a,t)=>a+(annualByT[t]?.l||0),0);
   const totHL=allTipsters.reduce((a,t)=>a+(annualByT[t]?.hl||0),0);
   const totV=allTipsters.reduce((a,t)=>a+(annualByT[t]?.v||0),0);
-  const tlc=totPL>=0?'var(--green)':'var(--red)';
-  const trc=totROI>=0?'var(--green)':'var(--red)';
+  const tlc=totPL>=0?'var(--pos)':'var(--neg)';
+  const trc=totROI>=0?'var(--pos)':'var(--neg)';
   const totSettled=totW+totHW+totL+totHL;
   const totWR=totSettled>0?((totW+totHW)/totSettled*100):0;
   const totDetail=[totW?`W:${totW}`:'',totHW?`HW:${totHW}`:'',totL?`L:${totL}`:'',totHL?`HL:${totHL}`:'',totV?`V:${totV}`:''].filter(Boolean).join(' ');
-  const totalAnnualRow=`<tr class="total-row" style="border-bottom:2px solid var(--border2);background:var(--bg4)">
-    <td style="font-weight:700;color:var(--text)">Total</td>
-    <td class="td-c"><span style="font-size:10px;color:var(--text3);margin-right:6px">${totDetail}</span><span style="font-size:13px;font-weight:700;color:var(--text)">${totN.toLocaleString('pt-BR')}</span></td>
+  const totalAnnualRow=`<tr class="total-row" style="border-bottom:2px solid var(--line);background:var(--field)">
+    <td style="font-weight:700;color:var(--ink)">Total</td>
+    <td class="td-c"><span style="font-size:10px;color:var(--ink-mute);margin-right:6px">${totDetail}</span><span style="font-size:13px;font-weight:700;color:var(--ink)">${totN.toLocaleString('pt-BR')}</span></td>
     <td class="td-num" style="color:${tlc};font-weight:700">${fmtPL(totPL)}</td>
     <td class="td-num">${fmtR(totS)}</td>
     <td class="td-c" style="color:${trc};font-weight:700">${fmtPct(totROI,2)}</td>
@@ -69,12 +69,12 @@ function renderConsolidado(){
     const wr=settled>0?((d.w+d.hw)/settled*100):0;
     const avgOdd=calcAvgOdd(tRows);
     const avgStake=d.n>0?turnover/d.n:0;
-    const lc=d.pl>=0?'var(--green)':'var(--red)';
-    const rc=roiV>=0?'var(--green)':'var(--red)';
+    const lc=d.pl>=0?'var(--pos)':'var(--neg)';
+    const rc=roiV>=0?'var(--pos)':'var(--neg)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
     return`<tr>
-      <td style="font-weight:700;color:var(--text)">${t}</td>
-      <td class="td-c"><span style="font-size:10px;color:var(--text3);margin-right:6px">${detail}</span><span style="font-size:13px;font-weight:600;color:var(--text)">${d.n.toLocaleString('pt-BR')}</span></td>
+      <td style="font-weight:700;color:var(--ink)">${t}</td>
+      <td class="td-c"><span style="font-size:10px;color:var(--ink-mute);margin-right:6px">${detail}</span><span style="font-size:13px;font-weight:600;color:var(--ink)">${d.n.toLocaleString('pt-BR')}</span></td>
       <td class="td-num" style="color:${lc};font-weight:600">${fmtPL(d.pl)}</td>
       <td class="td-num">${fmtR(turnover)}</td>
       <td class="td-c" style="color:${rc}">${fmtPct(roiV,2)}</td>
@@ -93,21 +93,21 @@ function renderConsolidado(){
   const allPLs=ymKeys.flatMap(ym=>allTipsters.map(t=>monthlyByT[ym+'_'+t]?.pl||0));
   const maxAbsM=Math.max(...allPLs.map(Math.abs),1);
   function heatBg(v){const a=0.12+Math.min(1,Math.abs(v)/maxAbsM)*0.82;return v>0?`rgba(0,160,100,${a})`:v<0?`rgba(200,40,60,${a})`:'transparent';}
-  function heatTxt(v){if(v===0)return'var(--text3)';const a=0.12+Math.min(1,Math.abs(v)/maxAbsM)*0.82;return a>0.5?(v>0?'#d0fff0':'#ffe0e5'):(v>0?'var(--green)':'var(--red)');}
+  function heatTxt(v){if(v===0)return'var(--ink-mute)';const a=0.12+Math.min(1,Math.abs(v)/maxAbsM)*0.82;return a>0.5?(v>0?'#d0fff0':'#ffe0e5'):(v>0?'var(--pos)':'var(--neg)');}
   const mLabels=ymKeys.map(k=>{const v=byTYMD[k];return MESES_CURTOS[v.month]+' '+v.year;});
   const heatRows=allTipsters.map(t=>{
     const acc=annualByT[t];
-    const accC=acc?.pl>=0?'var(--green)':acc?.pl<0?'var(--red)':'var(--text3)';
+    const accC=acc?.pl>=0?'var(--pos)':acc?.pl<0?'var(--neg)':'var(--ink-mute)';
     const cells=ymKeys.map(ymKey=>{
       const d=monthlyByT[ymKey+'_'+t];
-      if(!d||d.n===0)return`<td style="background:var(--bg4);border-radius:3px;padding:5px 8px;text-align:right;color:var(--text3);font-size:11px">—</td>`;
+      if(!d||d.n===0)return`<td style="background:var(--field);border-radius:3px;padding:5px 8px;text-align:right;color:var(--ink-mute);font-size:11px">—</td>`;
       const tRows=rows.filter(r=>r.tipster===t&&r.data.slice(0,7)===ymKey);
       const mStake=tRows.reduce((a,r)=>a+r.stake,0);
       const mROI=mStake>0?(d.pl/mStake*100):0;
       return`<td style="background:${heatBg(d.pl)};border-radius:3px;padding:5px 8px;text-align:right;color:${heatTxt(d.pl)};font-weight:600;white-space:nowrap;font-size:11px" title="${t} - ${mLabels[ymKeys.indexOf(ymKey)]}: ${fmtPL(d.pl)} (${d.n}b, ROI ${fmtPct(mROI,2)})">${fmtPL(d.pl)}<br><span style="font-size:9px;opacity:.7">${fmtPct(mROI,1)} · ${d.n}b</span></td>`;
     }).join('');
     return`<tr>
-      <td style="${sT}${rBg}font-weight:700;color:var(--text);padding:5px 10px;border-right:1px solid var(--border2);font-size:12px">${t}</td>
+      <td style="${sT}${rBg}font-weight:700;color:var(--ink);padding:5px 10px;border-right:1px solid var(--line);font-size:12px">${t}</td>
       <td style="${sA}${rBg}color:${accC};text-align:right;padding:5px 10px;font-weight:700;font-size:12px">${acc?fmtPL(acc.pl):'—'}<br><span style="font-size:9px;opacity:.55">${acc?.n||0}b</span></td>
       ${cells}
     </tr>`;
@@ -117,19 +117,19 @@ function renderConsolidado(){
     const n=allTipsters.reduce((a,t)=>a+(monthlyByT[ymKey+'_'+t]?.n||0),0);
     return`<td style="background:${heatBg(pl)};border-radius:3px;padding:5px 8px;text-align:right;color:${heatTxt(pl)};font-weight:700;white-space:nowrap;font-size:11px">${fmtPL(pl)}<br><span style="font-size:9px;opacity:.7">${n}b</span></td>`;
   }).join('');
-  const hBg2='background:var(--bg4);';
-  const heatThStyle=`${hBg2}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--text3);white-space:nowrap;min-width:110px`;
+  const hBg2='background:var(--field);';
+  const heatThStyle=`${hBg2}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--ink-mute);white-space:nowrap;min-width:110px`;
   const heatmapHTML=mkCard('cons_heat','Evolução Mensal',
     `<div style="overflow-x:auto"><table id="consHeatTable" style="border-collapse:separate;border-spacing:2px;font-size:12px;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums">
-      <thead><tr style="border-bottom:1px solid var(--border2)">
-        <th style="${sT}${hBg2}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text3);border-right:1px solid var(--border2);min-width:130px">Tipster</th>
-        <th style="${sA}${hBg2}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--text3);min-width:95px">Acumulado</th>
+      <thead><tr style="border-bottom:1px solid var(--line)">
+        <th style="${sT}${hBg2}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--ink-mute);border-right:1px solid var(--line);min-width:130px">Tipster</th>
+        <th style="${sA}${hBg2}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--ink-mute);min-width:95px">Acumulado</th>
         ${mLabels.map(m=>`<th style="${heatThStyle}">${m}</th>`).join('')}
       </tr></thead>
       <tbody>
-        <tr style="border-bottom:2px solid var(--border2)">
-          <td style="${sT}${hBg2}font-weight:700;color:var(--text);padding:5px 10px;border-right:1px solid var(--border2)">Total</td>
-          <td style="${sA}${hBg2}color:${totPL>=0?'var(--green)':'var(--red)'};text-align:right;padding:5px 10px;font-weight:700">${fmtPL(totPL)}</td>
+        <tr style="border-bottom:2px solid var(--line)">
+          <td style="${sT}${hBg2}font-weight:700;color:var(--ink);padding:5px 10px;border-right:1px solid var(--line)">Total</td>
+          <td style="${sA}${hBg2}color:${totPL>=0?'var(--pos)':'var(--neg)'};text-align:right;padding:5px 10px;font-weight:700">${fmtPL(totPL)}</td>
           ${heatTotalCells}
         </tr>
         ${heatRows}
@@ -162,7 +162,7 @@ function getAvailableMonths(){
 }
 function renderMensal(){
   const cont=document.getElementById('mensalContent');if(!cont)return;
-  if(!DADOS||!DADOS.length){cont.innerHTML='<p style="color:var(--text3);padding:2rem">Carregando dados...</p>';return;}
+  if(!DADOS||!DADOS.length){cont.innerHTML='<p style="color:var(--ink-mute);padding:2rem">Carregando dados...</p>';return;}
   const months=getAvailableMonths();
   if(!months.length){cont.innerHTML=mkEmpty('Sem dados no período');return;}
   // Get current selected month or default to latest
@@ -221,54 +221,54 @@ function renderMensal(){
   });
 
   function tipsterCell2(d){
-    if(!d||d.n===0)return`<td style="color:var(--text3);text-align:right;padding:4px 8px">—</td>`;
-    const c=d.pl>0?'var(--green)':d.pl<0?'var(--red)':'var(--text3)';
+    if(!d||d.n===0)return`<td style="color:var(--ink-mute);text-align:right;padding:4px 8px">—</td>`;
+    const c=d.pl>0?'var(--pos)':d.pl<0?'var(--neg)':'var(--ink-mute)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<td style="color:${c};text-align:right;padding:4px 8px;white-space:nowrap;vertical-align:top"><span style="font-weight:600">${fmtPL(d.pl)}</span><br><span style="font-size:9px;opacity:.55;color:var(--text3)">${d.n}b ${detail}</span></td>`;
+    return`<td style="color:${c};text-align:right;padding:4px 8px;white-space:nowrap;vertical-align:top"><span style="font-weight:600">${fmtPL(d.pl)}</span><br><span style="font-size:9px;opacity:.55;color:var(--ink-mute)">${d.n}b ${detail}</span></td>`;
   }
 
   const sT2='position:sticky;left:0;z-index:2;white-space:nowrap;';
-  const sA2='position:sticky;left:130px;z-index:2;white-space:nowrap;border-right:1px solid var(--border2);';
-  const hBgM='background:var(--bg4);';
-  const rBgM='background:var(--bg3);';
+  const sA2='position:sticky;left:130px;z-index:2;white-space:nowrap;border-right:1px solid var(--line);';
+  const hBgM='background:var(--field);';
+  const rBgM='background:var(--surface-2);';
 
   const daysDesc=[...days].reverse();
   const dayHdrs=daysDesc.map(day=>{
     const dp=new Date(day+'T12:00:00');
     const ds=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][dp.getDay()];
-    return`<th style="${hBgM}padding:5px 8px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--text3);white-space:nowrap;min-width:88px">${ds} ${day.slice(8)}</th>`;
+    return`<th style="${hBgM}padding:5px 8px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--ink-mute);white-space:nowrap;min-width:88px">${ds} ${day.slice(8)}</th>`;
   }).join('');
 
   const totalDayPL=totPL;
-  const dayTotRow=`<tr style="border-bottom:2px solid var(--border2)">
-    <td style="${sT2}${hBgM}font-weight:700;color:var(--text);padding:5px 10px;border-right:1px solid var(--border2)">Total</td>
-    <td style="${sA2}${hBgM}color:${totalDayPL>=0?'var(--green)':'var(--red)'};text-align:right;padding:5px 10px;font-weight:700">${fmtPL(totalDayPL)}</td>
+  const dayTotRow=`<tr style="border-bottom:2px solid var(--line)">
+    <td style="${sT2}${hBgM}font-weight:700;color:var(--ink);padding:5px 10px;border-right:1px solid var(--line)">Total</td>
+    <td style="${sA2}${hBgM}color:${totalDayPL>=0?'var(--pos)':'var(--neg)'};text-align:right;padding:5px 10px;font-weight:700">${fmtPL(totalDayPL)}</td>
     ${daysDesc.map(day=>{
       const pl=allTipsters.reduce((a,t)=>a+(byTDay[day]?.[t]?.pl||0),0);
       const n=allTipsters.reduce((a,t)=>a+(byTDay[day]?.[t]?.n||0),0);
-      if(n===0)return`<td style="${hBgM}text-align:right;padding:5px 8px;color:var(--text3)">—</td>`;
-      const c=pl>=0?'var(--green)':'var(--red)';
-      return`<td style="${hBgM}color:${c};text-align:right;padding:5px 8px;font-weight:700;white-space:nowrap">${fmtPL(pl)}<br><span style="font-size:9px;opacity:.55;color:var(--text3)">${n}b</span></td>`;
+      if(n===0)return`<td style="${hBgM}text-align:right;padding:5px 8px;color:var(--ink-mute)">—</td>`;
+      const c=pl>=0?'var(--pos)':'var(--neg)';
+      return`<td style="${hBgM}color:${c};text-align:right;padding:5px 8px;font-weight:700;white-space:nowrap">${fmtPL(pl)}<br><span style="font-size:9px;opacity:.55;color:var(--ink-mute)">${n}b</span></td>`;
     }).join('')}
   </tr>`;
 
   const tipRows=allTipsters.map(t=>{
     const acc=byTMonth[t];
-    const accC=acc?.pl>=0?'var(--green)':acc?.pl<0?'var(--red)':'var(--text3)';
+    const accC=acc?.pl>=0?'var(--pos)':acc?.pl<0?'var(--neg)':'var(--ink-mute)';
     const accDetail=acc?[acc.w?`W:${acc.w}`:'',acc.hw?`HW:${acc.hw}`:'',acc.l?`L:${acc.l}`:'',acc.hl?`HL:${acc.hl}`:'',acc.v?`V:${acc.v}`:''].filter(Boolean).join(' '):'';
     const dayCells=daysDesc.map(day=>tipsterCell2(byTDay[day]?.[t])).join('');
     return`<tr>
-      <td style="${sT2}${rBgM}font-weight:700;color:var(--text);padding:4px 10px;border-right:1px solid var(--border2);font-size:12px">${t}</td>
-      <td style="${sA2}${rBgM}color:${accC};text-align:right;padding:4px 10px;font-weight:700">${acc?fmtPL(acc.pl):'—'}<br><span style="font-size:9px;opacity:.55;color:var(--text3)">${acc?.n||0}b ${accDetail}</span></td>
+      <td style="${sT2}${rBgM}font-weight:700;color:var(--ink);padding:4px 10px;border-right:1px solid var(--line);font-size:12px">${t}</td>
+      <td style="${sA2}${rBgM}color:${accC};text-align:right;padding:4px 10px;font-weight:700">${acc?fmtPL(acc.pl):'—'}<br><span style="font-size:9px;opacity:.55;color:var(--ink-mute)">${acc?.n||0}b ${accDetail}</span></td>
       ${dayCells}
     </tr>`;
   }).join('');
 
   const tabelaHTML=mkCard('mensal_tabela',`Dia a Dia — ${moLabel}`,
     `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:400px">
-      <thead><tr style="border-bottom:1px solid var(--border2)">
-        <th style="${sT2}${hBgM}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text3);border-right:1px solid var(--border2);min-width:130px">Tipster</th>
-        <th style="${sA2}${hBgM}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--text3);min-width:95px">Mês</th>
+      <thead><tr style="border-bottom:1px solid var(--line)">
+        <th style="${sT2}${hBgM}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--ink-mute);border-right:1px solid var(--line);min-width:130px">Tipster</th>
+        <th style="${sA2}${hBgM}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--ink-mute);min-width:95px">Mês</th>
         ${dayHdrs}
       </tr></thead>
       <tbody>${dayTotRow}${tipRows}</tbody>
@@ -291,20 +291,20 @@ function renderMensal(){
     const roi2=s>0?(d.pl/s*100):0;
     const set2=d.w+d.hw+d.l+d.hl;
     const wr2=set2>0?((d.w+d.hw)/set2*100):0;
-    const lc=d.pl>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi2>=0?'color:var(--green)':'color:var(--red)';
+    const lc=d.pl>=0?'color:var(--pos)':'color:var(--neg)';
+    const rc=roi2>=0?'color:var(--pos)':'color:var(--neg)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td class="td-c">${d.n}</td>
-      <td class="td-c"><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
+    return`<tr><td style="font-weight:700;color:var(--ink)">${t}</td><td class="td-c">${d.n}</td>
+      <td class="td-c"><span style="font-size:9px;color:var(--ink-mute)">${detail}</span></td>
       <td class="td-num" style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
       <td class="td-num">${fmtR(s)}</td>
       <td class="td-c" style="${rc}">${fmtPct(roi2,2)}</td>
       <td class="td-c">${fmtPct(wr2,1,false)}</td>
       <td class="td-c">${fmtOdd(calcAvgOdd(tR))}</td></tr>`;
   }).join('');
-  const tipLc=totPL>=0?'color:var(--green)':'color:var(--red)';
+  const tipLc=totPL>=0?'color:var(--pos)':'color:var(--neg)';
   const roi=totS>0?(totPL/totS*100):0;
-  const tipRc=roi>=0?'color:var(--green)':'color:var(--red)';
+  const tipRc=roi>=0?'color:var(--pos)':'color:var(--neg)';
   const W=rows.filter(r=>r.resultado==='W').length;
   const HW=rows.filter(r=>r.resultado==='HW').length;
   const L=rows.filter(r=>r.resultado==='L').length;
@@ -316,7 +316,7 @@ function renderMensal(){
     `<div class="tbl-wrap"><table class="tbl" id="tblMensalTip">
       <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('Resultados','','c')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}${_mkOddMediaTh('r')}</tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${fmtOdd(calcAvgOdd(rows))}</td></tr>
+        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--ink-mute)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${fmtOdd(calcAvgOdd(rows))}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -364,15 +364,15 @@ function renderDiario(){
   const dp=new Date(selDay+'T12:00:00');
   const dowLabel=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][dp.getDay()];
 
-  const selectorHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem;padding:1rem 1.25rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
-    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Dia</div>
+  const selectorHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem;padding:1rem 1.25rem;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;flex-wrap:wrap">
+    <div style="font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Dia</div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-      <button onclick="prevDiario()" style="padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px">←</button>
-      <select id="diarioDaySel" onchange="selectDiario(this.value)" style="font-size:14px;font-weight:700;padding:6px 12px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:5px;font-family:var(--font-sans);cursor:pointer">
+      <button onclick="prevDiario()" style="padding:5px 10px;background:var(--field);border:1px solid var(--line);color:var(--ink-soft);border-radius:5px;cursor:pointer;font-size:13px">←</button>
+      <select id="diarioDaySel" onchange="selectDiario(this.value)" style="font-size:14px;font-weight:700;padding:6px 12px;background:var(--field);border:1px solid var(--line);color:var(--ink);border-radius:5px;font-family:var(--font-sans);cursor:pointer">
         ${days.map(d=>{const[y2,m2,d2]=d.split('-');return`<option value="${d}"${d===selDay?' selected':''}>${d2}/${m2}/${y2}</option>`;}).join('')}
       </select>
-      <button onclick="nextDiario()" style="padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px">→</button>
-      <span style="font-size:12px;color:var(--text3);margin-left:8px;font-family:'JetBrains Mono',monospace">${dowLabel}</span>
+      <button onclick="nextDiario()" style="padding:5px 10px;background:var(--field);border:1px solid var(--line);color:var(--ink-soft);border-radius:5px;cursor:pointer;font-size:13px">→</button>
+      <span style="font-size:12px;color:var(--ink-mute);margin-left:8px;font-family:'JetBrains Mono',monospace">${dowLabel}</span>
     </div>
   </div>`;
 
@@ -409,24 +409,24 @@ function renderDiario(){
     const set2=d.w+d.hw+d.l+d.hl;
     const wr2=set2>0?((d.w+d.hw)/set2*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0;
-    const lc=d.pl>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi2>=0?'color:var(--green)':'color:var(--red)';
+    const lc=d.pl>=0?'color:var(--pos)':'color:var(--neg)';
+    const rc=roi2>=0?'color:var(--pos)':'color:var(--neg)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td class="td-c">${d.n}</td>
-      <td class="td-c"><span style="font-size:9px;color:var(--text3)">${detail}</span></td>
+    return`<tr><td style="font-weight:700;color:var(--ink)">${t}</td><td class="td-c">${d.n}</td>
+      <td class="td-c"><span style="font-size:9px;color:var(--ink-mute)">${detail}</span></td>
       <td class="td-num" style="${lc};font-weight:600">${fmtPL(d.pl)}</td>
       <td class="td-num">${fmtR(d.s)}</td>
       <td class="td-c" style="${rc}">${fmtPct(roi2,2)}</td>
       <td class="td-c">${mkWRC(wr2)}</td>
       <td class="td-c">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
-  const tipLc=totPL>=0?'color:var(--green)':'color:var(--red)';
-  const tipRc=roi>=0?'color:var(--green)':'color:var(--red)';
+  const tipLc=totPL>=0?'color:var(--pos)':'color:var(--neg)';
+  const tipRc=roi>=0?'color:var(--pos)':'color:var(--neg)';
   const tipTableHTML=mkCard('diario_tips','Tipsters — Resultados do Dia',
     `<div class="tbl-wrap"><table class="tbl" id="tblDiarioTip">
       <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('Resultados','','c')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}${_mkOddMediaTh('r')}</tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${fmtOdd(calcAvgOdd(rows))}</td></tr>
+        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--ink-mute)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLc};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRc}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td><td class="td-c">${fmtOdd(calcAvgOdd(rows))}</td></tr>
         ${tipTableRows}
       </tbody>
     </table></div>`);
@@ -434,7 +434,7 @@ function renderDiario(){
   // Lista de apostas do dia — card style
   const RES_LABELS_D={W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'};
   const apostasCardsD=rows.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(r=>{
-    const plC=r.lucro>0?'var(--green)':r.lucro<0?'var(--red)':'var(--text3)';
+    const plC=r.lucro>0?'var(--pos)':r.lucro<0?'var(--neg)':'var(--ink-mute)';
     const hora=r.data.length>10?r.data.slice(11,16):'';
     const casaIcon=casaImg(r.casa,13);
     const svgIcon=sportEmoji(r.esporte);
@@ -443,7 +443,7 @@ function renderDiario(){
       <div class="bet-card-main" style="min-width:0;overflow:hidden">
         <div class="bet-card-meta">
           ${hora?`<span class="bet-time">${hora}</span>`:''}
-          <span class="bet-sport-tag">${svgIcon}<span style="color:var(--text3)">${r.esporte||''}</span></span>
+          <span class="bet-sport-tag">${svgIcon}<span style="color:var(--ink-mute)">${r.esporte||''}</span></span>
           ${r.tipster?`<span class="bet-tipster">${r.tipster}</span>`:''}
           <span class="bet-casa-pill">${casaIcon}<span>${r.casa||'—'}</span></span>
         </div>
@@ -452,8 +452,8 @@ function renderDiario(){
       </div>
       <div class="bet-card-nums">
         <div class="bet-num"><span class="bet-res-pill bet-res-${r.resultado}">${resLabel}</span><span class="bet-num-lbl">Resultado</span></div>
-        <div class="bet-num"><span class="bet-num-val" style="color:var(--text)">${fmtOdd(r.odd)}</span><span class="bet-num-lbl">Odd</span></div>
-        <div class="bet-num"><span class="bet-num-val" style="color:var(--text)">${fmtR(r.stake)}</span><span class="bet-num-lbl">Stake</span></div>
+        <div class="bet-num"><span class="bet-num-val" style="color:var(--ink)">${fmtOdd(r.odd)}</span><span class="bet-num-lbl">Odd</span></div>
+        <div class="bet-num"><span class="bet-num-val" style="color:var(--ink)">${fmtR(r.stake)}</span><span class="bet-num-lbl">Stake</span></div>
         <div class="bet-num" style="width:90px;min-width:90px"><span class="bet-num-val" style="color:${plC};font-size:12px">${fmtPL(r.lucro)}</span><span class="bet-num-lbl">P/L</span></div>
       </div>
     </div>`;
@@ -501,19 +501,19 @@ function renderSemana(){
   const [ye,me,de]=endStr.split('-');
   const weekLabel=`${ds}/${ms}/${ye} → ${de}/${me}/${ye}`;
 
-  const selectorHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem;padding:1rem 1.25rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap">
-    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Semana</div>
+  const selectorHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem;padding:1rem 1.25rem;background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;flex-wrap:wrap">
+    <div style="font-size:11px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Semana</div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-      <button onclick="prevSemana()" style="padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px">←</button>
-      <select id="semanaWeekSel" onchange="selectSemana(this.value)" style="font-size:13px;font-weight:700;padding:6px 12px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);border-radius:5px;font-family:'JetBrains Mono',monospace;cursor:pointer">
+      <button onclick="prevSemana()" style="padding:5px 10px;background:var(--field);border:1px solid var(--line);color:var(--ink-soft);border-radius:5px;cursor:pointer;font-size:13px">←</button>
+      <select id="semanaWeekSel" onchange="selectSemana(this.value)" style="font-size:13px;font-weight:700;padding:6px 12px;background:var(--field);border:1px solid var(--line);color:var(--ink);border-radius:5px;font-family:'JetBrains Mono',monospace;cursor:pointer">
         ${weeks.map(w=>{
           const ed=new Date(w+'T12:00:00');ed.setDate(ed.getDate()+6);
           const[yw,mw,dw]=w.split('-');const[ye2,me2,de2]=ed.toISOString().slice(0,10).split('-');
           return`<option value="${w}"${w===selWeek?' selected':''}>${dw}/${mw}/${yw} → ${de2}/${me2}/${ye2}</option>`;
         }).join('')}
       </select>
-      <button onclick="nextSemana()" style="padding:5px 10px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:13px">→</button>
-      <span style="font-size:11px;color:var(--text3);margin-left:8px;font-family:'JetBrains Mono',monospace">${weekLabel}</span>
+      <button onclick="nextSemana()" style="padding:5px 10px;background:var(--field);border:1px solid var(--line);color:var(--ink-soft);border-radius:5px;cursor:pointer;font-size:13px">→</button>
+      <span style="font-size:11px;color:var(--ink-mute);margin-left:8px;font-family:'JetBrains Mono',monospace">${weekLabel}</span>
     </div>
   </div>`;
 
@@ -559,54 +559,54 @@ function renderSemana(){
   });
 
   function tipCellW(d){
-    if(!d||d.n===0)return`<td style="color:var(--text3);text-align:right;padding:4px 8px">—</td>`;
-    const c=d.pl>0?'var(--green)':d.pl<0?'var(--red)':'var(--text3)';
+    if(!d||d.n===0)return`<td style="color:var(--ink-mute);text-align:right;padding:4px 8px">—</td>`;
+    const c=d.pl>0?'var(--pos)':d.pl<0?'var(--neg)':'var(--ink-mute)';
     const det=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<td style="color:${c};text-align:right;padding:4px 8px;white-space:nowrap;vertical-align:top"><span style="font-weight:600">${fmtPL(d.pl)}</span><br><span style="font-size:9px;opacity:.55;color:var(--text3)">${d.n}b ${det}</span></td>`;
+    return`<td style="color:${c};text-align:right;padding:4px 8px;white-space:nowrap;vertical-align:top"><span style="font-weight:600">${fmtPL(d.pl)}</span><br><span style="font-size:9px;opacity:.55;color:var(--ink-mute)">${d.n}b ${det}</span></td>`;
   }
   const DOWS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   const sT3='position:sticky;left:0;z-index:2;white-space:nowrap;';
-  const sA3='position:sticky;left:130px;z-index:2;white-space:nowrap;border-right:1px solid var(--border2);';
-  const hBgW='background:var(--bg4);';
-  const rBgW='background:var(--bg3);';
+  const sA3='position:sticky;left:130px;z-index:2;white-space:nowrap;border-right:1px solid var(--line);';
+  const hBgW='background:var(--field);';
+  const rBgW='background:var(--surface-2);';
 
   const dayHdrs=weekDays.map(day=>{
     const dp=new Date(day+'T12:00:00');
     const dow=DOWS[dp.getDay()];
     const [,md,dd]=day.split('-');
     const hasData=rows.some(r=>r.data.slice(0,10)===day);
-    return`<th style="${hBgW}padding:5px 8px;text-align:right;font-size:9px;text-transform:uppercase;${hasData?'color:var(--text2)':'color:var(--text3);opacity:.5'};white-space:nowrap;min-width:88px">${dow} ${dd}/${md}</th>`;
+    return`<th style="${hBgW}padding:5px 8px;text-align:right;font-size:9px;text-transform:uppercase;${hasData?'color:var(--ink-soft)':'color:var(--ink-mute);opacity:.5'};white-space:nowrap;min-width:88px">${dow} ${dd}/${md}</th>`;
   }).join('');
 
-  const dayTotRow=`<tr style="border-bottom:2px solid var(--border2)">
-    <td style="${sT3}${hBgW}font-weight:700;color:var(--text);padding:5px 10px;border-right:1px solid var(--border2)">Total</td>
-    <td style="${sA3}${hBgW}color:${totPL>=0?'var(--green)':'var(--red)'};text-align:right;padding:5px 10px;font-weight:700">${fmtPL(totPL)}</td>
+  const dayTotRow=`<tr style="border-bottom:2px solid var(--line)">
+    <td style="${sT3}${hBgW}font-weight:700;color:var(--ink);padding:5px 10px;border-right:1px solid var(--line)">Total</td>
+    <td style="${sA3}${hBgW}color:${totPL>=0?'var(--pos)':'var(--neg)'};text-align:right;padding:5px 10px;font-weight:700">${fmtPL(totPL)}</td>
     ${weekDays.map(day=>{
       const pl=allTipsters.reduce((a,t)=>a+(byTipDay[t]?.[day]?.pl||0),0);
       const n=allTipsters.reduce((a,t)=>a+(byTipDay[t]?.[day]?.n||0),0);
-      if(n===0)return`<td style="${hBgW}text-align:right;padding:5px 8px;color:var(--text3)">—</td>`;
-      const c=pl>=0?'var(--green)':'var(--red)';
-      return`<td style="${hBgW}color:${c};text-align:right;padding:5px 8px;font-weight:700;white-space:nowrap">${fmtPL(pl)}<br><span style="font-size:9px;opacity:.55;color:var(--text3)">${n}b</span></td>`;
+      if(n===0)return`<td style="${hBgW}text-align:right;padding:5px 8px;color:var(--ink-mute)">—</td>`;
+      const c=pl>=0?'var(--pos)':'var(--neg)';
+      return`<td style="${hBgW}color:${c};text-align:right;padding:5px 8px;font-weight:700;white-space:nowrap">${fmtPL(pl)}<br><span style="font-size:9px;opacity:.55;color:var(--ink-mute)">${n}b</span></td>`;
     }).join('')}
   </tr>`;
 
   const tipRows=allTipsters.map(t=>{
     const acc=byTipWeek[t];
-    const accC=acc?.pl>=0?'var(--green)':acc?.pl<0?'var(--red)':'var(--text3)';
+    const accC=acc?.pl>=0?'var(--pos)':acc?.pl<0?'var(--neg)':'var(--ink-mute)';
     const accDet=acc?[acc.w?`W:${acc.w}`:'',acc.hw?`HW:${acc.hw}`:'',acc.l?`L:${acc.l}`:'',acc.hl?`HL:${acc.hl}`:'',acc.v?`V:${acc.v}`:''].filter(Boolean).join(' '):'';
     const dayCells=weekDays.map(day=>tipCellW(byTipDay[t]?.[day])).join('');
     return`<tr>
-      <td style="${sT3}${rBgW}font-weight:700;color:var(--text);padding:4px 10px;border-right:1px solid var(--border2);font-size:12px">${t}</td>
-      <td style="${sA3}${rBgW}color:${accC};text-align:right;padding:4px 10px;font-weight:700">${acc?fmtPL(acc.pl):'—'}<br><span style="font-size:9px;opacity:.55;color:var(--text3)">${acc?.n||0}b ${accDet}</span></td>
+      <td style="${sT3}${rBgW}font-weight:700;color:var(--ink);padding:4px 10px;border-right:1px solid var(--line);font-size:12px">${t}</td>
+      <td style="${sA3}${rBgW}color:${accC};text-align:right;padding:4px 10px;font-weight:700">${acc?fmtPL(acc.pl):'—'}<br><span style="font-size:9px;opacity:.55;color:var(--ink-mute)">${acc?.n||0}b ${accDet}</span></td>
       ${dayCells}
     </tr>`;
   }).join('');
 
   const tabelaHTML=mkCard('semana_tabela',`Dia a Dia — ${weekLabel}`,
     `<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:400px">
-      <thead><tr style="border-bottom:1px solid var(--border2)">
-        <th style="${sT3}${hBgW}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--text3);border-right:1px solid var(--border2);min-width:130px">Tipster</th>
-        <th style="${sA3}${hBgW}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--text3);min-width:95px">Semana</th>
+      <thead><tr style="border-bottom:1px solid var(--line)">
+        <th style="${sT3}${hBgW}padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;color:var(--ink-mute);border-right:1px solid var(--line);min-width:130px">Tipster</th>
+        <th style="${sA3}${hBgW}padding:5px 10px;text-align:right;font-size:9px;text-transform:uppercase;color:var(--ink-mute);min-width:95px">Semana</th>
         ${dayHdrs}
       </tr></thead>
       <tbody>${dayTotRow}${tipRows}</tbody>
@@ -629,21 +629,21 @@ function renderSemana(){
     const roi2=d.s>0?(d.pl/d.s*100):0;
     const set2=d.w+d.hw+d.l+d.hl;
     const wr2=set2>0?((d.w+d.hw)/set2*100):0;
-    const lc=d.pl>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi2>=0?'color:var(--green)':'color:var(--red)';
+    const lc=d.pl>=0?'color:var(--pos)':'color:var(--neg)';
+    const rc=roi2>=0?'color:var(--pos)':'color:var(--neg)';
     const det=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td class="td-c">${d.n}</td>
-      <td class="td-c"><span style="font-size:9px;color:var(--text3)">${det}</span></td>
+    return`<tr><td style="font-weight:700;color:var(--ink)">${t}</td><td class="td-c">${d.n}</td>
+      <td class="td-c"><span style="font-size:9px;color:var(--ink-mute)">${det}</span></td>
       <td class="td-num" style="${lc};font-weight:600">${fmtPL(d.pl)}</td><td class="td-num">${fmtR(d.s)}</td>
       <td class="td-c" style="${rc}">${fmtPct(roi2,2)}</td><td class="td-c">${mkWRC(wr2)}</td></tr>`;
   }).join('');
-  const tipLcW=totPL>=0?'color:var(--green)':'color:var(--red)';
-  const tipRcW=roi>=0?'color:var(--green)':'color:var(--red)';
+  const tipLcW=totPL>=0?'color:var(--pos)':'color:var(--neg)';
+  const tipRcW=roi>=0?'color:var(--pos)':'color:var(--neg)';
   const tipTableHTML2=mkCard('semana_tips','Tipsters — Comparativo da Semana',
     `<div class="tbl-wrap"><table class="tbl" id="tblSemanaTip">
       <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('Resultados','','c')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}</tr></thead>
       <tbody>
-        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--text3)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLcW};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRcW}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td></tr>
+        <tr class="total-row"><td>Total</td><td class="td-c">${rows.length}</td><td class="td-c"><span style="font-size:9px;color:var(--ink-mute)">W:${W} HW:${HW} L:${L} HL:${HL} V:${V}</span></td><td class="td-num" style="${tipLcW};font-weight:700">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-c" style="${tipRcW}">${fmtPct(roi,2)}</td><td class="td-c">${mkWRC(wr)}</td></tr>
         ${tipTableRows2}
       </tbody>
     </table></div>`);

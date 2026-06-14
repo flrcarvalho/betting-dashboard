@@ -334,8 +334,8 @@ function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
   const mkRow=([k,d],isOutros=false,outrosLabel='Outros',outrosNames='',muted=false)=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
-    const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    const lc=d.l>=0?'color:var(--pos)':'color:var(--neg)';
+    const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
     const trStyle=muted?' style="opacity:0.45"':'';
     const labelCell=isOutros
       ?`<td><span class="outros-anchor" data-outros="${outrosNames.replace(/"/g,'&quot;')}" style="cursor:help;border-bottom:1px dashed var(--ink-mute);color:var(--ink-mute)">${outrosLabel} (${k})</span></td>`
@@ -987,12 +987,12 @@ function _tipMonthTbody(rows){
     const v=byM[k];const roi=v.s>0?(v.pl/v.s*100):0,wr=v.t>0?(v.w/v.t*100):0;
     const avgOdd=v.stk>0?v.wt/v.stk:0,avgStake=v.bets>0?v.s/v.bets:0;
     totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
-    const pc=v.pl>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    const pc=v.pl>=0?'color:var(--pos)':'color:var(--neg)';
+    const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
     return`<tr><td data-sort="${k}" style="white-space:nowrap">${MESES[v.mes]} ${v.ano}</td><td class="td-num">${v.bets.toLocaleString('pt-BR')}</td><td class="td-num" style="${pc}">${fmtPL(v.pl)}</td><td class="td-num">${fmtR(v.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
-  const tc2=totPL>=0?'color:var(--green)':'color:var(--red)';const rc2=tRoi>=0?'color:var(--green)':'color:var(--red)';
+  const tc2=totPL>=0?'color:var(--pos)':'color:var(--neg)';const rc2=tRoi>=0?'color:var(--pos)':'color:var(--neg)';
   return mHTML+`<tr class="total-row"><td>Total</td><td class="td-num">${totB.toLocaleString('pt-BR')}</td><td class="td-num" style="${tc2}">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-num" style="${rc2}">${fmtPct(tRoi,2)}</td><td class="td-num">${mkWRC(tWr)}</td><td class="td-num">${totB>0?fmtR(totS/totB):'—'}</td><td class="td-num">—</td></tr>`;
 }
 
@@ -1011,8 +1011,8 @@ function _tipBreakdownTbl(rows,dimKey,labelFn,tableId=''){
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0;
     const avgStake=d.n>0?d.s/d.n:0;
-    const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
+    const lc=d.l>=0?'color:var(--pos)':'color:var(--neg)';
+    const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
     return`<tr><td>${labelFn(k)}</td><td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const th=dimKey==='casa'?'Casa':'Esporte';
@@ -1097,9 +1097,9 @@ function renderTipsters(){
   const compRows=ents.map(([t,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
-    const lc=d.l>=0?'color:var(--green)':'color:var(--red)';
-    const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:700;color:var(--text)">${t}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td><td>${fmtR(avgStake)}</td></tr>`;
+    const lc=d.l>=0?'color:var(--pos)':'color:var(--neg)';
+    const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
+    return`<tr><td style="font-weight:700;color:var(--ink)">${t}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td><td>${fmtR(avgStake)}</td></tr>`;
   }).join('');
   document.getElementById('tipsterCompTable').innerHTML=`<table class="tbl" id="tblTipComp"><thead><tr>${mkTh('Tipster','','l')+mkTh('Bets','','r')+mkTh('Win Rate','','r')+mkTh('Turnover','','r')+mkTh('P/L','','r')+mkTh('ROI','','r')+_mkOddMediaTh('r')+mkTh('Stake média','','r')}</tr></thead><tbody>${compRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblTipComp',[1,3,4,5,6,7]),100);
@@ -1138,15 +1138,15 @@ function renderResultadosCasa(){
   const maxAbs=Math.max(...vals.map(Math.abs),1);
   const barRows=ents.map(([c,d],i)=>{
     const v=vals[i];const barW=Math.abs(v)/maxAbs*48;
-    const color=v>=0?'var(--green)':'var(--red)';const lc=v>=0?'color:var(--green)':'color:var(--red)';
+    const color=v>=0?'var(--pos)':'var(--neg)';const lc=v>=0?'color:var(--pos)':'color:var(--neg)';
     const wr=d.t>0?((d.w+d.hw)/d.t*100):0;
-    return`<div style="display:grid;grid-template-columns:160px 1fr 120px;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:12px;font-weight:600;color:var(--text)">${casaCell(c)}</div>
-      <div style="position:relative;height:14px;background:var(--bg5);border-radius:3px;overflow:hidden">
-        <div style="position:absolute;left:50%;top:0;height:100%;width:1px;background:var(--border2);z-index:1"></div>
+    return`<div style="display:grid;grid-template-columns:160px 1fr 120px;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-2)">
+      <div style="font-size:12px;font-weight:600;color:var(--ink)">${casaCell(c)}</div>
+      <div style="position:relative;height:14px;background:var(--elevated);border-radius:3px;overflow:hidden">
+        <div style="position:absolute;left:50%;top:0;height:100%;width:1px;background:var(--line);z-index:1"></div>
         <div style="position:absolute;${v>=0?'left:50%':'right:'+((100-barW)/2)+'%'};width:${barW}%;height:100%;background:${color};border-radius:3px;opacity:.8"></div>
       </div>
-      <div style="text-align:right;font-size:11px;font-family:'JetBrains Mono',monospace;white-space:nowrap;${lc}"><span style="display:inline-block;min-width:64px;text-align:right">${fmtPct(v,2)}</span><span style="display:inline-block;min-width:52px;text-align:right;color:var(--text3);font-size:10px">(${d.n})</span></div>
+      <div style="text-align:right;font-size:11px;font-family:'JetBrains Mono',monospace;white-space:nowrap;${lc}"><span style="display:inline-block;min-width:64px;text-align:right">${fmtPct(v,2)}</span><span style="display:inline-block;min-width:52px;text-align:right;color:var(--ink-mute);font-size:10px">(${d.n})</span></div>
     </div>`;
   }).join('');
   const barEl=document.getElementById('resultadosCasaBars');
@@ -1155,8 +1155,8 @@ function renderResultadosCasa(){
   const tblRows=ents.map(([c,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?((d.w+d.hw)/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0;
-    const lc=d.l>=0?'color:var(--green)':'color:var(--red)';const rc=roi>=0?'color:var(--green)':'color:var(--red)';
-    return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--green)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--red)">L:${d.l2}</span> <span style="color:var(--text3)">V:${d.v}</span></td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc};font-weight:600">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td></tr>`;
+    const lc=d.l>=0?'color:var(--pos)':'color:var(--neg)';const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
+    return`<tr><td style="font-weight:600">${casaCell(c)}</td><td>${d.n}</td><td><span style="color:var(--pos)">W:${d.w}</span> <span style="color:var(--hw)">HW:${d.hw}</span> <span style="color:var(--hl)">HL:${d.hl}</span> <span style="color:var(--neg)">L:${d.l2}</span> <span style="color:var(--ink-mute)">V:${d.v}</span></td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc};font-weight:600">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td></tr>`;
   }).join('');
   const tblEl=document.getElementById('resultadosCasaTable');
   if(tblEl)tblEl.innerHTML=`<table class="tbl" id="tblResCasa"><thead><tr>${mkTh('Casa','','l')+mkTh('Bets','','r')+'<th>Resultados</th>'+mkTh('Win Rate','','r')+mkTh('Turnover','','r')+mkTh('P/L','','r')+mkTh('ROI','','r')+_mkOddMediaTh('r')}</tr></thead><tbody>${tblRows}</tbody></table>`;

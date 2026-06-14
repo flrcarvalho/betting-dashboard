@@ -1,4 +1,4 @@
-// ── overview.js — Gráficos e cards da Visão Geral ──────────────────────────────
+﻿// ── overview.js — Gráficos e cards da Visão Geral ──────────────────────────────
 
 function renderKPI(rows){
   const lucro=rows.reduce((a,r)=>a+r.lucro,0),stake=rows.reduce((a,r)=>a+r.stake,0);
@@ -43,7 +43,7 @@ function renderKPI(rows){
     {l:'Odd Média Pond.',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
     {l:'Win Rate',v:fmtPct(wr,1,false),c:'neu',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`,bar:wr},
   ];
-  const divider=`<div style="grid-column:1/-1;height:1px;background:var(--border);margin:2px 0;opacity:.6"></div>`;
+  const divider=`<div style="grid-column:1/-1;height:1px;background:var(--line-2);margin:2px 0;opacity:.6"></div>`;
   document.getElementById('kpiGrid').innerHTML=
     `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.5rem">${row1.map(k=>`<div class="kpi" style="position:relative;${k.accent||''}">${k.accent?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;opacity:.8"></div>`:''}<div class="kpi-label"><span class="kpi-pipe"></span> ${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div>${k.spark?`<div class="kpi-sparkline">${k.spark}</div>`:''}</div>`).join('')}</div>`+
     `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">${row2.map(k=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div>${k.bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,k.bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`;
@@ -156,13 +156,13 @@ function renderHeatmap(rows){
   // Same color logic as daily heatmap
   function heatBg(v){const a=0.12+Math.min(1,Math.abs(v)/maxAbs)*0.82;return v>0?`rgba(0,160,100,${a})`:v<0?`rgba(200,40,60,${a})`:'transparent';}
   function heatTxt(v){
-    if(v===0)return'var(--text3)';
+    if(v===0)return'var(--ink-mute)';
     const a=0.12+Math.min(1,Math.abs(v)/maxAbs)*0.82;
-    return a>0.5?(v>0?'#d0fff0':'#ffe0e5'):(v>0?'var(--green)':'var(--red)');
+    return a>0.5?(v>0?'#d0fff0':'#ffe0e5'):(v>0?'var(--pos)':'var(--neg)');
   }
   let html=`<table class="heatmap-table"><thead><tr><th></th>${MESES.map(m=>`<th style="text-align:center">${m}</th>`).join('')}</tr></thead><tbody>`;
   anos.forEach(ano=>{
-    html+=`<tr><th style="text-align:right;padding-right:8px;color:var(--text3);font-size:10px;white-space:nowrap">${ano}</th>`;
+    html+=`<tr><th style="text-align:right;padding-right:8px;color:var(--ink-mute);font-size:10px;white-space:nowrap">${ano}</th>`;
     for(let m=0;m<12;m++){
       const k=ano+'-'+m;
       if(byM[k]){
@@ -220,17 +220,17 @@ function renderOvStreaks(rows){
   el.innerHTML=`
     <div class="kpi-grid" style="margin-bottom:0">
       <div class="kpi">
-        <div class="kpi-label" style="color:var(--green)">Sequência Positiva</div>
+        <div class="kpi-label" style="color:var(--pos)">Sequência Positiva</div>
         <div class="kpi-val ${isPosCurrent?'pos':'neu'}">${isPosCurrent?posStreak:0} dias</div>
         <div class="kpi-sub">${isPosCurrent?fmtPL(posVal):('última: '+posStreak+' dias  +'+fmtR(posVal))}</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label" style="color:var(--red)">Drawdown Atual</div>
+        <div class="kpi-label" style="color:var(--neg)">Drawdown Atual</div>
         <div class="kpi-val ${isNegCurrent?'neg':'neu'}">${isNegCurrent?negStreak:0} dias</div>
         <div class="kpi-sub">${isNegCurrent?fmtPL(negVal):('último: '+negStreak+' dias')}</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label" style="color:var(--amber)">Topo Histórico</div>
+        <div class="kpi-label" style="color:var(--warn)">Topo Histórico</div>
         <div class="kpi-val pos">${fmtPL(peakVal)}</div>
         <div class="kpi-sub">atingido em ${peakDateFmt}</div>
       </div>
@@ -251,7 +251,7 @@ function renderOvCusto(){
   }
   const{allForns,allCasas,contaCount}=_costState;
   if(!allForns||!allForns.length){
-    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:12px;font-family:var(--font-sans)">Aguardando dados...</div>`;
+    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--ink-mute);font-size:12px;font-family:var(--font-sans)">Aguardando dados...</div>`;
     return;
   }
   const PIE_COLORS=['#2BC07E','#2E8BFF','#E0A21A','#7FB2FF','#95A1B0','#E5524B','#34d399','#fbbf24','#60a5fa','#AEB7C2','#fb923c'];
@@ -259,7 +259,7 @@ function renderOvCusto(){
   allForns.forEach(f=>{fornTots[f]=allCasas.reduce((a,c)=>{const k=f+'||'+c;return a+(custoData[k]||0)*(contaCount[k]||0);},0);});
   const grandCost=Object.values(fornTots).reduce((a,v)=>a+v,0);
   if(!grandCost){
-    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:12px;font-family:var(--font-sans)">💡 Preencha os custos na aba <strong style="color:var(--amber)">Custos de Contas</strong> para ver o resumo aqui.</div>`;
+    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--ink-mute);font-size:12px;font-family:var(--font-sans)">💡 Preencha os custos na aba <strong style="color:var(--warn)">Custos de Contas</strong> para ver o resumo aqui.</div>`;
     return;
   }
   const totalContas=allForns.reduce((a,f)=>a+allCasas.reduce((b,c)=>b+(contaCount[f+'||'+c]||0),0),0);
@@ -281,11 +281,11 @@ function renderOvCusto(){
     return`<div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 22px;display:flex;align-items:center;gap:12px;min-width:220px">
       <div style="flex-shrink:0;transform:scale(1.3)">${casaImg(c,16)||''}</div>
       <div style="flex:1">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">${c}</div>
-        <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px">${nContas} contas</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px">${c}</div>
+        <div style="font-size:10px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;margin-bottom:6px">${nContas} contas</div>
         <div style="display:flex;align-items:baseline;gap:10px">
-          <span style="font-size:18px;font-weight:700;color:var(--amber);font-family:'JetBrains Mono',monospace">R$ ${fmt(casaTots[c],0)}</span>
-          <span style="font-size:13px;font-weight:600;color:var(--text2);font-family:'JetBrains Mono',monospace">R$${fmt(avg,0)}/conta</span>
+          <span style="font-size:18px;font-weight:700;color:var(--warn);font-family:'JetBrains Mono',monospace">R$ ${fmt(casaTots[c],0)}</span>
+          <span style="font-size:13px;font-weight:600;color:var(--ink-soft);font-family:'JetBrains Mono',monospace">R$${fmt(avg,0)}/conta</span>
         </div>
       </div>
     </div>`;
@@ -302,11 +302,11 @@ function renderOvCusto(){
     const casasF=casasComCustoF.sort((a,b)=>{const ka=f+'||'+a,kb=f+'||'+b;return (custoData[kb]||0)*(contaCount[kb]||0)-(custoData[ka]||0)*(contaCount[ka]||0);}).slice(0,5);
     const casaRows=casasF.map(c=>{
       const k=f+'||'+c;const custo=custoData[k]||0;const n=contaCount[k]||0;const subtot=custo*n;
-      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">${casaCell(c)}</div>
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line-2)">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)">${casaCell(c)}</div>
         <div style="text-align:right;font-size:11px;font-family:'JetBrains Mono',monospace">
-          <span style="color:var(--text3)">${n}×R$${fmt(custo,0)}</span>
-          <span style="color:var(--text);font-weight:600;margin-left:8px">R$${fmt(subtot,0)}</span>
+          <span style="color:var(--ink-mute)">${n}×R$${fmt(custo,0)}</span>
+          <span style="color:var(--ink);font-weight:600;margin-left:8px">R$${fmt(subtot,0)}</span>
         </div>
       </div>`;
     }).join('');
@@ -314,13 +314,13 @@ function renderOvCusto(){
     return`<div style="background:var(--surface);border:1px solid var(--line);border-top:2px solid ${color};border-radius:var(--r-lg);padding:20px 22px;flex:1;min-width:200px;max-width:340px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
         <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
-        <div style="font-size:13px;font-weight:700;color:var(--text)">${f}</div>
-        <div style="margin-left:auto;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">${pct}% do total</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink)">${f}</div>
+        <div style="margin-left:auto;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--ink-mute)">${pct}% do total</div>
       </div>
-      <div style="font-size:22px;font-weight:700;color:var(--amber);font-family:'JetBrains Mono',monospace;letter-spacing:-.02em;margin-bottom:2px">R$ ${fmt(tot,0)}</div>
-      <div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:.75rem">${nContas} contas · média R$${fmt(avgF,0)}/conta</div>
+      <div style="font-size:22px;font-weight:700;color:var(--warn);font-family:'JetBrains Mono',monospace;letter-spacing:-.02em;margin-bottom:2px">R$ ${fmt(tot,0)}</div>
+      <div style="font-size:10px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;margin-bottom:.75rem">${nContas} contas · média R$${fmt(avgF,0)}/conta</div>
       <div>${casaRows}</div>
-      ${moreCount>0?`<div style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:5px;text-align:center">+ ${moreCount} casas</div>`:''}
+      ${moreCount>0?`<div style="font-size:10px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;margin-top:5px;text-align:center">+ ${moreCount} casas</div>`:''}
     </div>`;
   }).join('');
 
@@ -331,6 +331,6 @@ function renderOvCusto(){
       <div class="kpi"><div class="kpi-label">Custo Médio/Conta</div><div class="kpi-val neu">R$ ${fmt(avgCostPago,0)}</div><div class="kpi-sub">${contasComPreco} contas com preço</div></div>
       <div class="kpi"><div class="kpi-label">Custo Médio/Casa</div><div class="kpi-val neu">R$ ${fmt(avgPorCasa,0)}</div><div class="kpi-sub">${casasComCusto.length} casas com custo</div></div>
     </div>
-    ${casasComCusto.length>0?`<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">${casaCards}</div>`:''}
+    ${casasComCusto.length>0?`<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--line-2)">${casaCards}</div>`:''}
     <div style="display:flex;flex-wrap:wrap;gap:.75rem">${fornCards}</div>`;
 }

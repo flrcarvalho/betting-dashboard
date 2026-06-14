@@ -5,7 +5,7 @@
 html, body {
   height: 100%;
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   -webkit-font-smoothing: antialiased;
@@ -39,7 +39,7 @@ body::before {
 .sidebar {
   width: 220px;
   background: var(--bg2);
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--line-2);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -51,7 +51,7 @@ body::before {
 
 .sidebar-logo {
   padding: 1rem 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,13 +68,13 @@ body::before {
 .logo-name {
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
-  color: var(--text);
+  color: var(--ink);
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
 .logo-sub {
   font-size: var(--text-xxs);
-  color: var(--text3);
+  color: var(--ink-mute);
   font-family: var(--font-mono);
   margin-top: 2px;
 }
@@ -89,7 +89,7 @@ body::before {
   color: var(--ink-mute);
   font-family: var(--font-mono);
   font-weight: var(--weight-bold);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line-2);
   margin-top: 2px;
 }
 
@@ -100,14 +100,14 @@ body::before {
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  color: var(--text2);
+  color: var(--ink-soft);
   cursor: pointer;
   transition: all 0.12s;
   border-left: 2px solid transparent;
   height: 34px;
 }
 .nav-item:hover {
-  color: var(--text);
+  color: var(--ink);
   background: rgba(46,139,255,0.06);
 }
 .nav-item.active {
@@ -130,7 +130,7 @@ body::before {
 
 .sidebar-bottom {
   padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line-2);
 }
 .update-btn {
   width: 100%;
@@ -139,8 +139,8 @@ body::before {
   font-family: var(--font-sans);
   font-weight: var(--weight-medium);
   background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--text2);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
@@ -156,7 +156,7 @@ body::before {
   justify-content: center;
   gap: 5px;
   font-size: var(--text-xxs);
-  color: var(--text3);
+  color: var(--ink-mute);
   text-align: center;
   margin-top: var(--space-1);
   font-family: var(--font-mono);
@@ -168,7 +168,7 @@ body::before {
   top: 0; right: 0; left: 220px;
   height: 68px;
   background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line-2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -232,10 +232,10 @@ body::before {
 .ap-btn {
   flex: 1;
   padding: 3px var(--sp-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-2);
   border-radius: var(--r-xs);
   background: transparent;
-  color: var(--text3);
+  color: var(--ink-mute);
   font-size: var(--text-xs);
   font-family: var(--font-mono);
   cursor: pointer;
@@ -258,30 +258,30 @@ body::before {
   gap: 7px;
   cursor: pointer;
   font-size: var(--text-xs);
-  color: var(--text3);
+  color: var(--ink-mute);
   font-family: var(--font-mono);
   padding: 4px 10px;
-  border: 1px solid var(--border2);
+  border: 1px solid var(--line);
   border-radius: var(--radius-pill);
-  background: var(--bg4);
+  background: var(--field);
   transition: border-color 0.12s;
 }
 .theme-toggle:hover { border-color: var(--border3); }
 .tog-track {
   width: 26px; height: 14px;
-  background: var(--bg5);
+  background: var(--elevated);
   border-radius: 7px;
   position: relative;
 }
 .tog-thumb {
   width: 10px; height: 10px;
-  background: var(--text3);
+  background: var(--ink-mute);
   border-radius: 50%;
   position: absolute;
   top: 2px; left: 2px;
   transition: all 0.2s;
 }
-[data-theme="light"] .tog-thumb { left: 14px; background: var(--blue); }
+[data-theme="light"] .tog-thumb { left: 14px; background: var(--accent); }
 
 /* ── Main content ────────────────────────────────────────────────────────── */
 .main { margin-left: 220px; flex: 1; min-height: 100vh; }
@@ -311,7 +311,7 @@ body::before {
   font-weight: var(--weight-extrabold);
   letter-spacing: -0.035em;
   line-height: 1;
-  color: var(--text);
+  color: var(--ink);
 }
 .page-sub {
   font-size: var(--text-nano);
@@ -353,7 +353,7 @@ html[data-theme="light"].t-page-gradient .page-title {
 .filter-group { display: flex; flex-direction: column; gap: 4px; }
 .filter-label {
   font-size: var(--text-nano);
-  color: var(--text3);
+  color: var(--ink-mute);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-family: var(--font-mono);
@@ -363,14 +363,14 @@ html[data-theme="light"].t-page-gradient .page-title {
 .date-row input[type=date] {
   font-size: var(--text-xs);
   padding: 5px var(--space-2);
-  background: var(--bg4);
-  border: 1px solid var(--border2);
-  color: var(--text2);
+  background: var(--field);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   width: 120px;
 }
-.date-sep { font-size: var(--text-xs); color: var(--text3); }
+.date-sep { font-size: var(--text-xs); color: var(--ink-mute); }
 .quick-btns { display: flex; gap: 3px; margin-top: 3px; }
 
 /* ── Row layouts ─────────────────────────────────────────────────────────── */
@@ -398,7 +398,7 @@ html[data-theme="light"].t-page-gradient .page-title {
 /* ── Daily / month blocks ────────────────────────────────────────────────── */
 .month-block {
   margin-bottom: var(--space-4);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-2);
   border-radius: var(--r-sm);
   overflow: hidden;
 }
@@ -407,13 +407,13 @@ html[data-theme="light"].t-page-gradient .page-title {
   align-items: center;
   justify-content: space-between;
   padding: 0.65rem var(--space-3);
-  background: var(--bg4);
+  background: var(--field);
   cursor: pointer;
   font-size: 12px;
   font-weight: var(--weight-semibold);
 }
-.month-hdr:hover { background: var(--bg5); }
-.month-tog { font-size: var(--text-xxs); color: var(--text3); transition: transform 0.2s; }
+.month-hdr:hover { background: var(--elevated); }
+.month-tog { font-size: var(--text-xxs); color: var(--ink-mute); transition: transform 0.2s; }
 .month-body { display: none; overflow-x: auto; }
 .month-body.open { display: block; }
 
@@ -452,13 +452,13 @@ html[data-theme="light"].t-page-gradient .page-title {
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: .06em;
-  color: var(--text3);
+  color: var(--ink-mute);
 }
 .loader-bar-wrap {
   width: 100%;
   height: 10px;
   border-radius: 100px;
-  background: var(--border2);
+  background: var(--line);
   overflow: hidden;
 }
 .loader-bar-fill {
@@ -476,10 +476,10 @@ html[data-theme="light"].t-page-gradient .page-title {
 
 .error-box {
   background: var(--red-dim);
-  border: 1px solid var(--red);
+  border: 1px solid var(--neg);
   border-radius: var(--radius);
   padding: var(--space-4);
-  color: var(--red);
+  color: var(--neg);
   font-size: 12px;
   line-height: 1.8;
   font-family: var(--font-mono);
@@ -512,7 +512,7 @@ html[data-theme="light"].t-page-gradient .page-title {
   to   { transform: translateX(100%); }
 }
 .skeleton-block {
-  background: var(--surface-2, var(--bg3));
+  background: var(--surface-2, var(--surface-2));
   border-radius: var(--radius);
   overflow: hidden;
   position: relative;
