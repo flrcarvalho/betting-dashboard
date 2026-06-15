@@ -447,21 +447,33 @@ function buildHTML(){
       <div class="page" id="page-apostas">
         ${buildFilters('apostas',sports,casas,tipsters)}
         <div id="apostasKPI" style="margin-bottom:1rem"></div>
-        <!-- Filter + sort bar -->
+        <!-- Busca rápida por coluna -->
         <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;padding:16px 22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg)">
           <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1">
-            ${[['Data',0],['Esporte',1],['Tipster',2],['Casa',3],['Parceiro',4],['Aposta',5],['Descrição',6]].map(([lbl,i])=>`<input class="apostas-filter-inp acf" type="text" placeholder="${lbl}..." oninput="apostasFilter(${i},this.value)">`).join('')}
+            ${[['Aposta/Tipo',5],['Descrição/Evento',6],['Esporte',1],['Tipster',2],['Casa',3],['Parceiro',4]].map(([lbl,i])=>`<input class="apostas-filter-inp acf" type="text" placeholder="${lbl}..." oninput="apostasFilter(${i},this.value)">`).join('')}
           </div>
           <button onclick="clearApostasFilters()" style="font-size:10px;padding:5px 10px;background:transparent;border:1px solid var(--line);color:var(--ink-mute);border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0">✕ Limpar</button>
         </div>
-        <!-- Sort bar -->
-        <div style="display:flex;gap:5px;align-items:center;margin-bottom:.75rem;flex-wrap:wrap">
-          <span style="font-size:9px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-right:4px">Ordenar:</span>
-          ${[['Data',0],['Odd',8],['Stake',7],['P/L',10],['Resultado',9],['Tipster',2],['Casa',3]].map(([lbl,i])=>`<button class="apostas-sort-btn" data-col="${i}" onclick="apostasSort(${i})">${lbl} <span class="sort-arrow"></span></button>`).join('')}
-        </div>
-        <!-- Cards container -->
-        <div class="apostas-cont" id="apostasCont" style="height:calc(100vh - 380px)">
-          <div id="apostasCardWrap"></div>
+        <!-- Tabela de apostas -->
+        <div class="btbl-wrap">
+          <!-- Header fixo da tabela -->
+          <div class="btbl-cols btbl-hdr-row">
+            <div class="btbl-th sortable" data-col="0" onclick="apostasSort(0)">Data <span class="sort-arrow">↓</span></div>
+            <div class="btbl-th">Aposta / Evento</div>
+            <div class="btbl-th">Esporte</div>
+            <div class="btbl-th">Tipster</div>
+            <div class="btbl-th">Casa · Parceiro</div>
+            <div class="btbl-th sortable" data-col="7" onclick="apostasSort(7)">Stake <span class="sort-arrow">↕</span></div>
+            <div class="btbl-th sortable" data-col="8" onclick="apostasSort(8)">Odd <span class="sort-arrow">↕</span></div>
+            <div class="btbl-th">Resultado</div>
+            <div class="btbl-th sortable" data-col="10" onclick="apostasSort(10)" style="text-align:right">P/L <span class="sort-arrow">↕</span></div>
+          </div>
+          <!-- Contador -->
+          <div id="apostasCounter" class="btbl-counter"></div>
+          <!-- Linhas virtualizadas -->
+          <div id="apostasCont" style="height:calc(100vh - 440px);overflow-y:auto">
+            <div id="apostasCardWrap"></div>
+          </div>
         </div>
       </div>
 

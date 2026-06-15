@@ -1,8 +1,9 @@
-﻿// ── apostas.js — Espelho da base com virtual scroll ─────────────────────────────
+// ── apostas.js — Espelho da base com virtual scroll ─────────────────────────────
 
-// Apostas — espelho da base de dados com virtual scroll
 let apostasFiltered=[], apostasSortCol=0, apostasSortAsc=false;
 let apostasColFilters={};
+
+const BTBL_ROW_H=68; // altura de linha da tabela de apostas
 
 function renderApostas(){
   const baseRows=filtrarPagina('apostas');
@@ -57,20 +58,23 @@ function renderApostas(){
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;width:100%">${row1.join('')}</div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;width:100%">${row2.join('')}</div>`;
   }
-  // Update sort button active states
-  document.querySelectorAll('.apostas-sort-btn').forEach(btn=>{
-    const ci=parseInt(btn.dataset.col);
-    btn.classList.toggle('active',ci===apostasSortCol);
-    const arrow=btn.querySelector('.sort-arrow');
-    if(arrow)arrow.textContent=ci===apostasSortCol?(apostasSortAsc?'↑':'↓'):'';
+  // Contador e sort arrows no header da tabela
+  const counter=document.getElementById('apostasCounter');
+  if(counter){
+    counter.textContent=`${apostasFiltered.length.toLocaleString('pt-BR')} de ${baseRows.length.toLocaleString('pt-BR')} apostas`;
+  }
+  document.querySelectorAll('.btbl-th.sortable').forEach(th=>{
+    const ci=parseInt(th.dataset.col);
+    const arrow=th.querySelector('.sort-arrow');
+    th.classList.toggle('sort-active',ci===apostasSortCol);
+    if(arrow)arrow.textContent=ci===apostasSortCol?(apostasSortAsc?'↑':'↓'):'↕';
   });
-  // Virtual scroll render
+  // Virtual scroll
   renderApostasVirt();
   const _ac=document.getElementById('apostasCont');
   if(_ac){let _raf=null;_ac.onscroll=function(){if(_raf)return;_raf=requestAnimationFrame(()=>{renderApostasVirt();_raf=null;});};}
 }
 
-function betResLabel(r){return{W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'}[r]||r;}
 function renderApostasVirt(){
   const cont=document.getElementById('apostasCont');
   if(!cont)return;
@@ -81,55 +85,44 @@ function renderApostasVirt(){
   const scrollTop=cont.scrollTop;
   const contH=cont.clientHeight||600;
   const buf=10;
-  const startIdx=Math.max(0,Math.floor(scrollTop/CARD_H)-buf);
-  const endIdx=Math.min(total,Math.ceil((scrollTop+contH)/CARD_H)+buf);
-  const topPad=startIdx*CARD_H;
-  const botPad=Math.max(0,(total-endIdx)*CARD_H);
-  const RES_LABELS={W:'Ganha',HW:'½ Ganha',L:'Perdida',HL:'½ Perdida',V:'Void'};
-  const cards=rows.slice(startIdx,endIdx).map(r=>{
+  const startIdx=Math.max(0,Math.floor(scrollTop/BTBL_ROW_H)-buf);
+  const endIdx=Math.min(total,Math.ceil((scrollTop+contH)/BTBL_ROW_H)+buf);
+  const topPad=startIdx*BTBL_ROW_H;
+  const botPad=Math.max(0,(total-endIdx)*BTBL_ROW_H);
+  const RES_SHORT={W:'W',HW:'½W',L:'L',HL:'½L',V:'V'};
+  const lines=rows.slice(startIdx,endIdx).map(r=>{
     const d=r.data.slice(0,10);
     const [yr,mo,dy]=d.split('-');
-    const hora=r.data.length>10?r.data.slice(11,16):'';
-    const dateStr=`${dy}/${mo}`;
-    const plC=r.lucro>0?'var(--pos)':r.lucro<0?'var(--neg)':'var(--ink-mute)';
-    const resLabel=RES_LABELS[r.resultado]||r.resultado;
+    const dateStr=`${dy}/${mo}/${yr}`;
     const resClass=`bet-res-${r.resultado}`;
-    const cardClass=`bet-card res-${r.resultado}`;
-    return`<div class="${cardClass}" style="height:${CARD_H}px">
-      <div class="bet-card-main" style="min-width:0;overflow:hidden">
-        <div class="bet-card-meta">
-          <span class="bet-time">${dateStr}${hora?' · '+hora:''}</span>
-          <span class="bet-sport-tag">${mkSpChip(r.esporte)}<span style="color:var(--ink-mute)">${r.esporte||''}</span></span>
-          ${r.tipster?`<span class="bet-tipster">${r.tipster}</span>`:''}
-          <span class="bet-casa-pill">${mkHouseChip(r.casa)}<span>${r.casa||'—'}</span></span>
-          ${r.parceiro&&r.parceiro!=='—'?`<span style="font-size:9px;color:var(--ink-mute);font-family:var(--font-sans)">${r.parceiro}</span>`:''}
-        </div>
-        <div class="bet-aposta">${r.aposta||'—'}</div>
-        ${r.descricao?`<div class="bet-desc">${r.descricao}</div>`:''}
+    const resLabel=RES_SHORT[r.resultado]||r.resultado;
+    const parceiro=r.parceiro&&r.parceiro!=='—'?r.parceiro:'';
+    return`<div class="btbl-cols btbl-data-row" style="height:${BTBL_ROW_H}px">
+      <div class="btbl-cell btbl-date">${dateStr}</div>
+      <div class="btbl-cell">
+        ${r.aposta?`<div class="btbl-tipo">${r.aposta}</div>`:''}
+        <div class="btbl-desc">${r.descricao||r.aposta||'—'}</div>
       </div>
-      <div class="bet-card-nums">
-        <div class="bet-num">
-          <span class="bet-res-pill ${resClass}">${resLabel}</span>
-          <span class="bet-num-lbl">Resultado</span>
-        </div>
-        <div class="bet-num">
-          <span class="bet-num-val" style="color:var(--ink)">${fmtOdd(r.odd)}</span>
-          <span class="bet-num-lbl">Odd</span>
-        </div>
-        <div class="bet-num">
-          <span class="bet-num-val" style="color:var(--ink)">${fmtR(r.stake)}</span>
-          <span class="bet-num-lbl">Stake</span>
-        </div>
-        <div class="bet-num" style="width:90px;min-width:90px">
-          <span class="bet-num-val" style="color:${plC};font-size:12px">${fmtPL(r.lucro)}</span>
-          <span class="bet-num-lbl">P/L</span>
+      <div class="btbl-cell btbl-sport">${mkSpChip(r.esporte)}<span>${r.esporte||'—'}</span></div>
+      <div class="btbl-cell btbl-tipster">${r.tipster||'—'}</div>
+      <div class="btbl-cell btbl-casa">
+        ${mkHouseChip(r.casa)}
+        <div class="btbl-casa-sub">
+          <span class="btbl-casa-nome">${r.casa||'—'}</span>
+          ${parceiro?`<span class="btbl-casa-conta">${parceiro}</span>`:''}
         </div>
       </div>
+      <div class="btbl-cell btbl-num">${fmtR(r.stake)}</div>
+      <div class="btbl-cell btbl-num">${fmtOdd(r.odd)}</div>
+      <div class="btbl-cell" style="display:flex;align-items:center;justify-content:center">
+        <span class="bet-res-pill ${resClass}">${resLabel}</span>
+      </div>
+      <div class="btbl-cell btbl-pl">${fmtPL(r.lucro)}</div>
     </div>`;
   }).join('');
   wrapper.innerHTML=
     `<div class="virt-spacer" style="height:${topPad}px"></div>`+
-    cards+
+    lines+
     `<div class="virt-spacer" style="height:${botPad}px"></div>`;
 }
 
