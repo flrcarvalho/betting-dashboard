@@ -1,5 +1,29 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: sparkline removida do card P/L Liquido — COMPLETO (2026-06-15 sessao 32)
+
+## Sessao 2026-06-15 (sessao 32) — Remocao do mini grafico do KPI P/L Liquido
+
+### O que foi feito
+
+**assets/js/charts/overview.js**
+- Removido calculo do sparkline (byDay90, cumPL90, mkSparkline)
+- Removida prop `spark` do objeto P/L Liquido em `row1`
+- Removido `<div class="kpi-sparkline">` do template HTML
+
+**assets/css/layout.css**
+- Removida regra `.kpi-sparkline` (CSS morto)
+
+Os 8 cards da grade de KPIs agora tem estrutura identica e altura uniforme.
+
+### Pendente historico (nao prioritario)
+- gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (migracao para mkTh)
+
+## Proximo passo
+- Verificar no browser: 8 KPI cards com altura uniforme, sem mini grafico no P/L Liquido
+
+---
+
 ## Estado atual: painel Aparencia simplificado para apenas toggle de tema — COMPLETO (2026-06-14 sessao 31)
 
 ## Sessao 2026-06-14 (sessao 31) — Limpeza do painel Aparencia

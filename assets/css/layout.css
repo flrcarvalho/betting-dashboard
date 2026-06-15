@@ -539,9 +539,3 @@ html[data-theme="light"].t-page-gradient .page-title {
   animation: pulse-dot 2s infinite;
 }
 
-/* ── KPI sparkline (item 11) ──────────────────────────────────────────────── */
-.kpi-sparkline {
-  margin-top: 6px;
-  opacity: 0.9;
-  line-height: 0;
-}
