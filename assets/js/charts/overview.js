@@ -34,7 +34,7 @@ function renderKPI(rows){
     {l:'Turnover',v:fmtR(stake),c:'neu',s:'volume apostado'},
     {l:'ROI',v:fmtPct(roi,2),c:roi>=0?'pos':'neg',s:n+' apostas'},
     {l:'Odd Média Pond.',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
-    {l:'Win Rate',v:fmtPct(wr,1,false),c:'neu',s:`<span class="res-w">W:${W}</span> <span class="res-hw">HW:${HW}</span> <span class="res-l">L:${L}</span> <span class="res-hl">HL:${HL}</span> <span class="res-v">V:${V}</span>`,bar:wr},
+    {l:'Win Rate',v:fmtPct(wr,1,false),c:'neu',s:settled+' encerradas',bar:wr},
   ];
   const divider=`<div style="grid-column:1/-1;height:1px;background:var(--line-2);margin:2px 0;opacity:.6"></div>`;
   document.getElementById('kpiGrid').innerHTML=
@@ -188,49 +188,46 @@ function renderOvHeatmap(){
   });
 }
 
-// ── Card de sequências e topo na Visão Geral ──
+// ── Card de cenário atual na Visão Geral ──
 function renderOvStreaks(rows){
   const el=document.getElementById('ovStreaksContent');
   if(!el||!rows.length)return;
-  // Calcula P/L acumulado dia a dia
   const byDay={};rows.forEach(r=>{const k=r.data.slice(0,10);if(!byDay[k])byDay[k]=0;byDay[k]+=r.lucro;});
   const days=Object.keys(byDay).sort();
-  let cum=0,peak=0,peakDate='',peakVal=0;
-  const cumVals=days.map(d=>{cum+=byDay[d];if(cum>peakVal){peakVal=cum;peakDate=d;}return{d,v:cum};});
-  // Sequência positiva atual (dias consecutivos com P/L diário positivo desde o último negativo)
+  let cum=0,peakVal=0,peakDate='';
+  days.forEach(d=>{cum+=byDay[d];if(cum>peakVal){peakVal=cum;peakDate=d;}});
   let posStreak=0,posVal=0,negStreak=0,negVal=0;
-  // Positive streak (dias consecutivos de lucro a partir do final)
   for(let i=days.length-1;i>=0;i--){if(byDay[days[i]]>0){posStreak++;posVal+=byDay[days[i]];}else break;}
-  // Negative streak
   for(let i=days.length-1;i>=0;i--){if(byDay[days[i]]<0){negStreak++;negVal+=byDay[days[i]];}else break;}
-  // Peak date formatted
   const pd=peakDate?peakDate.split('-'):[];
   const peakDateFmt=pd.length===3?`${pd[2]}/${pd[1]}/${pd[0].slice(2)}`:'-';
-  // Last day
   const lastDay=days[days.length-1];
   const isPosCurrent=posStreak>0&&byDay[lastDay]>0;
   const isNegCurrent=negStreak>0&&byDay[lastDay]<0;
+  const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
+  const vS='font-size:16px';
+  const sbS='margin-top:auto;padding-top:6px';
   el.innerHTML=`
-    <div class="kpi-grid" style="margin-bottom:0">
-      <div class="kpi">
-        <div class="kpi-label" style="color:var(--pos)">Sequência Positiva</div>
-        <div class="kpi-val ${isPosCurrent?'pos':'neu'}">${isPosCurrent?posStreak:0} dias</div>
-        <div class="kpi-sub">${isPosCurrent?fmtPL(posVal):('última: '+posStreak+' dias  +'+fmtR(posVal))}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">
+      <div class="kpi" style="${kS}">
+        <div class="kpi-label"><span class="kpi-pipe"></span>Sequência Positiva</div>
+        <div class="fdc-kpi__value" data-state="${isPosCurrent?'pos':'info'}" style="${vS}">${isPosCurrent?posStreak:0} dias</div>
+        <div class="kpi-sub" style="${sbS}">${isPosCurrent?fmtPL(posVal):('última: '+posStreak+' dias')}</div>
       </div>
-      <div class="kpi">
-        <div class="kpi-label" style="color:var(--neg)">Drawdown Atual</div>
-        <div class="kpi-val ${isNegCurrent?'neg':'neu'}">${isNegCurrent?negStreak:0} dias</div>
-        <div class="kpi-sub">${isNegCurrent?fmtPL(negVal):('último: '+negStreak+' dias')}</div>
+      <div class="kpi" style="${kS}">
+        <div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual</div>
+        <div class="fdc-kpi__value" data-state="${isNegCurrent?'real':'info'}" style="${vS}">${isNegCurrent?negStreak:0} dias</div>
+        <div class="kpi-sub" style="${sbS}">${isNegCurrent?fmtPL(negVal):('último: '+negStreak+' dias')}</div>
       </div>
-      <div class="kpi">
-        <div class="kpi-label" style="color:var(--warn)">Topo Histórico</div>
-        <div class="kpi-val pos">${fmtPL(peakVal)}</div>
-        <div class="kpi-sub">atingido em ${peakDateFmt}</div>
+      <div class="kpi" style="${kS}">
+        <div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico</div>
+        <div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(peakVal)}</div>
+        <div class="kpi-sub" style="${sbS}">atingido em ${peakDateFmt}</div>
       </div>
-      <div class="kpi">
-        <div class="kpi-label">Distância do Topo</div>
-        <div class="kpi-val ${cum<peakVal?'neg':'pos'}">${cum<peakVal?fmtPL(cum-peakVal):fmtPL(0)}</div>
-        <div class="kpi-sub">P/L atual: ${fmtPL(cum)}</div>
+      <div class="kpi" style="${kS}">
+        <div class="kpi-label"><span class="kpi-pipe"></span>Distância do Topo</div>
+        <div class="fdc-kpi__value" data-state="${cum<peakVal?'real':'pos'}" style="${vS}">${cum<peakVal?fmtPL(cum-peakVal):fmtPL(0)}</div>
+        <div class="kpi-sub" style="${sbS}">P/L atual: ${fmtPL(cum)}</div>
       </div>
     </div>`;
 }

@@ -411,7 +411,7 @@ function buildHTML(){
         ${buildFilters('overview',sports,casas,tipsters)}
         <div class="kpi-grid" id="kpiGrid"></div>
         ${mkCard('bankroll','Resultado Geral','<div class="chart-wrap" style="min-height:380px"><canvas id="chartBankroll" role="img" aria-label="P/L"></canvas></div>','<span style="margin-left:auto;margin-right:8px;font-family:JetBrains Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-soft);opacity:.7">P/L diário · evolução acumulada</span>')}
-        ${mkCard('ov_streaks','Sequências & Topo Histórico','<div id="ovStreaksContent"></div>')}
+        ${mkCard('ov_streaks','Cenário Atual','<div id="ovStreaksContent"></div>')}
         ${mkCard('roi_monthly','ROI Mensal (%)','<div class="chart-wrap" style="min-height:220px"><canvas id="chartROI" role="img" aria-label="ROI mensal"></canvas></div>')}
         ${mkCard('odds_dist','Distribuição de Odds — Apostas, Win Rate e ROI por faixa','<div class="chart-wrap" style="height:240px"><canvas id="chartOddsDist" role="img" aria-label="Odds dist"></canvas></div>')}
         ${mkCard('ov_custo','Custo de Contas — Resumo','<div id="ovCustoContent"></div>')}
