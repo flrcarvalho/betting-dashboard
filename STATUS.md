@@ -1,8 +1,8 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: sparkline removida do card P/L Liquido — COMPLETO (2026-06-15 sessao 32)
+## Estado atual: KPI cards uniformes + Cenario Atual na Visao Geral — COMPLETO (2026-06-15 sessao 33)
 
-## Sessao 2026-06-15 (sessao 32) — Remocao do mini grafico do KPI P/L Liquido
+## Sessao 2026-06-15 (sessoes 32-33) — KPI cards uniformes + Cenario Atual
 
 ### O que foi feito
 
@@ -10,17 +10,28 @@
 - Removido calculo do sparkline (byDay90, cumPL90, mkSparkline)
 - Removida prop `spark` do objeto P/L Liquido em `row1`
 - Removido `<div class="kpi-sparkline">` do template HTML
+- Sub-texto W:/HW:/L:/HL:/V: removido do card Win Rate (substituido por "N encerradas")
+- `renderOvStreaks`: cards migrados para `fdc-kpi__value` + `data-state` (pos/real/info)
+- Inline styles kS/vS/sbS e kpi-pipe nos labels — mesmo padrao visual do popup de tipsters
 
 **assets/css/layout.css**
 - Removida regra `.kpi-sparkline` (CSS morto)
 
-Os 8 cards da grade de KPIs agora tem estrutura identica e altura uniforme.
+**assets/js/app.js**
+- Titulo do card `'Sequencias & Topo Historico'` renomeado para `'Cenario Atual'`
+
+Os 8 KPI cards agora tem estrutura e altura identicas. A secao Cenario Atual na Visao Geral
+segue o mesmo padrao visual do popup de tipsters.
+
+### Commits desta sessao
+- 3398b51 refactor(overview): remove sparkline do card P/L Liquido
+- d1da61c refactor(overview): renomeia secao para Cenario Atual e aplica estilo fdc-kpi__value
 
 ### Pendente historico (nao prioritario)
 - gestao.js: tblCost, tblForn, tblCross, tblCG, tblCT (migracao para mkTh)
 
 ## Proximo passo
-- Verificar no browser: 8 KPI cards com altura uniforme, sem mini grafico no P/L Liquido
+- Verificar no browser: 8 KPI cards uniformes; secao Cenario Atual com cores pos/real/info corretas
 
 ---
 
