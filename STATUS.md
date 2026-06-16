@@ -1,5 +1,40 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: Cenario Atual e Diagnostico de Risco corrigidos na Visao Geral — COMPLETO (2026-06-16 sessao 34)
+
+## Sessao 2026-06-16 (sessao 34) — Auditoria de drawdown + correcao Visao Geral
+
+### O que foi feito
+
+**Auditoria completa de drawdown (leitura)**
+- Mapeadas 9 funcoes de calculo em app.js linhas 128-171
+- Identificadas 6 inconsistencias, sendo a principal: "Drawdown Atual" na Visao Geral media dias negativos consecutivos (conceito errado)
+- Tooltip do "Max Drawdown" nos popups Casa/Tipster diz "XMDD" mas exibe calcMDDreais (bug pendente)
+- EMDD documentado como formula de Brownian Motion mas implementado como xmdd*0.85 (bug pendente)
+
+**assets/js/charts/overview.js**
+- renderOvStreaks: reescrita para usar calcTopoDrawdown, calcMDDreais, calcMDDpct, calcRecoveryFactor
+- Exibe agora: Topo Historico, Drawdown Atual (R$), Max Drawdown, Recovery Factor
+- Mesma logica e markup do popup de Tipster (Cenario Atual)
+- renderOvRisco: nova funcao adicionada com Diagnostico de Risco
+- Exibe: P-Value (bootstrap), DD Medio (MC.xmdd), DD Maximo (MC.p99), Nivel de Solidez
+- Usa calcMCdrawdown(rows, 10000), calcPValueMC, calcSolidez
+
+**assets/js/app.js**
+- Card ov_risco adicionado em buildHTML() apos ov_streaks
+- renderOvRisco(rows) adicionado em renderPage() para pagina overview
+
+### Pendente
+- Verificar no browser: Cenario Atual com 4 KPIs corretos; novo card Diagnostico de Risco visivel
+- Tooltip do "Max Drawdown" (popups Casa e Tipster) diz "XMDD" mas valor e calcMDDreais — corrigir label
+- EMDD: implementacao real e xmdd*0.85, documentacao diz Brownian Motion — alinhar ou documentar fator 0.85
+
+## Proximo passo
+- Abrir index.html, ir para Visao Geral e confirmar os 2 cards visuais
+- Corrigir tooltip "Max Drawdown" em performance.js linha 743 (trocar "XMDD" por "MDD")
+
+---
+
 ## Estado atual: KPI cards uniformes + Cenario Atual na Visao Geral — COMPLETO (2026-06-15 sessao 33)
 
 ## Sessao 2026-06-15 (sessoes 32-33) — KPI cards uniformes + Cenario Atual

@@ -192,44 +192,79 @@ function renderOvHeatmap(){
 function renderOvStreaks(rows){
   const el=document.getElementById('ovStreaksContent');
   if(!el||!rows.length)return;
-  const byDay={};rows.forEach(r=>{const k=r.data.slice(0,10);if(!byDay[k])byDay[k]=0;byDay[k]+=r.lucro;});
-  const days=Object.keys(byDay).sort();
-  let cum=0,peakVal=0,peakDate='';
-  days.forEach(d=>{cum+=byDay[d];if(cum>peakVal){peakVal=cum;peakDate=d;}});
-  let posStreak=0,posVal=0,negStreak=0,negVal=0;
-  for(let i=days.length-1;i>=0;i--){if(byDay[days[i]]>0){posStreak++;posVal+=byDay[days[i]];}else break;}
-  for(let i=days.length-1;i>=0;i--){if(byDay[days[i]]<0){negStreak++;negVal+=byDay[days[i]];}else break;}
-  const pd=peakDate?peakDate.split('-'):[];
-  const peakDateFmt=pd.length===3?`${pd[2]}/${pd[1]}/${pd[0].slice(2)}`:'-';
-  const lastDay=days[days.length-1];
-  const isPosCurrent=posStreak>0&&byDay[lastDay]>0;
-  const isNegCurrent=negStreak>0&&byDay[lastDay]<0;
+  const _td=calcTopoDrawdown(rows);
+  const _rf=calcRecoveryFactor(rows);
+  const _mddR=calcMDDreais(rows);
+  const _mddP=calcMDDpct(rows);
   const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
   const vS='font-size:16px';
   const sbS='margin-top:auto;padding-top:6px';
-  el.innerHTML=`
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">
-      <div class="kpi" style="${kS}">
-        <div class="kpi-label"><span class="kpi-pipe"></span>Sequência Positiva</div>
-        <div class="fdc-kpi__value" data-state="${isPosCurrent?'pos':'info'}" style="${vS}">${isPosCurrent?posStreak:0} dias</div>
-        <div class="kpi-sub" style="${sbS}">${isPosCurrent?fmtPL(posVal):('última: '+posStreak+' dias')}</div>
-      </div>
-      <div class="kpi" style="${kS}">
-        <div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual</div>
-        <div class="fdc-kpi__value" data-state="${isNegCurrent?'real':'info'}" style="${vS}">${isNegCurrent?negStreak:0} dias</div>
-        <div class="kpi-sub" style="${sbS}">${isNegCurrent?fmtPL(negVal):('último: '+negStreak+' dias')}</div>
-      </div>
-      <div class="kpi" style="${kS}">
-        <div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico</div>
-        <div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(peakVal)}</div>
-        <div class="kpi-sub" style="${sbS}">atingido em ${peakDateFmt}</div>
-      </div>
-      <div class="kpi" style="${kS}">
-        <div class="kpi-label"><span class="kpi-pipe"></span>Distância do Topo</div>
-        <div class="fdc-kpi__value" data-state="${cum<peakVal?'real':'pos'}" style="${vS}">${cum<peakVal?fmtPL(cum-peakVal):fmtPL(0)}</div>
-        <div class="kpi-sub" style="${sbS}">P/L atual: ${fmtPL(cum)}</div>
-      </div>
-    </div>`;
+  const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+  el.innerHTML=
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico ${_mkTipAnchor('Topo Histórico','','Maior saldo que a banca <b>já atingiu</b> no período.','<span class="lbl">marco</span>')}</div>`+
+        `<div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(_td.topo)}</div>`+
+        `<div class="kpi-sub" style="${sbS}">atingido em ${_fmtD(_td.topoData)}</div>`+
+      `</div>`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual ${_mkTipAnchor('Drawdown Atual','<span class="lbl">DD</span> <span class="op">=</span> Topo <span class="op">→</span> Saldo atual','Quanto a banca está <b>abaixo do último pico</b>, agora.','<span class="thr">perto de 0</span> <span class="good">é o ideal</span>')}</div>`+
+        `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_td.ddAtual)}</div>`+
+        `<div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div>`+
+      `</div>`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">MDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior perda</b> do topo ao fundo, em R$, no período.','<span class="thr">quanto menor, melhor</span>')}</div>`+
+        `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div>`+
+        `<div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div>`+
+      `</div>`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor ${_mkTipAnchor('Recovery Factor','<span class="lbl">RF</span> <span class="op">=</span> Lucro <span class="op">÷</span> Máx. Drawdown','Quantas vezes o lucro total <b>cobre a maior queda</b> da banca.','<span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="thr">&gt; 5</span> <span class="good">muito bom</span>')}</div>`+
+        `<div class="fdc-kpi__value" data-state="info" style="${vS};text-align:right">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div>`+
+        `<div class="kpi-sub" style="${sbS}">qualidade</div>`+
+      `</div>`+
+    `</div>`;
+}
+
+// ── Card de diagnóstico de risco na Visão Geral ──
+function renderOvRisco(rows){
+  const el=document.getElementById('ovRiscoContent');
+  if(!el||!rows.length)return;
+  const _mc=calcMCdrawdown(rows,10000);
+  const _pv=calcPValueMC(rows);
+  const _td=calcTopoDrawdown(rows);
+  const _profit=_td.atual;
+  const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});
+  const _solCor=_sol.score>=0.65?'var(--d-pos)':_sol.score>=0.45?'var(--d-proj)':'var(--d-neg)';
+  const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
+  const vS='font-size:16px';
+  const sbS='margin-top:auto;padding-top:6px';
+  el.innerHTML=
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>p-value ${_mkTipAnchor('P-Value','<span class="lbl">p</span> <span class="op">=</span> P(resultado <span class="lbl">|</span> acaso)','Probabilidade do resultado ser <b>mero acaso</b>. Quanto menor, mais confiável o <b>edge</b>.',rodapePValue(_pv))}</div>`+
+        `<div class="fdc-kpi__value" data-state="${_pv<0.05?'pos':'proj'}" style="${vS}">${_pv<0.001?'< 0,001':fmt(_pv,4)}</div>`+
+        `<div class="kpi-sub" style="${sbS}">${_pv<0.001?'resultado robusto':_pv<0.05?'rejeita o acaso':'inconclusivo'}</div>`+
+      `</div>`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica esperada</b> nas 10.000 simulações de Monte Carlo.','<span class="lbl">projetado · média</span>')}</div>`+
+        `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.xmdd)}</div>`+
+        `<div class="kpi-sub" style="${sbS}">projetado · média</div>`+
+      `</div>`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Máximo ${_mkTipAnchor('DD Máximo','<span class="lbl">pior</span> DD simulado','Pior queda plausível (<b>1 em 100</b> cenários). Dimensiona a banca.','<span class="lbl">projetado · cauda</span>')}</div>`+
+        `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.p99)}</div>`+
+        `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
+      `</div>`+
+      `<div class="kpi" style="${kS}">`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez ${_mkTipAnchor('Nível de Solidez','<span class="lbl">índice composto</span>','P-value, drawdown e consistência <b>num selo só</b>.','<span class="lbl">Escala</span> <span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="good">Baixa → Alta</span>')}</div>`+
+        `<div class="fdc-risk-meter" style="margin-top:auto">`+
+          `<span class="fdc-risk-meter__tag" style="color:${_solCor}">${_sol.faixa}</span>`+
+          `<div class="fdc-risk-meter__track">`+
+            `<span class="fdc-risk-meter__knob" style="--value:${(_sol.score*100).toFixed(1)}%"></span>`+
+          `</div>`+
+        `</div>`+
+      `</div>`+
+    `</div>`;
 }
 
 // ── Card de custo na Visão Geral ──
