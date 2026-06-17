@@ -260,26 +260,11 @@ function resColor(r){
   return m[r]||'var(--ink-soft)';
 }
 
-// Card collapse
-const CARD_STATE_KEY='dash_cards_v1';
-let cardStates={};
-(()=>{try{cardStates=JSON.parse(localStorage.getItem(CARD_STATE_KEY)||'{}')}catch(e){}})();
-function toggleCard(id){
-  const el=document.getElementById('card-'+id);
-  if(!el)return;
-  const c=el.classList.toggle('collapsed');
-  cardStates[id]=c;
-  try{localStorage.setItem(CARD_STATE_KEY,JSON.stringify(cardStates));}catch(e){}
-  // resize charts inside on open
-  if(!c){setTimeout(()=>{Object.values(charts).forEach(ch=>{try{ch.resize();}catch(e){}});},50);}
-}
 function mkCard(id,title,bodyHTML,extraHdrHTML=''){
-  const collapsed=cardStates[id]?'collapsed':'';
-  return`<div class="card ${collapsed}" id="card-${id}">
-    <div class="card-hdr" onclick="toggleCard('${id}')">
+  return`<div class="card" id="card-${id}">
+    <div class="card-hdr">
       <div class="card-title">${title}</div>
       ${extraHdrHTML}
-      <div class="card-tog">▼</div>
     </div>
     <div class="card-body">${bodyHTML}</div>
   </div>`;

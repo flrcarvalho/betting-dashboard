@@ -93,20 +93,15 @@ function renderSport(rows){
   const posCount=_sportEnts.filter(([,d])=>d.l>0).length;
   const negCount=_sportEnts.filter(([,d])=>d.l<0).length;
   const totalSp=_sportEnts.length;
-  const portDayMap={};rows.forEach(r=>{const dk=r.data.slice(0,10);portDayMap[dk]=(portDayMap[dk]||0)+r.lucro;});
-  const portDays=Object.keys(portDayMap).sort();
-  let pCum=0;const portVals=portDays.map(d=>{pCum+=portDayMap[d];return parseFloat(pCum.toFixed(2));});
-  const portSpark=portVals.length>=2?mkSparkline(portVals,96,26):'';
   const plCls=portPL>=0?'pos':'neg';
   const roiCls=portROI>=0?'pos':'neg';
   const kpiEl=document.getElementById('sportPortfolioKPIs');
   if(kpiEl){
     kpiEl.innerHTML=
-      `<div class="kpi" style="position:relative">`+
+      `<div class="kpi">`+
         `<div class="kpi-label"><span class="kpi-pipe"></span> P/L Total</div>`+
         `<div class="kpi-val ${plCls}">${fmtPL(portPL)}</div>`+
         `<div class="kpi-sub">resultado total</div>`+
-        (portSpark?`<div class="kpi-sparkline">${portSpark}</div>`:'')+
       `</div>`+
       `<div class="kpi">`+
         `<div class="kpi-label"><span class="kpi-pipe"></span> ROI</div>`+
@@ -176,20 +171,15 @@ function renderCasa(rows){
   const posCount=_casaEnts.filter(([,d])=>d.l>0).length;
   const negCount=_casaEnts.filter(([,d])=>d.l<0).length;
   const totalC=_casaEnts.length;
-  const portDayMap={};rows.forEach(r=>{const dk=r.data.slice(0,10);portDayMap[dk]=(portDayMap[dk]||0)+r.lucro;});
-  const portDays=Object.keys(portDayMap).sort();
-  let pCum=0;const portVals=portDays.map(d=>{pCum+=portDayMap[d];return parseFloat(pCum.toFixed(2));});
-  const portSpark=portVals.length>=2?mkSparkline(portVals,96,26):'';
   const plCls=portPL>=0?'pos':'neg';
   const roiCls=portROI>=0?'pos':'neg';
   const el=document.getElementById('casaPortfolioKPIs');
   if(el){
     el.innerHTML=
-      `<div class="kpi" style="position:relative">`+
+      `<div class="kpi">`+
         `<div class="kpi-label"><span class="kpi-pipe"></span> P/L Total</div>`+
         `<div class="kpi-val ${plCls}">${fmtPL(portPL)}</div>`+
         `<div class="kpi-sub">resultado total</div>`+
-        (portSpark?`<div class="kpi-sparkline">${portSpark}</div>`:'')+
       `</div>`+
       `<div class="kpi">`+
         `<div class="kpi-label"><span class="kpi-pipe"></span> ROI</div>`+
@@ -1070,23 +1060,16 @@ function renderTipsters(){
       const posCount=_tipsterEnts.filter(([,d])=>d.l>0).length;
       const negCount=_tipsterEnts.filter(([,d])=>d.l<0).length;
       const totalT=_tipsterEnts.length;
-      // Sparkline acumulado diário do conjunto
-      const portDayMap={};
-      kpiRows.forEach(r=>{const dk=r.data.slice(0,10);portDayMap[dk]=(portDayMap[dk]||0)+r.lucro;});
-      const portDays=Object.keys(portDayMap).sort();
-      let pCum=0;const portVals=portDays.map(d=>{pCum+=portDayMap[d];return parseFloat(pCum.toFixed(2));});
-      const portSpark=portVals.length>=2?mkSparkline(portVals,96,26):'';
       const plCls=portPL>=0?'pos':'neg';
       const roiCls=portROI>=0?'pos':'neg';
       const roiStr=fmtPct(portROI,2);
       const el=document.getElementById('tipsterPortfolioKPIs');
       if(el){
         el.innerHTML=
-          `<div class="kpi" style="position:relative">`+
+          `<div class="kpi">`+
             `<div class="kpi-label"><span class="kpi-pipe"></span> P/L Carteira</div>`+
             `<div class="kpi-val ${plCls}">${fmtPL(portPL)}</div>`+
             `<div class="kpi-sub">resultado do conjunto</div>`+
-            (portSpark?`<div class="kpi-sparkline">${portSpark}</div>`:'')+
           `</div>`+
           `<div class="kpi">`+
             `<div class="kpi-label"><span class="kpi-pipe"></span> ROI Ponderado</div>`+

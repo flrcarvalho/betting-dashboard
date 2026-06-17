@@ -38,8 +38,10 @@ function renderKPI(rows){
   ];
   const divider=`<div style="grid-column:1/-1;height:1px;background:var(--line-2);margin:2px 0;opacity:.6"></div>`;
   document.getElementById('kpiGrid').innerHTML=
-    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.5rem">${row1.map(k=>`<div class="kpi" style="position:relative;${k.accent||''}">${k.accent?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;opacity:.8"></div>`:''}<div class="kpi-label"><span class="kpi-pipe"></span> ${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`+
-    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">${row2.map(k=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div>${k.bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,k.bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub">${k.s}</div></div>`).join('')}</div>`;
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:stretch;margin-bottom:1.25rem">`+
+    row1.map(k=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')+
+    row2.map(k=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div>${k.bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,k.bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub">${k.s}</div></div>`).join('')+
+    `</div>`;
 }
 
 function renderBankroll(rows){
