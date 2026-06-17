@@ -1,5 +1,51 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: KPI cards sem sparkline, altura uniforme, secoes sem colapso — COMPLETO (2026-06-16 sessao 35)
+
+## Sessao 2026-06-16 (sessao 35) — Correcoes visuais de cards e remocao de colapso
+
+### O que foi feito
+
+**assets/js/charts/performance.js**
+- Removidas sparklines dos cards P/L Total (Esportes e Bookies) e P/L Carteira (Tipsters)
+- Variaveis portDayMap/portDays/portVals/portSpark limpas nos 3 blocos de portfolio KPIs
+- `style="position:relative"` removido dos cards que tinham sparkline
+
+**assets/css/components.css**
+- `.kpi`: adicionado `display:flex; flex-direction:column; min-height:120px`
+- `.kpi-sub`: `margin-top:4px` substituido por `margin-top:auto; padding-top:6px` (subtitulo no fundo)
+- `.card-hdr`: removidos `cursor:pointer` e `user-select:none`; removido hover azul
+- Removidos: bloco `.card-tog`, `.card.collapsed .card-body/tog/hdr`
+
+**assets/css/layout.css**
+- `.kpi-grid`: adicionado `align-items:stretch`
+- `[data-density="compact"] .kpi`: adicionado `min-height:96px`
+
+**assets/js/charts/overview.js**
+- Os 8 KPI cards da Visao Geral unificados em grid unico com `align-items:stretch`
+- Elimina diferenca de altura entre linha de cima (P/L) e linha de baixo (metricas)
+
+**assets/js/app.js**
+- Removidos: `toggleCard()`, `CARD_STATE_KEY`, `cardStates` e IIFE de localStorage
+- `mkCard()` simplificado: sem onclick, sem `.card-tog ▼`, sem estado colapsado
+
+**assets/js/charts/shared.js**
+- Removida `toggleBlock()` (codigo morto, nunca chamado nos arquivos ativos)
+
+### Pendente
+- Verificar no browser: 8 KPI cards identicos na Visao Geral; sem sparklines nos portfolios; sem botao v nas secoes
+- Tooltip do "Max Drawdown" (popups Casa e Tipster) diz "XMDD" mas valor e calcMDDreais -- corrigir label
+- EMDD: implementacao real e xmdd*0.85, documentacao diz Brownian Motion -- alinhar ou documentar fator 0.85
+
+### Commit desta sessao
+- 2e85f90 refactor(ui): remove sparklines dos KPI cards, uniformiza altura e elimina colapso de secoes
+
+## Proximo passo
+- Abrir index.html e verificar os 3 pontos visuais acima
+- Corrigir tooltip "Max Drawdown" em performance.js linha 743 (trocar "XMDD" por "MDD")
+
+---
+
 ## Estado atual: Cenario Atual e Diagnostico de Risco corrigidos na Visao Geral — COMPLETO (2026-06-16 sessao 34)
 
 ## Sessao 2026-06-16 (sessao 34) — Auditoria de drawdown + correcao Visao Geral

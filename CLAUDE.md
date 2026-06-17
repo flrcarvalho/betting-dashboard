@@ -24,7 +24,7 @@ assets/js/
                           + helpers de normalização, cálculos de métricas, utilidades
   filters.js            → lógica de filtros (data, período rápido, multiselect por esporte/casa/tipster)
   charts/
-    shared.js           → mkCalendarHeatmap, mkSparkline, mkKpiGrid, toggleBlock, buildSummaryTable,
+    shared.js           → mkCalendarHeatmap, mkSparkline, mkKpiGrid, buildSummaryTable,
                           mkWRC(wr), mkEmpty(msg), constantes APOSTAS_COLS/CARD_H
     gestao.js           → custoData, buildCostState, renderParceiros, renderCustos,
                           renderCustoTipster, renderCustoCards, renderMetrics
