@@ -76,7 +76,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   color: var(--ink-soft);
-  min-width: 40px;
+  min-width: 72px;
   text-align: center;
   letter-spacing: 0.02em;
 }

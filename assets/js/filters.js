@@ -17,7 +17,7 @@ function _dayNavLabel(off){
   if(off===0)return'Hoje';
   if(off===-1)return'Ontem';
   const d=new Date();d.setDate(d.getDate()+off);
-  return(d.getDate()+'').padStart(2,'0')+'/'+((d.getMonth()+1)+'').padStart(2,'0');
+  return(d.getDate()+'').padStart(2,'0')+'/'+((d.getMonth()+1)+'').padStart(2,'0')+'/'+d.getFullYear();
 }
 
 function navDay(p,delta){
