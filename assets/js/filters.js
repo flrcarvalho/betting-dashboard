@@ -18,7 +18,6 @@ function _ytdStart(){return new Date().getFullYear()+'-01-01';}
 
 function _dayNavLabel(off){
   if(off===0)return'Hoje';
-  if(off===-1)return'Ontem';
   const d=new Date();d.setDate(d.getDate()+off);
   return(d.getDate()+'').padStart(2,'0')+'/'+((d.getMonth()+1)+'').padStart(2,'0')+'/'+d.getFullYear();
 }
@@ -38,7 +37,6 @@ function navDay(p,delta){
 const _MESES_NAV=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 function _monthNavLabel(off){
   if(off===0)return'Este mês';
-  if(off===-1)return'Mês passado';
   const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+off);
   return _MESES_NAV[d.getMonth()]+'/'+d.getFullYear();
 }
