@@ -1,5 +1,42 @@
 # STATUS — Betting Dashboard
 
+## Estado atual: navegacao de dias/meses nos filtros, delay de data corrigido, ROI renomeado — COMPLETO (2026-06-18 sessao 36)
+
+## Sessao 2026-06-18 (sessao 36) — Navegacao de dias/meses e correcoes de filtro
+
+### O que foi feito
+
+**assets/js/filters.js**
+- Setas de navegacao de dias: ao ativar "Hoje", aparecem setas ◀▶ abaixo dos atalhos
+- Setas de navegacao de meses: ao ativar "MTD", aparecem setas ◀▶ para navegar entre meses
+- Dias anteriores: rotulo mostra dd/mm/yyyy. Meses anteriores: rotulo mostra Mmm/YYYY. Offset 0 = "Hoje" / "Este mes"
+- Meses passados: periodo completo (1 ao ultimo dia). Mes atual: de 1 ate hoje (MTD)
+- Debounce de inputs de data corrigido de 120ms para 700ms (eliminado travamento ao digitar dia/mes/ano)
+- Estado dayOff e monthOff adicionados ao FS; todos os atalhos resetam ambos
+
+**assets/css/components.css**
+- Adicionados `.day-nav`, `.day-nav-arrow`, `.day-nav-label` (setas de navegacao, tema FDC)
+- min-width do label ajustado para 72px (acomodar dd/mm/yyyy)
+
+**assets/js/charts/performance.js**
+- "ROI Ponderado" renomeado para "ROI" no KPI de visao geral dos Tipsters (unica ocorrencia)
+
+### Pendente
+- Tooltip do "Max Drawdown" (popups Casa e Tipster) diz "XMDD" mas valor e calcMDDreais -- corrigir label
+- EMDD: implementacao real e xmdd*0.85, documentacao diz Brownian Motion -- alinhar ou documentar fator 0.85
+
+### Commits desta sessao
+- 7aa1273 feat(filters): navegacao de dias com setas apos botao Hoje
+- 761ec21 fix(filters,tipsters): data dd/mm/yyyy na nav de dias e renomeia ROI
+- 887847e feat(filters): nav de meses no MTD e corrige delay nos inputs de data
+- d3a601a fix(filters): remove labels 'Ontem' e 'Mes passado', exibe data direta
+
+## Proximo passo
+- Corrigir tooltip "Max Drawdown" em performance.js (trocar label "XMDD" por "MDD")
+- Alinhar EMDD: documentar fator 0.85 ou implementar formula correta de Brownian Motion
+
+---
+
 ## Estado atual: KPI cards sem sparkline, altura uniforme, secoes sem colapso — COMPLETO (2026-06-16 sessao 35)
 
 ## Sessao 2026-06-16 (sessao 35) — Correcoes visuais de cards e remocao de colapso
