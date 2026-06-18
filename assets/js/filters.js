@@ -1,11 +1,14 @@
 ﻿// Filter state
 const FS={};
-function gfs(p){if(!FS[p])FS[p]={df:'',dt:'',qd:0,qt:'',dayOff:0};return FS[p];}
+function gfs(p){if(!FS[p])FS[p]={df:'',dt:'',qd:0,qt:'',dayOff:0,monthOff:0};return FS[p];}
 
 // Cache de filtro (limpo no início de cada renderPage) + debounce
 let _filterCache={};
 let _renderDebounceT;
+let _dateDebouncT;
 function _renderPageDebounced(p){clearTimeout(_renderDebounceT);_renderDebounceT=setTimeout(()=>renderPage(p),120);}
+// Debounce longo para inputs de data: aguarda o usuário terminar dia+mês+ano antes de renderizar
+function _renderPageDebouncedDate(p){clearTimeout(_dateDebouncT);clearTimeout(_renderDebounceT);_dateDebouncT=setTimeout(()=>renderPage(p),700);}
 
 // Date helpers for WTD/MTD/YTD/Hoje
 function _today(){return new Date().toISOString().slice(0,10);}
@@ -32,6 +35,27 @@ function navDay(p,delta){
   rqb(p);_renderPageDebounced(p);
 }
 
+const _MESES_NAV=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function _monthNavLabel(off){
+  if(off===0)return'Este mês';
+  if(off===-1)return'Mês passado';
+  const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+off);
+  return _MESES_NAV[d.getMonth()]+'/'+d.getFullYear();
+}
+
+function navMonth(p,delta){
+  const st=gfs(p);
+  const newOff=Math.min(0,st.monthOff+delta);
+  st.monthOff=newOff;st.qt='mtd';st.qd=0;
+  const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+newOff);
+  const firstDay=new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10);
+  const lastDay=newOff===0?_today():new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().slice(0,10);
+  st.df=firstDay;st.dt=lastDay;
+  const fEl=document.getElementById('df_f_'+p);if(fEl)fEl.value=firstDay;
+  const tEl=document.getElementById('df_t_'+p);if(tEl)tEl.value=lastDay;
+  rqb(p);_renderPageDebounced(p);
+}
+
 function filtrarPagina(p){
   if(_filterCache[p])return _filterCache[p];
   const st=gfs(p);
@@ -50,17 +74,17 @@ function filtrarPagina(p){
   return res;
 }
 
-function setDateF(p,type,val){const st=gfs(p);st.qd=0;st.qt='';st.dayOff=0;if(type==='f')st.df=val;else st.dt=val;rqb(p);_renderPageDebounced(p);}
+function setDateF(p,type,val){const st=gfs(p);st.qd=0;st.qt='';st.dayOff=0;st.monthOff=0;if(type==='f')st.df=val;else st.dt=val;rqb(p);_renderPageDebouncedDate(p);}
 
 function setQuick(p,days){
-  const st=gfs(p);st.qd=days;st.qt='';st.dayOff=0;st.df='';st.dt='';
+  const st=gfs(p);st.qd=days;st.qt='';st.dayOff=0;st.monthOff=0;st.df='';st.dt='';
   ['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   rqb(p);_renderPageDebounced(p);
 }
 
 function setQuickType(p,qt){
   const st=gfs(p);
-  st.qt=qt;st.qd=0;st.dayOff=0;
+  st.qt=qt;st.qd=0;st.dayOff=0;st.monthOff=0;
   const today=_today();
   const f=qt==='hoje'?today:qt==='wtd'?_wtdStart():qt==='mtd'?_mtdStart():qt==='ytd'?_ytdStart():'';
   st.df=f;st.dt=today;
@@ -69,7 +93,7 @@ function setQuickType(p,qt){
   rqb(p);_renderPageDebounced(p);
 }
 
-function clearDate(p){const st=gfs(p);st.qd=0;st.qt='';st.dayOff=0;st.df='';st.dt='';['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});rqb(p);_renderPageDebounced(p);}
+function clearDate(p){const st=gfs(p);st.qd=0;st.qt='';st.dayOff=0;st.monthOff=0;st.df='';st.dt='';['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});rqb(p);_renderPageDebounced(p);}
 
 function rqb(p){
   const st=gfs(p);
@@ -88,6 +112,15 @@ function rqb(p){
     if(lbl)lbl.textContent=_dayNavLabel(st.dayOff||0);
     const fwd=document.getElementById('dayNavFwd_'+p);
     if(fwd)fwd.disabled=(st.dayOff||0)>=0;
+  }
+  const mnav=document.getElementById('monthNav_'+p);
+  if(mnav){
+    const isMtd=st.qt==='mtd';
+    mnav.style.display=isMtd?'flex':'none';
+    const mlbl=document.getElementById('monthNavLbl_'+p);
+    if(mlbl)mlbl.textContent=_monthNavLabel(st.monthOff||0);
+    const mfwd=document.getElementById('monthNavFwd_'+p);
+    if(mfwd)mfwd.disabled=(st.monthOff||0)>=0;
   }
 }
 
@@ -258,6 +291,11 @@ function buildFilters(p,sports,casas,tipsters){
         <button class="day-nav-arrow" onclick="navDay('${p}',-1)" aria-label="Dia anterior">&#9664;</button>
         <span class="day-nav-label" id="dayNavLbl_${p}">${_dayNavLabel(st.dayOff||0)}</span>
         <button class="day-nav-arrow" id="dayNavFwd_${p}" onclick="navDay('${p}',1)" aria-label="Próximo dia"${(st.dayOff||0)>=0?' disabled':''}>&#9654;</button>
+      </div>
+      <div class="day-nav" id="monthNav_${p}" style="display:${st.qt==='mtd'?'flex':'none'}">
+        <button class="day-nav-arrow" onclick="navMonth('${p}',-1)" aria-label="Mês anterior">&#9664;</button>
+        <span class="day-nav-label" id="monthNavLbl_${p}">${_monthNavLabel(st.monthOff||0)}</span>
+        <button class="day-nav-arrow" id="monthNavFwd_${p}" onclick="navMonth('${p}',1)" aria-label="Próximo mês"${(st.monthOff||0)>=0?' disabled':''}>&#9654;</button>
       </div>
     </div>
     <div class="filter-group"><div class="filter-label">Esporte</div>${buildMS('sp_'+p,sports,'Todos os esportes',p)}</div>
