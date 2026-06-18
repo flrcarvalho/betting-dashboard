@@ -1,6 +1,6 @@
 ﻿// Filter state
 const FS={};
-function gfs(p){if(!FS[p])FS[p]={df:'',dt:'',qd:0,qt:''};return FS[p];}
+function gfs(p){if(!FS[p])FS[p]={df:'',dt:'',qd:0,qt:'',dayOff:0};return FS[p];}
 
 // Cache de filtro (limpo no início de cada renderPage) + debounce
 let _filterCache={};
@@ -12,6 +12,25 @@ function _today(){return new Date().toISOString().slice(0,10);}
 function _wtdStart(){const d=new Date(),day=d.getDay()||7;d.setDate(d.getDate()-(day-1));return d.toISOString().slice(0,10);}
 function _mtdStart(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10);}
 function _ytdStart(){return new Date().getFullYear()+'-01-01';}
+
+function _dayNavLabel(off){
+  if(off===0)return'Hoje';
+  if(off===-1)return'Ontem';
+  const d=new Date();d.setDate(d.getDate()+off);
+  return(d.getDate()+'').padStart(2,'0')+'/'+((d.getMonth()+1)+'').padStart(2,'0');
+}
+
+function navDay(p,delta){
+  const st=gfs(p);
+  const newOff=Math.min(0,st.dayOff+delta);
+  st.dayOff=newOff;st.qt='hoje';st.qd=0;
+  const d=new Date();d.setDate(d.getDate()+newOff);
+  const iso=d.toISOString().slice(0,10);
+  st.df=iso;st.dt=iso;
+  const fEl=document.getElementById('df_f_'+p);if(fEl)fEl.value=iso;
+  const tEl=document.getElementById('df_t_'+p);if(tEl)tEl.value=iso;
+  rqb(p);_renderPageDebounced(p);
+}
 
 function filtrarPagina(p){
   if(_filterCache[p])return _filterCache[p];
@@ -31,17 +50,17 @@ function filtrarPagina(p){
   return res;
 }
 
-function setDateF(p,type,val){const st=gfs(p);st.qd=0;st.qt='';if(type==='f')st.df=val;else st.dt=val;rqb(p);_renderPageDebounced(p);}
+function setDateF(p,type,val){const st=gfs(p);st.qd=0;st.qt='';st.dayOff=0;if(type==='f')st.df=val;else st.dt=val;rqb(p);_renderPageDebounced(p);}
 
 function setQuick(p,days){
-  const st=gfs(p);st.qd=days;st.qt='';st.df='';st.dt='';
+  const st=gfs(p);st.qd=days;st.qt='';st.dayOff=0;st.df='';st.dt='';
   ['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   rqb(p);_renderPageDebounced(p);
 }
 
 function setQuickType(p,qt){
   const st=gfs(p);
-  st.qt=qt;st.qd=0;
+  st.qt=qt;st.qd=0;st.dayOff=0;
   const today=_today();
   const f=qt==='hoje'?today:qt==='wtd'?_wtdStart():qt==='mtd'?_mtdStart():qt==='ytd'?_ytdStart():'';
   st.df=f;st.dt=today;
@@ -50,7 +69,7 @@ function setQuickType(p,qt){
   rqb(p);_renderPageDebounced(p);
 }
 
-function clearDate(p){const st=gfs(p);st.qd=0;st.qt='';st.df='';st.dt='';['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});rqb(p);_renderPageDebounced(p);}
+function clearDate(p){const st=gfs(p);st.qd=0;st.qt='';st.dayOff=0;st.df='';st.dt='';['df_f_'+p,'df_t_'+p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});rqb(p);_renderPageDebounced(p);}
 
 function rqb(p){
   const st=gfs(p);
@@ -61,6 +80,15 @@ function rqb(p){
     else if(b.dataset.qt)active=(st.qt===b.dataset.qt);
     b.classList.toggle('active',active);
   });
+  const nav=document.getElementById('dayNav_'+p);
+  if(nav){
+    const isHoje=st.qt==='hoje';
+    nav.style.display=isHoje?'flex':'none';
+    const lbl=document.getElementById('dayNavLbl_'+p);
+    if(lbl)lbl.textContent=_dayNavLabel(st.dayOff||0);
+    const fwd=document.getElementById('dayNavFwd_'+p);
+    if(fwd)fwd.disabled=(st.dayOff||0)>=0;
+  }
 }
 
 // Multiselect
@@ -225,6 +253,11 @@ function buildFilters(p,sports,casas,tipsters){
         <button class="qbtn ${st.qd===30?'active':''}" data-days="30" onclick="setQuick('${p}',30)">30d</button>
         <button class="qbtn ${st.qd===90?'active':''}" data-days="90" onclick="setQuick('${p}',90)">90d</button>
         <button class="qbtn ${isAll?'active':''}" data-all="1" onclick="clearDate('${p}')">Tudo</button>
+      </div>
+      <div class="day-nav" id="dayNav_${p}" style="display:${st.qt==='hoje'?'flex':'none'}">
+        <button class="day-nav-arrow" onclick="navDay('${p}',-1)" aria-label="Dia anterior">&#9664;</button>
+        <span class="day-nav-label" id="dayNavLbl_${p}">${_dayNavLabel(st.dayOff||0)}</span>
+        <button class="day-nav-arrow" id="dayNavFwd_${p}" onclick="navDay('${p}',1)" aria-label="Próximo dia"${(st.dayOff||0)>=0?' disabled':''}>&#9654;</button>
       </div>
     </div>
     <div class="filter-group"><div class="filter-label">Esporte</div>${buildMS('sp_'+p,sports,'Todos os esportes',p)}</div>
