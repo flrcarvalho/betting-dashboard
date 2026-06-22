@@ -1,6 +1,56 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: navegacao de dias/meses nos filtros, delay de data corrigido, ROI renomeado — COMPLETO (2026-06-18 sessao 36)
+## Estado atual: auditoria matematica — heatmap ROI, p-value, drawdown esperado e determinismo corrigidos — COMPLETO (2026-06-22 sessao 37)
+
+## Sessao 2026-06-22 (sessao 37) — Auditoria matematica completa (C1, C2, A1, A2, M1)
+
+### O que foi feito
+
+Auditoria distribuida em 3 agentes conferiu TODAS as formulas. Nucleo financeiro (ROI, P/L, turnover, stake media, odd ponderada) correto e consistente em todas as copias inline. Corrigidos os bugs C1, C2, A1, A2 e o determinismo M1.
+
+**C1 — ROI do heatmap "Evolucao Mensal" (assets/js/charts/temporal.js)**
+- Bug: chave de mes 0-indexada (`getMonth()`, ex. "2026-00") cruzada com `r.data.slice(0,7)` ISO 1-indexada ("2026-01") -> ROI por celula usava turnover do mes ERRADO (off-by-one); jan/dez sempre 0,00%
+- Fix: acumular `stake` em `monthlyByT` no loop principal (campo `s`) e usar `d.s` direto na celula; eliminado o re-filtro bugado
+
+**C2 — P-Value invalido (gestao.js + app.js)**
+- Bug: `calcPValue` testava H0 `WinRate = 1/odd_media` — invalida por desigualdade de Jensen (subestima break-even) e por contar HW como vitoria cheia. Estudo do usuario: 26,4% de falso-positivo vs 5% alvo
+- Fix: pagina Metricas passou a usar `calcPValueMC` (bootstrap recentralizado/studentizado, ja rodava nos drill-downs). Funcao `calcPValue` REMOVIDA de app.js. `normalCDF` mantida (utilitario correto, agora sem uso)
+
+**A1 — XMDD subestimava risco (app.js + gestao.js)**
+- Bug: `calcXMDD` simulava odd/stake uniformes -> apagava a variancia real -> subestimava MDD 18-70% (pior quanto mais dispersas as odds; estudo mostrou ate inversao do sinal risco x dispersao)
+- Fix: Metricas usa `calcMCdrawdown` (bootstrap dos P/L reais, 10.000 sims). `calcXMDD` ficou orfa em app.js (so resta no dashboard.html legado)
+
+**A2 — "EMDD" era numero inventado (app.js + gestao.js)**
+- Bug: `emdd = xmdd*0.85` (fator magico) rotulado como formula browniana de Magdon-Ismail. Formula do card invalida (nem e Magdon-Ismail; expoente dimensionalmente quebrado)
+- Fix: KPIs renomeados -> "Drawdown Medio Esperado" (xmdd) e "Drawdown p95 (risco)" (p95), ambos do bootstrap. Ratio "Profit / Drawdown" = pl/xmdd (MEDIA, igual ao profitXmdd dos drill-downs -> escala 5/2 da Solidez MANTIDA sem refit). Cards m_emdd/m_xmdd/m_pemdd reescritos
+- Aviso esperado e correto: ratio de Metricas cai ~15% (sai o 0,85); tambem conserta a Solidez que estava inflada 1/0,85 em Metricas vs drill-down
+
+**M1 — Determinismo (app.js calcMCdrawdown)**
+- Bug: `Math.random()` -> numeros tremiam a cada render; ordem do array divergia entre telas
+- Fix: semeado com `mulberry32` (semente derivada dos dados, independente de ordem) + ordenacao dos VALORES de P/L (`pls.sort()`). Ordenar por data NAO bastava (apostas do mesmo dia empatam). Verificado por teste: ordem natural vs embaralhada -> xmdd/p95/p99 identicos bit-a-bit; deterministico entre renders
+
+### Criterio de aceite
+- Um tipster filtrado em Metricas e seu drill-down devem exibir o MESMO Drawdown Medio e a MESMA Solidez (mesmo pl/xmdd). Garantido por construcao (motor unico + determinismo)
+
+### Fora de escopo (issue a parte — nao misturar com a correcao)
+- Reexaminar se os cortes 5/2 da escala de Solidez (calcSolidez) sao os ideais — independente de A1/A2
+- Remover `calcXMDD` de app.js (orfa); tooltip "Max Drawdown" que diz "XMDD" mas mostra calcMDDreais
+
+### Pendentes da auditoria (nao criticos)
+- A3: P/L Liquido (calcCostFiltered) ignora filtros de casa/tipster ao ratear custo por janela de data
+- M2: WR em shared.js/temporal.js usa W+HW+L+HL em vez de `!=='V'` (equivalente hoje, fragil se surgir novo codigo)
+- M3: odd media do calendario (shared.js) nao aplica filtro odd>0 && stake>0
+
+### Estudos de referencia (do usuario, claudeweb)
+- estudo_pvalue_C2.md — fundamentacao do C2 (ASA 2016, Hall & Wilson 1991, North-Curtis-Sham 2002)
+- estudo_drawdown_A1_A2.md — fundamentacao A1/A2; §3.6 atualizado para a decisao final (media no ratio, p95 no display, sem refit, determinismo por ordenacao de valores)
+
+## Proximo passo
+- Decidir A3/M2/M3 da auditoria, ou abrir issue para recalibracao da escala 5/2 da Solidez
+
+---
+
+## Estado anterior: navegacao de dias/meses nos filtros, delay de data corrigido, ROI renomeado — COMPLETO (2026-06-18 sessao 36)
 
 ## Sessao 2026-06-18 (sessao 36) — Navegacao de dias/meses e correcoes de filtro
 

@@ -343,19 +343,21 @@ function renderCustos(rows){
 // Metrics knowledge base
 function renderMetrics(rows){
   const mddR=calcMDDreais(rows),mddPct=calcMDDpct(rows);
-  const xmdd=calcXMDD(rows),emdd=xmdd*0.85;
-  const pval=calcPValue(rows),pl=rows.reduce((a,r)=>a+r.lucro,0);
-  const profEmddRaw=emdd>0?pl/emdd:null;
-  const profEmdd=profEmddRaw!==null?fmt(profEmddRaw,2):'—';
+  // Bootstrap dos P/L reais (mesmo motor dos drill-downs): média = drawdown típico, p95 = cauda de risco
+  const _mc=calcMCdrawdown(rows,10000),xmdd=_mc.xmdd,ddP95=_mc.p95;
+  const pval=calcPValueMC(rows),pl=rows.reduce((a,r)=>a+r.lucro,0);
+  // Profit / Drawdown usa a MÉDIA (xmdd) — idêntico ao profitXmdd dos drill-downs (performance.js)
+  const profDdRaw=xmdd>0?pl/xmdd:null;
+  const profDd=profDdRaw!==null?fmt(profDdRaw,2):'—';
   const roi=calcROI(rows),wr=calcWR(rows),avgOdd=calcAvgOdd(rows);
   const stake=rows.reduce((a,r)=>a+r.stake,0);
   document.getElementById('metricsKPI').innerHTML=[
     {l:'MDD Real (R$)',v:'R$ '+fmt(mddR,0),c:mddR<5000?'pos':mddR<15000?'neu':'neg'},
     {l:'MDD Real (%)',v:fmtPct(mddPct,2,false),c:mddPct<15?'pos':mddPct<30?'neu':'neg'},
-    {l:'EMDD (R$)',v:'R$ '+fmt(emdd,0),c:emdd<5000?'pos':emdd<15000?'neu':'neg'},
-    {l:'XMDD Monte Carlo',v:'R$ '+fmt(xmdd,0),c:xmdd<5000?'pos':xmdd<15000?'neu':'neg'},
+    {l:'Drawdown Médio Esperado',v:'R$ '+fmt(xmdd,0),c:xmdd<5000?'pos':xmdd<15000?'neu':'neg'},
+    {l:'Drawdown p95 (risco)',v:'R$ '+fmt(ddP95,0),c:ddP95<5000?'pos':ddP95<15000?'neu':'neg'},
     {l:'P-Value',v:pval<0.001?'<0,001':fmt(pval,3),c:pval<0.05?'pos':pval<0.15?'neu':'neg'},
-    {l:'Profit / EMDD',v:profEmdd,c:profEmddRaw!==null&&profEmddRaw>=5?'pos':profEmddRaw!==null&&profEmddRaw>=2?'neu':'neg'},
+    {l:'Profit / Drawdown',v:profDd,c:profDdRaw!==null&&profDdRaw>=5?'pos':profDdRaw!==null&&profDdRaw>=2?'neu':'neg'},
   ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div></div>`).join('');
 }
 

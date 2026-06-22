@@ -17,8 +17,8 @@ function renderConsolidado(){
     else if(res==='HW')annualByT[t].hw++; else if(res==='HL')annualByT[t].hl++;
     else if(res==='V')annualByT[t].v++;
     const mk=ymKey+'_'+t;
-    if(!monthlyByT[mk])monthlyByT[mk]={pl:0,n:0,w:0,l:0,hw:0,hl:0,v:0,year:d.getFullYear(),month:d.getMonth()};
-    monthlyByT[mk].pl+=r.lucro; monthlyByT[mk].n++;
+    if(!monthlyByT[mk])monthlyByT[mk]={pl:0,s:0,n:0,w:0,l:0,hw:0,hl:0,v:0,year:d.getFullYear(),month:d.getMonth()};
+    monthlyByT[mk].pl+=r.lucro; monthlyByT[mk].s+=r.stake; monthlyByT[mk].n++;
     if(res==='W')monthlyByT[mk].w++; else if(res==='L')monthlyByT[mk].l++;
     else if(res==='HW')monthlyByT[mk].hw++; else if(res==='HL')monthlyByT[mk].hl++;
     else if(res==='V')monthlyByT[mk].v++;
@@ -101,8 +101,7 @@ function renderConsolidado(){
     const cells=ymKeys.map(ymKey=>{
       const d=monthlyByT[ymKey+'_'+t];
       if(!d||d.n===0)return`<td style="background:var(--field);border-radius:3px;padding:5px 8px;text-align:right;color:var(--ink-mute);font-size:11px">—</td>`;
-      const tRows=rows.filter(r=>r.tipster===t&&r.data.slice(0,7)===ymKey);
-      const mStake=tRows.reduce((a,r)=>a+r.stake,0);
+      const mStake=d.s;
       const mROI=mStake>0?(d.pl/mStake*100):0;
       return`<td style="background:${heatBg(d.pl)};border-radius:3px;padding:5px 8px;text-align:right;color:${heatTxt(d.pl)};font-weight:600;white-space:nowrap;font-size:11px" title="${t} - ${mLabels[ymKeys.indexOf(ymKey)]}: ${fmtPL(d.pl)} (${d.n}b, ROI ${fmtPct(mROI,2)})">${fmtPL(d.pl)}<br><span style="font-size:9px;opacity:.7">${fmtPct(mROI,1)} · ${d.n}b</span></td>`;
     }).join('');

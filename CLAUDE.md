@@ -95,7 +95,7 @@ brand/                  → logos e favicons FDC Capital
 | `parceiros` | Fornecedores & Parceiros | Turnover/lucro por conta e fornecedor |
 | `custos` | Custos de Contas | Custo de aquisição por conta (salvo em localStorage) |
 | `custos_tipster` | Custo de Tipsters | Assinaturas e pagamentos a tipsters (localStorage) |
-| `metrics` | Métricas | Base de conhecimento: ROI, WR, MDD, EMDD, XMDD, P-Value |
+| `metrics` | Métricas | Base de conhecimento: ROI, WR, MDD, Drawdown Médio Esperado (xmdd), Drawdown p95, P-Value |
 
 ---
 
@@ -224,14 +224,14 @@ Todo container visual (painel, caixa, card de seção, card de entidade) usa:
 
 ## Regra semântica: camada de diagnóstico (`--d-*`)
 
-Tokens para o painel de risco do tipster (MDD, EMDD, XMDD, P-Value). Usar `--neg` /
+Tokens para o painel de risco do tipster (MDD, Drawdown Médio Esperado, Drawdown p95, P-Value). Usar `--neg` /
 `--pos` / `--warn` direto acoplaria cor e significado incorretamente — âmbar para um
 fato realizado, ou vermelho para uma projeção estatística, confunde o leitor.
 
 | Token | Hex | Semântica — quando usar |
 |---|---|---|
 | `--d-neg` | `#E5524B` | Perda **REALIZADA** — fato registrado (MDD real, P/L negativo, barra de loss) |
-| `--d-proj` | `#D6A45A` | Perda **PROJETADA** — estatística (EMDD, XMDD, drawdown esperado) |
+| `--d-proj` | `#D6A45A` | Perda **PROJETADA** — estatística (drawdown médio esperado, p95, bootstrap) |
 | `--d-pos` | `#4FC79A` | Resultado a favor / edge significativo (mint suave; P-value < 5%) |
 | `--d-info` | `#4DA3FF` | Métrica de qualidade / rótulo neutro (ROI, WR, odd média, labels) |
 | `--d-pos-strong` | `#2BC07E` | Positivo forte (= `--pos`) — igual ao verde de P/L |

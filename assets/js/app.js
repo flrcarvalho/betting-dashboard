@@ -127,20 +127,26 @@ function calcWR(rows){const v=rows.filter(r=>['W','HW'].includes(r.resultado));c
 function calcAvgOdd(rows){const real=rows.filter(r=>r.odd>0&&r.stake>0);const ss=real.reduce((a,r)=>a+r.stake,0);return ss>0?real.reduce((a,r)=>a+r.odd*r.stake,0)/ss:0;}
 function calcMDDreais(rows){let cum=0,peak=0,mdd=0;for(const r of rows){cum+=r.lucro;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}return mdd;}
 function calcMDDpct(rows){let bank=BASE_BANK,peak=BASE_BANK,mdd=0;for(const r of rows){bank+=r.lucro;if(bank>peak)peak=bank;const dd=(peak-bank)/peak*100;if(dd>mdd)mdd=dd;}return mdd;}
-function calcXMDD(rows,sims=250){const settled=rows.filter(r=>r.resultado!=='V');if(settled.length<5)return 0;const n=settled.length,wr=calcWR(rows)/100;const avgOdd=settled.reduce((a,r)=>a+r.odd,0)/settled.length;const avgStake=rows.reduce((a,r)=>a+r.stake,0)/rows.length;let total=0;for(let s=0;s<sims;s++){let cum=0,peak=0,mdd=0;for(let i=0;i<n;i++){const win=Math.random()<wr;cum+=win?avgStake*(avgOdd-1):-avgStake;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}total+=mdd;}return total/sims;}
-function calcPValue(rows){const settled=rows.filter(r=>r.resultado!=='V');const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;const n=settled.length;if(n<5)return 1;const avgOdd=settled.reduce((a,r)=>a+r.odd,0)/n;const z=(wins/n-1/avgOdd)/Math.sqrt((1/avgOdd)*(1-1/avgOdd)/n);return Math.max(0,Math.min(0.999,1-normalCDF(z)));}
-function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+function calcXMDD(rows,sims=250){const settled=rows.filter(r=>r.resultado!=='V');if(settled.length<5)return 0;const n=settled.length,wr=calcWR(rows)/100;const avgOdd=settled.reduce((a,r)=>a+r.odd,0)/settled.length;const avgStake=rows.reduce((a,r)=>a+r.stake,0)/rows.length;let total=0;for(let s=0;s<sims;s++){let cum=0,peak=0,mdd=0;for(let i=0;i<n;i++){const win=Math.random()<wr;cum+=win?avgStake*(avgOdd-1):-avgStake;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}total+=mdd;}return total/sims;}function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
 function calcPValueMC(rows,sims){var n=rows.length;if(n<30)return 1;sims=sims||(n>10000?3000:(n>3000?5000:10000));var L=new Float64Array(n),S=new Float64Array(n),sumL=0,sumS=0;for(var i=0;i<n;i++){L[i]=+rows[i].lucro||0;S[i]=+rows[i].stake||0;sumL+=L[i];sumS+=S[i];}if(sumS<=0)return 1;var yObs=sumL/sumS,r0=new Float64Array(n),q0=0;for(var j=0;j<n;j++){r0[j]=L[j]-yObs*S[j];q0+=r0[j]*r0[j];}var seObs=Math.sqrt(q0)/sumS;if(seObs<=0)return 1;var tObs=yObs/seObs;var seed=((n*2654435761)^(Math.round(Math.abs(sumL)*1000)|0))>>>0,rng=mulberry32(seed),cnt=0;for(var s=0;s<sims;s++){var rs=0,ss=0,rr=0,rsa=0,ssq=0;for(var b=0;b<n;b++){var k=(rng()*n)|0,rk=r0[k],sk=S[k];rs+=rk;ss+=sk;rr+=rk*rk;rsa+=rk*sk;ssq+=sk*sk;}if(ss<=0)continue;var ys=rs/ss,su2=rr-2*ys*rsa+ys*ys*ssq;if(su2>0&&ys*ss/Math.sqrt(su2)>=tObs)cnt++;}return(cnt+1)/(sims+1);}
 function calcMCdrawdown(rows,sims){
   sims=sims||5000;
   var n=rows.length;
   if(n<2)return{xmdd:0,p50:0,p95:0,p99:0};
-  var pls=new Float64Array(n);
-  for(var i=0;i<n;i++)pls[i]=rows[i].lucro||0;
+  var pls=new Float64Array(n),sumL=0;
+  for(var i=0;i<n;i++){pls[i]=rows[i].lucro||0;sumL+=pls[i];}
+  // O bootstrap reamostra o MULTICONJUNTO de P/L (iid) — a ordem do array só afeta a
+  // realização semeada, não a distribuição. Ordenar os VALORES canoniza o array: o mesmo
+  // conjunto de apostas dá o mesmo número em Métricas e nos drill-downs, independente da
+  // ordem de entrada. (Ordenar por data não basta: apostas do mesmo dia empatam e a ordem
+  // interna do empate ainda variaria entre telas.) Float64Array.sort() é numérico por padrão.
+  pls.sort();
+  // Semente derivada dos dados (independente da ordem) → determinístico entre renders e telas
+  var seed=((n*2654435761)^(Math.round(Math.abs(sumL)*1000)|0))>>>0,rng=mulberry32(seed);
   var mdds=new Float64Array(sims);
   for(var s=0;s<sims;s++){
     var acc=0,peak=0,dd=0;
-    for(var b=0;b<n;b++){acc+=pls[(Math.random()*n)|0];if(acc>peak)peak=acc;var t=peak-acc;if(t>dd)dd=t;}
+    for(var b=0;b<n;b++){acc+=pls[(rng()*n)|0];if(acc>peak)peak=acc;var t=peak-acc;if(t>dd)dd=t;}
     mdds[s]=dd;
   }
   var arr=Array.prototype.slice.call(mdds).sort(function(a,b){return a-b;});
@@ -548,15 +554,15 @@ function buildHTML(){
           <div class="metric-example">Exemplo: Se seu P/L chegou a +R$ 50.000 e depois caiu para +R$ 30.000, seu MDD é R$ 20.000 (40% do pico)</div>
           <div class="metric-warn">Um MDD elevado indica volatilidade alta. Mesmo com ROI positivo, um MDD grande pode levar ao abandono psicológico da estratégia.</div>`)}
 
-        ${mkCard('m_emdd','EMDD — Expected Maximum Drawdown',`
-          <div class="metric-desc">Drawdown médio esperado com base nas suas métricas atuais (ROI, odd média, número de apostas). Calculado pela fórmula de movimento browniano com drift — a mesma usada pelo WinnerOdds.</div>
-          <div class="metric-formula">EMDD = σ² / (2μ) × [1 − e^(−2μN/σ²)]</div>
-          <div class="metric-desc" style="margin-top:.5rem">Onde μ = lucro médio por aposta, σ = desvio padrão dos resultados, N = número de apostas.</div>
-          <div class="metric-warn">Se MDD real &gt; EMDD: você sofreu mais drawdown que o esperado. Se MDD real &lt;&lt; EMDD: resultados podem ter sido preparados ou selecionados.</div>`)}
+        ${mkCard('m_emdd','Drawdown Médio Esperado',`
+          <div class="metric-desc">Drawdown típico que você deve esperar ao longo da operação. Calculado por <b>bootstrap</b>: reamostra os P/L reais das suas apostas (com reposição) milhares de vezes e tira a média dos MDD simulados. Não assume distribuição nem odd/stake uniformes — herda a dispersão real da carteira.</div>
+          <div class="metric-formula">Drawdown Médio = média dos MDD de 10.000 reamostragens dos P/L reais</div>
+          <div class="metric-desc" style="margin-top:.5rem">É o mesmo cálculo usado no Nível de Solidez dos drill-downs — a página Métricas e os popups mostram o mesmo número.</div>`)}
 
-        ${mkCard('m_xmdd','XMDD — Monte Carlo Maximum Drawdown',`
-          <div class="metric-desc">Calculado por simulação: o sistema simula centenas de sequências aleatórias com as mesmas métricas (Win Rate, odd média, stake média) e calcula o drawdown médio. É mais preciso que o EMDD analítico mas varia levemente a cada recálculo.</div>
-          <div class="metric-formula">XMDD = média dos MDD de 250 simulações Monte Carlo</div>`)}
+        ${mkCard('m_xmdd','Drawdown p95 (risco)',`
+          <div class="metric-desc">O cenário <b>ruim-mas-plausível</b> contra o qual você dimensiona a banca: em 95% das reamostragens o drawdown ficou abaixo deste valor; só 5% foram piores. Risco mora na cauda, não na média — por isso o p95 costuma ser ~2× o Drawdown Médio.</div>
+          <div class="metric-formula">Drawdown p95 = percentil 95 dos MDD de 10.000 reamostragens dos P/L reais</div>
+          <div class="metric-warn">Use o p95 para definir quanta banca segurar; use o Drawdown Médio para a métrica de eficiência (Profit / Drawdown).</div>`)}
 
         ${mkCard('m_pval','P-Value',`
           <div class="metric-desc">Probabilidade de que seus resultados sejam fruto do acaso (sorte), assumindo que você não tem vantagem real. Quanto menor o P-Value, mais improvável é que seus resultados sejam aleatórios.</div>
@@ -568,9 +574,9 @@ function buildHTML(){
             <div class="term-card"><div class="term-name">&gt; 5%</div><div class="term-def">Não significativo. Mais apostas necessárias para confirmar o edge.</div></div>
           </div>`)}
 
-        ${mkCard('m_pemdd','Profit / EMDD',`
-          <div class="metric-desc">Ratio entre o lucro total e o drawdown esperado. Mede a eficiência da estratégia: quanto lucro você gera para cada unidade de risco.</div>
-          <div class="metric-formula">Profit/EMDD = Lucro Total / EMDD</div>
+        ${mkCard('m_pemdd','Profit / Drawdown',`
+          <div class="metric-desc">Ratio entre o lucro total e o <b>drawdown médio esperado</b>. Mede a eficiência da estratégia: quanto lucro você gera para cada unidade de risco típico (análogo ao Calmar). Usa a média — não o p95 — para casar com o Nível de Solidez dos drill-downs.</div>
+          <div class="metric-formula">Profit / Drawdown = Lucro Total / Drawdown Médio Esperado</div>
           <div class="term-grid">
             <div class="term-card"><div class="term-name">&gt; 5</div><div class="term-def">Método excelente. Alto retorno para o risco tomado.</div></div>
             <div class="term-card"><div class="term-name">2 – 5</div><div class="term-def">Método bom. Adequado para operação profissional.</div></div>
