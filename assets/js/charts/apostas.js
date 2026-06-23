@@ -24,13 +24,13 @@ function renderApostas(){
   });
   // KPI
   const pl=apostasFiltered.reduce((a,r)=>a+r.lucro,0);
-  const stake=apostasFiltered.reduce((a,r)=>a+r.stake,0);
+  const stake=calcTurnover(apostasFiltered);   // turnover exclui Void
   const roi=stake>0?(pl/stake*100):0;
   const wins=apostasFiltered.filter(r=>['W','HW'].includes(r.resultado)).length;
   const settled=apostasFiltered.filter(r=>r.resultado!=='V').length;
   const wr=settled>0?(wins/settled*100):0;
   const avgOddAp=calcAvgOdd(apostasFiltered);
-  const avgStakeAp=apostasFiltered.length>0?stake/apostasFiltered.length:0;
+  const avgStakeAp=settled>0?stake/settled:0;   // turnover ÷ encerradas (exclui Void)
   const kpiEl=document.getElementById('apostasKPI');
   if(kpiEl){
     const mkKA=(l,v,c,sub,bar)=>`<div class="kpi" style="height:110px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;padding:14px 16px;overflow:hidden"><div class="kpi-label" style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-mute);margin-bottom:8px;white-space:nowrap;flex-shrink:0">${l}</div><div class="kpi-val ${c}" style="font-size:22px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0">${v}</div>${bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub" style="font-size:10px;margin-top:8px;font-family:'JetBrains Mono',monospace;display:flex;flex-wrap:wrap;gap:2px 5px;overflow:hidden">${sub||''}</div></div>`;

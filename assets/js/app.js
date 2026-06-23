@@ -122,7 +122,9 @@ function normalizeDados(dados){
   });
 }
 function normalCDF(z){const t=1/(1+.2316419*Math.abs(z)),d=.3989423*Math.exp(-z*z/2);const p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p;}
-function calcROI(rows){const s=rows.reduce((a,r)=>a+r.stake,0),l=rows.reduce((a,r)=>a+r.lucro,0);return s>0?(l/s)*100:0;}
+// Turnover canônico: soma da stake APENAS de apostas encerradas (exclui Void — stake devolvida)
+function calcTurnover(rows){return rows.reduce((a,r)=>a+(r.resultado!=='V'?r.stake:0),0);}
+function calcROI(rows){const s=calcTurnover(rows),l=rows.reduce((a,r)=>a+r.lucro,0);return s>0?(l/s)*100:0;}
 function calcWR(rows){const v=rows.filter(r=>['W','HW'].includes(r.resultado));const t=rows.filter(r=>r.resultado!=='V');return t.length>0?(v.length/t.length)*100:0;}
 function calcAvgOdd(rows){const real=rows.filter(r=>r.odd>0&&r.stake>0);const ss=real.reduce((a,r)=>a+r.stake,0);return ss>0?real.reduce((a,r)=>a+r.odd*r.stake,0)/ss:0;}
 function calcMDDreais(rows){let cum=0,peak=0,mdd=0;for(const r of rows){cum+=r.lucro;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}return mdd;}

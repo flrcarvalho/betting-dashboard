@@ -1,7 +1,7 @@
 ﻿// ── overview.js — Gráficos e cards da Visão Geral ──────────────────────────────
 
 function renderKPI(rows){
-  const lucro=rows.reduce((a,r)=>a+r.lucro,0),stake=rows.reduce((a,r)=>a+r.stake,0);
+  const lucro=rows.reduce((a,r)=>a+r.lucro,0),stake=calcTurnover(rows);
   const roi=calcROI(rows),n=rows.length;
   const W=rows.filter(r=>r.resultado==='W').length;
   const L=rows.filter(r=>r.resultado==='L').length;
@@ -85,7 +85,7 @@ function renderBankroll(rows){
 }
 
 function renderROIMonthly(rows){
-  const byM={};rows.forEach(r=>{const d=new Date(r.data+'T12:00:00');const k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byM[k])byM[k]={pl:0,s:0,mes:d.getMonth(),ano:d.getFullYear()};byM[k].pl+=r.lucro;byM[k].s+=r.stake;});
+  const byM={};rows.forEach(r=>{const d=new Date(r.data+'T12:00:00');const k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byM[k])byM[k]={pl:0,s:0,mes:d.getMonth(),ano:d.getFullYear()};byM[k].pl+=r.lucro;if(r.resultado!=='V')byM[k].s+=r.stake;});
   const mks=Object.keys(byM).sort();
   const lbl=mks.map(k=>{const v=byM[k];return MESES_CURTOS[v.mes]+' '+String(v.ano).slice(2);});
   const vals=mks.map(k=>byM[k].s>0?parseFloat((byM[k].pl/byM[k].s*100).toFixed(2)):0);
@@ -144,7 +144,7 @@ function renderOddsDist(rows){
 }
 
 function renderHeatmap(rows){
-  const byM={};rows.forEach(r=>{const d=new Date(r.data+'T12:00:00');const k=d.getFullYear()+'-'+d.getMonth();if(!byM[k])byM[k]={l:0,s:0,mes:d.getMonth(),ano:d.getFullYear()};byM[k].l+=r.lucro;byM[k].s+=r.stake;});
+  const byM={};rows.forEach(r=>{const d=new Date(r.data+'T12:00:00');const k=d.getFullYear()+'-'+d.getMonth();if(!byM[k])byM[k]={l:0,s:0,mes:d.getMonth(),ano:d.getFullYear()};byM[k].l+=r.lucro;if(r.resultado!=='V')byM[k].s+=r.stake;});
   const anos=[...new Set(Object.values(byM).map(v=>v.ano))].sort();
   const vals=Object.values(byM).map(v=>v.l);
   const maxAbs=Math.max(...vals.map(Math.abs),1);

@@ -18,7 +18,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
     const dm = dayMap[d];
     dm.pl += r.lucro;
     dm.n++;
-    dm.turnover += (r.stake||0);
+    if(r.resultado!=='V') dm.turnover += (r.stake||0);   // turnover exclui Void
     const res = r.resultado;
     if(res==='W') dm.wins++;
     else if(res==='HW') dm.hw++;
@@ -31,11 +31,12 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const mRows = allDados.filter(r=>r.data.slice(0,7)===cur);
   const mPL = mRows.reduce((a,r)=>a+r.lucro,0);
   const mN = mRows.length;
-  const mTurnover = mRows.reduce((a,r)=>a+(r.stake||0),0);
+  const mTurnover = calcTurnover(mRows);  // exclui Void (stake devolvida)
   const mROI = mTurnover>0 ? mPL/mTurnover*100 : 0;
   const mWR = calcWR(mRows);            // canônico: vitórias / encerradas (exclui V)
   const mAvgOdd = calcAvgOdd(mRows);     // ponderada pela stake, filtra odd>0 && stake>0
-  const mAvgStake = mN>0 ? mTurnover/mN : 0;
+  const mSettled = mRows.filter(r=>r.resultado!=='V').length;
+  const mAvgStake = mSettled>0 ? mTurnover/mSettled : 0;  // turnover ÷ encerradas
 
   // Heatmap: opacidade proporcional ao |P/L|, escala 0.07→0.49
   const maxAbs = Math.max(1, ...Object.values(dayMap).map(d=>Math.abs(d.pl)));
@@ -171,7 +172,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
 // ── Shared KPI grid builder (2 rows × 4) ────────────────────────────────────
 function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
   const pl=rows.reduce((a,r)=>a+r.lucro,0);
-  const stake=rows.reduce((a,r)=>a+r.stake,0);
+  const stake=calcTurnover(rows);   // turnover exclui Void
   const roi=stake>0?(pl/stake*100):0;
   const n=rows.length;
   const W=rows.filter(r=>r.resultado==='W').length;
@@ -182,7 +183,7 @@ function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
   const settled=rows.filter(r=>r.resultado!=='V').length;
   const wr=calcWR(rows);
   const avgOdd=calcAvgOdd(rows);
-  const avgStake=n>0?stake/n:0;
+  const avgStake=settled>0?stake/settled:0;   // turnover ÷ encerradas (exclui Void)
   const betsBreak=[W?`<span class="res-w">W:${W}</span>`:'',HW?`<span class="res-hw">HW:${HW}</span>`:'',L?`<span class="res-l">L:${L}</span>`:'',HL?`<span class="res-hl">HL:${HL}</span>`:'',V?`<span class="res-v">V:${V}</span>`:''].filter(Boolean).join(' ');
   const mkK=(l,v,c,s,subFlex,bar)=>`<div class="kpi"><div class="kpi-label"><span class="kpi-pipe"></span> ${l}</div><div class="kpi-val ${c}">${v}</div>${bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub"${subFlex?' style="display:flex;flex-wrap:wrap;gap:2px 5px"':''}>${s}</div></div>`;
   const row1=[

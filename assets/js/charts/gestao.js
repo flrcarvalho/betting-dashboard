@@ -216,7 +216,7 @@ function renderParceiros(rows){
   const normRows=rows.map(r=>({...r,fornecedor:normForn(r.fornecedor)}));
   // ── Resumo por fornecedor ──
   const byForn={};
-  normRows.forEach(r=>{const f=r.fornecedor;if(!byForn[f])byForn[f]={l:0,s:0,n:0,contas:new Set()};byForn[f].l+=r.lucro;byForn[f].s+=r.stake;byForn[f].n++;byForn[f].contas.add(r.conta);});
+  normRows.forEach(r=>{const f=r.fornecedor;if(!byForn[f])byForn[f]={l:0,s:0,n:0,contas:new Set()};byForn[f].l+=r.lucro;if(r.resultado!=='V')byForn[f].s+=r.stake;byForn[f].n++;byForn[f].contas.add(r.conta);});
   const fornEnts=Object.entries(byForn).sort((a,b)=>b[1].l-a[1].l);
   const parcKpiEl=document.getElementById('parcKpiGrid');
   if(parcKpiEl)parcKpiEl.innerHTML=mkKpiGrid(normRows,{plLabel:'P/L dos Parceiros',contextLabel:'Fornecedores',contextVal:fornEnts.length,contextSub:fornEnts.map(e=>e[0]).join(' · ')});
@@ -258,7 +258,7 @@ function renderParceiros(rows){
 
   // ── Contas Individuais ──
   const map={};
-  normRows.forEach(r=>{const key=r.fornecedor+'||'+r.conta+'||'+r.casa;if(!map[key])map[key]={conta:r.conta,forn:r.fornecedor,casa:r.casa,n:0,s:0,l:0,datas:[]};map[key].n++;map[key].s+=r.stake;map[key].l+=r.lucro;map[key].datas.push(r.data);});
+  normRows.forEach(r=>{const key=r.fornecedor+'||'+r.conta+'||'+r.casa;if(!map[key])map[key]={conta:r.conta,forn:r.fornecedor,casa:r.casa,n:0,s:0,l:0,datas:[]};map[key].n++;if(r.resultado!=='V')map[key].s+=r.stake;map[key].l+=r.lucro;map[key].datas.push(r.data);});
   const accRows=Object.values(map).sort((a,b)=>b.l-a.l).map(e=>{const roi=e.s>0?(e.l/e.s*100):0;const lc=e.l>=0?'color:var(--pos)':'color:var(--neg)';const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';const sorted=e.datas.slice().sort();const d1=sorted[0].slice(0,10).split('-'),d2=sorted[sorted.length-1].slice(0,10).split('-');const dias=Math.round((new Date(sorted[sorted.length-1])-new Date(sorted[0]))/864e5);return`<tr><td style="font-weight:700;color:var(--ink)">${e.forn}</td><td>${e.conta}</td><td>${casaCell(e.casa)}</td><td>${e.n}</td><td>${fmtR(e.s)}</td><td style="${lc}">${fmtPL(e.l)}</td><td style="${rc}">${fmtPct(roi,1)}</td><td>${d1[2]}/${d1[1]}/${d1[0].slice(2)}</td><td>${d2[2]}/${d2[1]}/${d2[0].slice(2)}</td><td>${dias}d</td></tr>`;}).join('');
   document.getElementById('parcTable').innerHTML=`<table class="tbl" id="tblParc"><thead><tr><th>Fornecedor<span class="sort-icon"></span></th><th>Conta<span class="sort-icon"></span></th><th>Casa<span class="sort-icon"></span></th><th>Bets<span class="sort-icon"></span></th><th>Turnover<span class="sort-icon"></span></th><th>Profit<span class="sort-icon"></span></th><th>ROI<span class="sort-icon"></span></th><th>1ª Aposta<span class="sort-icon"></span></th><th>Última<span class="sort-icon"></span></th><th>Período<span class="sort-icon"></span></th></tr></thead><tbody>${accRows}</tbody></table>`;
   setTimeout(()=>makeSortable('tblParc',[3,4,5,6,9]),100);

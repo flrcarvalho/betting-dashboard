@@ -65,7 +65,7 @@ function _renderSportCards(){
   const sorted=[..._sportEnts].sort((a,b)=>dir*(fn(b)-fn(a)));
   el.innerHTML=sorted.map(([sport,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
-    const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
+    const avgStake=d.t>0?d.s/d.t:0,avgOdd=d.stk>0?d.wt/d.stk:0;
     return _mkSportCard(sport,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_sportDays[sport]||{},_sportAllDays),avgStake,avgOdd);
   }).join('');
   document.querySelectorAll('#sportSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
@@ -79,7 +79,7 @@ function renderSport(rows){
   const map={},dayMap={};
   rows.forEach(r=>{
     if(!map[r.esporte])map[r.esporte]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
-    map[r.esporte].l+=r.lucro;map[r.esporte].s+=r.stake;map[r.esporte].n++;
+    map[r.esporte].l+=r.lucro;if(r.resultado!=='V')map[r.esporte].s+=r.stake;map[r.esporte].n++;
     if(r.resultado!=='V'){map[r.esporte].t++;if(['W','HW'].includes(r.resultado))map[r.esporte].w++;}
     if(r.odd>0&&r.stake>0){map[r.esporte].wt+=r.odd*r.stake;map[r.esporte].stk+=r.stake;}
     const dk=r.data.slice(0,10);
@@ -92,7 +92,7 @@ function renderSport(rows){
 
   // Portfolio KPIs
   const portPL=rows.reduce((a,r)=>a+r.lucro,0);
-  const portS=rows.reduce((a,r)=>a+r.stake,0);
+  const portS=calcTurnover(rows);   // turnover exclui Void
   const portROI=portS>0?(portPL/portS*100):0;
   const posCount=_sportEnts.filter(([,d])=>d.l>0).length;
   const negCount=_sportEnts.filter(([,d])=>d.l<0).length;
@@ -157,7 +157,7 @@ function renderCasa(rows){
   const map={},dayMap={};
   rows.forEach(r=>{
     if(!map[r.casa])map[r.casa]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
-    map[r.casa].l+=r.lucro;map[r.casa].s+=r.stake;map[r.casa].n++;
+    map[r.casa].l+=r.lucro;if(r.resultado!=='V')map[r.casa].s+=r.stake;map[r.casa].n++;
     if(r.resultado!=='V'){map[r.casa].t++;if(['W','HW'].includes(r.resultado))map[r.casa].w++;}
     if(r.odd>0&&r.stake>0){map[r.casa].wt+=r.odd*r.stake;map[r.casa].stk+=r.stake;}
     const dk=r.data.slice(0,10);
@@ -170,7 +170,7 @@ function renderCasa(rows){
 
   // Portfolio KPIs
   const portPL=rows.reduce((a,r)=>a+r.lucro,0);
-  const portS=rows.reduce((a,r)=>a+r.stake,0);
+  const portS=calcTurnover(rows);   // turnover exclui Void
   const portROI=portS>0?(portPL/portS*100):0;
   const posCount=_casaEnts.filter(([,d])=>d.l>0).length;
   const negCount=_casaEnts.filter(([,d])=>d.l<0).length;
@@ -246,7 +246,7 @@ function _renderCasaCards(){
   const sorted=[..._casaEnts].sort((a,b)=>dir*(fn(b)-fn(a)));
   el.innerHTML=sorted.map(([c,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
-    const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
+    const avgStake=d.t>0?d.s/d.t:0,avgOdd=d.stk>0?d.wt/d.stk:0;
     return _mkCasaCard(c,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_casaDays[c]||{},_casaAllDays),avgStake,avgOdd);
   }).join('');
   el.onclick=function(e){if(e.target.closest('.tip-anchor'))return;const card=e.target.closest('.tcard');if(card&&card.dataset.casa)openCasaDrill(card.dataset.casa);};
@@ -310,10 +310,10 @@ function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
   rows.forEach(r=>{
     const k=r[dimKey];if(!k)return;
     if(!map[k])map[k]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0,r30s:0,r15s:0};
-    map[k].l+=r.lucro;map[k].s+=r.stake;map[k].n++;
+    map[k].l+=r.lucro;if(r.resultado!=='V')map[k].s+=r.stake;map[k].n++;
     if(r.resultado!=='V'){map[k].t++;if(['W','HW'].includes(r.resultado))map[k].w++;}
     if(r.odd>0&&r.stake>0){map[k].wt+=r.odd*r.stake;map[k].stk+=r.stake;}
-    if(dimKey==='tipster'){
+    if(dimKey==='tipster'&&r.resultado!=='V'){   // turnover recente exclui Void
       if(r.data>=cutoff30)map[k].r30s+=r.stake;
       if(r.data>=cutoff15)map[k].r15s+=r.stake;
     }
@@ -327,7 +327,7 @@ function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
   const rest=ents.slice(maxVisible);
   const mkRow=([k,d],isOutros=false,outrosLabel='Outros',outrosNames='',muted=false)=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
-    const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
+    const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.t>0?d.s/d.t:0;
     const lc=d.l>=0?'color:var(--pos)':'color:var(--neg)';
     const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
     const trStyle=muted?' style="opacity:0.45"':'';
@@ -364,7 +364,7 @@ function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
 function renderCasaDrill(rows){
   const nome=_casaDrillBaseName;
   const pl=rows.reduce((a,r)=>a+r.lucro,0);
-  const s=rows.reduce((a,r)=>a+r.stake,0);
+  const s=calcTurnover(rows);   // turnover exclui Void
   const roi=s>0?pl/s*100:0;
   const settled=rows.filter(r=>r.resultado!=='V');
   const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;
@@ -386,7 +386,7 @@ function renderCasaDrill(rows){
   const body=document.getElementById('casaDrillBody');
   if(!body)return;
 
-  const avgStake=rows.length?s/rows.length:0;
+  const avgStake=settled.length?s/settled.length:0;   // turnover ÷ encerradas (exclui Void)
   const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
   const sbS='margin-top:auto;padding-top:6px';
   const vS='font-size:16px';
@@ -627,7 +627,7 @@ function _renderTipCards(){
   const sorted=[..._tipsterEnts].sort((a,b)=>dir*(fn(b)-fn(a)));
   el.innerHTML=sorted.map(([t,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
-    const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
+    const avgStake=d.t>0?d.s/d.t:0,avgOdd=d.stk>0?d.wt/d.stk:0;
     return _mkTipCard(t,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_tipsterDays[t]||{},_tipsterAllDays),avgStake,avgOdd);
   }).join('');
   el.onclick=function(e){if(e.target.closest('.tip-anchor'))return;const card=e.target.closest('.tcard');if(card&&card.dataset.name)openTipsterDrill(card.dataset.name);};
@@ -675,7 +675,7 @@ function _updateDrillChips(){
 function renderTipsterDrill(rows){
   const nome=_drillBaseName;
   const pl=rows.reduce((a,r)=>a+r.lucro,0);
-  const s=rows.reduce((a,r)=>a+r.stake,0);
+  const s=calcTurnover(rows);   // turnover exclui Void
   const roi=s>0?pl/s*100:0;
   const settled=rows.filter(r=>r.resultado!=='V');
   const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;
@@ -696,7 +696,7 @@ function renderTipsterDrill(rows){
   if(!body)return;
 
   // KPIs — 5 cards simétricos (1 row, repeat 5, font-xl para caber)
-  const avgStake=rows.length?s/rows.length:0;
+  const avgStake=settled.length?s/settled.length:0;   // turnover ÷ encerradas (exclui Void)
   const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
   const sbS='margin-top:auto;padding-top:6px';
   const vS='font-size:16px';
@@ -993,11 +993,11 @@ window.saveDrill=async function(){
 // ── Helpers extraídos para reuso no popup ───────────────────────────────────
 function _tipMonthTbody(rows){
   const byM={};
-  rows.forEach(r=>{const d=new Date(r.data+'T12:00:00'),k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byM[k])byM[k]={bets:0,pl:0,s:0,w:0,t:0,wt:0,stk:0,ano:d.getFullYear(),mes:d.getMonth()};byM[k].bets++;byM[k].pl+=r.lucro;byM[k].s+=r.stake;if(r.resultado!=='V'){byM[k].t++;if(['W','HW'].includes(r.resultado))byM[k].w++;}if(r.odd>0&&r.stake>0){byM[k].wt+=r.odd*r.stake;byM[k].stk+=r.stake;}});
+  rows.forEach(r=>{const d=new Date(r.data+'T12:00:00'),k=`${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;if(!byM[k])byM[k]={bets:0,pl:0,s:0,w:0,t:0,wt:0,stk:0,ano:d.getFullYear(),mes:d.getMonth()};byM[k].bets++;byM[k].pl+=r.lucro;if(r.resultado!=='V')byM[k].s+=r.stake;if(r.resultado!=='V'){byM[k].t++;if(['W','HW'].includes(r.resultado))byM[k].w++;}if(r.odd>0&&r.stake>0){byM[k].wt+=r.odd*r.stake;byM[k].stk+=r.stake;}});
   let totPL=0,totS=0,totB=0,totW=0,totT=0;
   const mHTML=Object.keys(byM).sort().map(k=>{
     const v=byM[k];const roi=v.s>0?(v.pl/v.s*100):0,wr=v.t>0?(v.w/v.t*100):0;
-    const avgOdd=v.stk>0?v.wt/v.stk:0,avgStake=v.bets>0?v.s/v.bets:0;
+    const avgOdd=v.stk>0?v.wt/v.stk:0,avgStake=v.t>0?v.s/v.t:0;
     totPL+=v.pl;totS+=v.s;totB+=v.bets;totW+=v.w;totT+=v.t;
     const pc=v.pl>=0?'color:var(--pos)':'color:var(--neg)';
     const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
@@ -1005,7 +1005,7 @@ function _tipMonthTbody(rows){
   }).join('');
   const tRoi=totS>0?(totPL/totS*100):0,tWr=totT>0?(totW/totT*100):0;
   const tc2=totPL>=0?'color:var(--pos)':'color:var(--neg)';const rc2=tRoi>=0?'color:var(--pos)':'color:var(--neg)';
-  return mHTML+`<tr class="total-row"><td>Total</td><td class="td-num">${totB.toLocaleString('pt-BR')}</td><td class="td-num" style="${tc2}">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-num" style="${rc2}">${fmtPct(tRoi,2)}</td><td class="td-num">${mkWRC(tWr)}</td><td class="td-num">${totB>0?fmtR(totS/totB):'—'}</td><td class="td-num">—</td></tr>`;
+  return mHTML+`<tr class="total-row"><td>Total</td><td class="td-num">${totB.toLocaleString('pt-BR')}</td><td class="td-num" style="${tc2}">${fmtPL(totPL)}</td><td class="td-num">${fmtR(totS)}</td><td class="td-num" style="${rc2}">${fmtPct(tRoi,2)}</td><td class="td-num">${mkWRC(tWr)}</td><td class="td-num">${totT>0?fmtR(totS/totT):'—'}</td><td class="td-num">—</td></tr>`;
 }
 
 function _tipBreakdownTbl(rows,dimKey,labelFn,tableId=''){
@@ -1013,7 +1013,7 @@ function _tipBreakdownTbl(rows,dimKey,labelFn,tableId=''){
   rows.forEach(r=>{
     const k=r[dimKey];if(!k)return;
     if(!map[k])map[k]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
-    map[k].l+=r.lucro;map[k].s+=r.stake;map[k].n++;
+    map[k].l+=r.lucro;if(r.resultado!=='V')map[k].s+=r.stake;map[k].n++;
     if(r.resultado!=='V'){map[k].t++;if(['W','HW'].includes(r.resultado))map[k].w++;}
     if(r.odd>0&&r.stake>0){map[k].wt+=r.odd*r.stake;map[k].stk+=r.stake;}
   });
@@ -1022,7 +1022,7 @@ function _tipBreakdownTbl(rows,dimKey,labelFn,tableId=''){
   const tRows=ents.map(([k,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
     const avgOdd=d.stk>0?d.wt/d.stk:0;
-    const avgStake=d.n>0?d.s/d.n:0;
+    const avgStake=d.t>0?d.s/d.t:0;
     const lc=d.l>=0?'color:var(--pos)':'color:var(--neg)';
     const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
     return`<tr><td>${labelFn(k)}</td><td class="td-num">${d.n.toLocaleString('pt-BR')}</td><td class="td-num" style="${lc}">${fmtPL(d.l)}</td><td class="td-num">${fmtR(d.s)}</td><td class="td-num" style="${rc}">${fmtPct(roi,2)}</td><td class="td-num">${mkWRC(wr)}</td><td class="td-num">${fmtR(avgStake)}</td><td class="td-num">${fmtOdd(avgOdd)}</td></tr>`;
@@ -1044,7 +1044,7 @@ function renderTipsters(){
     const tipMap={},tipDays={};
     baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{
       if(!tipMap[r.tipster])tipMap[r.tipster]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};
-      tipMap[r.tipster].l+=r.lucro;tipMap[r.tipster].s+=r.stake;tipMap[r.tipster].n++;
+      tipMap[r.tipster].l+=r.lucro;if(r.resultado!=='V')tipMap[r.tipster].s+=r.stake;tipMap[r.tipster].n++;
       if(r.resultado!=='V'){tipMap[r.tipster].t++;if(['W','HW'].includes(r.resultado))tipMap[r.tipster].w++;}
       if(r.odd>0&&r.stake>0){tipMap[r.tipster].wt+=r.odd*r.stake;tipMap[r.tipster].stk+=r.stake;}
       const dk=r.data.slice(0,10);
@@ -1059,7 +1059,7 @@ function renderTipsters(){
       const kpiRows=baseRows.filter(r=>activeT.includes(r.tipster));
       const portPL=kpiRows.reduce((a,r)=>a+r.lucro,0);
       const portROI=calcROI(kpiRows);
-      const portStake=kpiRows.reduce((a,r)=>a+r.stake,0);
+      const portStake=calcTurnover(kpiRows);   // turnover exclui Void
       const portN=kpiRows.length;
       const posCount=_tipsterEnts.filter(([,d])=>d.l>0).length;
       const negCount=_tipsterEnts.filter(([,d])=>d.l<0).length;
@@ -1097,11 +1097,11 @@ function renderTipsters(){
 
   // Comparativo Geral
   const map={};
-  baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{if(!map[r.tipster])map[r.tipster]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};map[r.tipster].l+=r.lucro;map[r.tipster].s+=r.stake;map[r.tipster].n++;if(r.resultado!=='V'){map[r.tipster].t++;if(['W','HW'].includes(r.resultado))map[r.tipster].w++;}if(r.odd>0&&r.stake>0){map[r.tipster].wt+=r.odd*r.stake;map[r.tipster].stk+=r.stake;}});
+  baseRows.filter(r=>activeT.includes(r.tipster)).forEach(r=>{if(!map[r.tipster])map[r.tipster]={l:0,s:0,n:0,w:0,t:0,wt:0,stk:0};map[r.tipster].l+=r.lucro;if(r.resultado!=='V')map[r.tipster].s+=r.stake;map[r.tipster].n++;if(r.resultado!=='V'){map[r.tipster].t++;if(['W','HW'].includes(r.resultado))map[r.tipster].w++;}if(r.odd>0&&r.stake>0){map[r.tipster].wt+=r.odd*r.stake;map[r.tipster].stk+=r.stake;}});
   const ents=Object.entries(map).sort((a,b)=>b[1].l-a[1].l);
   const compRows=ents.map(([t,d])=>{
     const roi=d.s>0?(d.l/d.s*100):0,wr=d.t>0?(d.w/d.t*100):0;
-    const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.n>0?d.s/d.n:0;
+    const avgOdd=d.stk>0?d.wt/d.stk:0,avgStake=d.t>0?d.s/d.t:0;
     const lc=d.l>=0?'color:var(--pos)':'color:var(--neg)';
     const rc=roi>=0?'color:var(--pos)':'color:var(--neg)';
     return`<tr><td style="font-weight:700;color:var(--ink)">${t}</td><td>${d.n}</td><td class="td-num">${mkWRC(wr)}</td><td>${fmtR(d.s)}</td><td style="${lc}">${fmtPL(d.l)}</td><td style="${rc}">${fmtPct(roi,2)}</td><td>${fmtOdd(avgOdd)}</td><td>${fmtR(avgStake)}</td></tr>`;
@@ -1117,7 +1117,7 @@ function renderResultadosCasa(){
   rows.forEach(r=>{
     if(!r.casa)return;
     if(!byC[r.casa])byC[r.casa]={l:0,s:0,n:0,w:0,hw:0,l2:0,hl:0,v:0,t:0,wt:0,stk:0};
-    const d=byC[r.casa];d.l+=r.lucro;d.s+=r.stake;d.n++;
+    const d=byC[r.casa];d.l+=r.lucro;if(r.resultado!=='V')d.s+=r.stake;d.n++;
     if(r.resultado==='W')d.w++;else if(r.resultado==='HW')d.hw++;
     else if(r.resultado==='L')d.l2++;else if(r.resultado==='HL')d.hl++;
     else if(r.resultado==='V')d.v++;
@@ -1127,7 +1127,7 @@ function renderResultadosCasa(){
   const ents=Object.entries(byC).sort((a,b)=>b[1].l-a[1].l);
   // KPI total
   const totPL=rows.reduce((a,r)=>a+r.lucro,0);
-  const totS=rows.reduce((a,r)=>a+r.stake,0);
+  const totS=calcTurnover(rows);   // turnover exclui Void
   const totROI=totS>0?(totPL/totS*100):0;
   const totW=ents.reduce((a,[,d])=>a+d.w+d.hw,0),totT=ents.reduce((a,[,d])=>a+d.t,0);
   const totWR=totT>0?(totW/totT*100):0;

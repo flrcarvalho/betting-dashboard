@@ -18,7 +18,7 @@ function renderConsolidado(){
     else if(res==='V')annualByT[t].v++;
     const mk=ymKey+'_'+t;
     if(!monthlyByT[mk])monthlyByT[mk]={pl:0,s:0,n:0,w:0,l:0,hw:0,hl:0,v:0,year:d.getFullYear(),month:d.getMonth()};
-    monthlyByT[mk].pl+=r.lucro; monthlyByT[mk].s+=r.stake; monthlyByT[mk].n++;
+    monthlyByT[mk].pl+=r.lucro; if(res!=='V')monthlyByT[mk].s+=r.stake; monthlyByT[mk].n++;
     if(res==='W')monthlyByT[mk].w++; else if(res==='L')monthlyByT[mk].l++;
     else if(res==='HW')monthlyByT[mk].hw++; else if(res==='HL')monthlyByT[mk].hl++;
     else if(res==='V')monthlyByT[mk].v++;
@@ -38,7 +38,7 @@ function renderConsolidado(){
   const rBg='background:var(--surface-2);';
   const totPL=allTipsters.reduce((a,t)=>a+(annualByT[t]?.pl||0),0);
   const totN=allTipsters.reduce((a,t)=>a+(annualByT[t]?.n||0),0);
-  const totS=rows.reduce((a,r)=>a+r.stake,0);
+  const totS=calcTurnover(rows);   // turnover exclui Void
   const totROI=totS>0?(totPL/totS*100):0;
   const totW=allTipsters.reduce((a,t)=>a+(annualByT[t]?.w||0),0);
   const totHW=allTipsters.reduce((a,t)=>a+(annualByT[t]?.hw||0),0);
@@ -57,16 +57,17 @@ function renderConsolidado(){
     <td class="td-c" style="color:${trc};font-weight:700">${fmtPct(totROI,2)}</td>
     <td class="td-c">${mkWRC(totWR)}</td>
     <td class="td-c">${fmtOdd(calcAvgOdd(rows))}</td>
-    <td class="td-num">${totN>0?fmtR(totS/totN):'—'}</td>
+    <td class="td-num">${(totN-totV)>0?fmtR(totS/(totN-totV)):'—'}</td>
   </tr>`;
   const anualRows=allTipsters.map(t=>{
     const d=annualByT[t];if(!d)return'';
     const tRows=rows.filter(r=>r.tipster===t);
-    const turnover=tRows.reduce((a,r)=>a+r.stake,0);
+    const turnover=calcTurnover(tRows);   // exclui Void
     const roiV=turnover>0?(d.pl/turnover*100):0;
     const wr=calcWR(tRows);
     const avgOdd=calcAvgOdd(tRows);
-    const avgStake=d.n>0?turnover/d.n:0;
+    const settled=d.n-d.v;
+    const avgStake=settled>0?turnover/settled:0;   // turnover ÷ encerradas
     const lc=d.pl>=0?'var(--pos)':'var(--neg)';
     const rc=roiV>=0?'var(--pos)':'var(--neg)';
     const detail=[d.w?`W:${d.w}`:'',d.hw?`HW:${d.hw}`:'',d.l?`L:${d.l}`:'',d.hl?`HL:${d.hl}`:'',d.v?`V:${d.v}`:''].filter(Boolean).join(' ');
@@ -194,7 +195,7 @@ function renderMensal(){
 
   // KPIs do mês
   const totPL=rows.reduce((a,r)=>a+r.lucro,0);
-  const totS=rows.reduce((a,r)=>a+r.stake,0);
+  const totS=calcTurnover(rows);   // turnover exclui Void
   const kpiHTML=mkKpiGrid(rows,{plLabel:'P/L do Mês',contextLabel:'Dias Ativos',contextVal:days.length,contextSub:'de '+new Date(selMonthVal+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})});
 
   // Tabela dia a dia com tipsters (igual ao bloco do Consolidado, mas só para este mês)
@@ -284,7 +285,7 @@ function renderMensal(){
   const tipTableRows=allTipsters.map(t=>{
     const d=byTMonth[t];if(!d)return'';
     const tR=rows.filter(r=>r.tipster===t);
-    const s=tR.reduce((a,r)=>a+r.stake,0);
+    const s=calcTurnover(tR);   // turnover exclui Void
     const roi2=s>0?(d.pl/s*100):0;
     const set2=d.w+d.hw+d.l+d.hl;
     const wr2=set2>0?((d.w+d.hw)/set2*100):0;
@@ -377,7 +378,7 @@ function renderDiario(){
 
   const allTipsters=[...new Set(rows.map(r=>r.tipster).filter(Boolean))].sort();
   const totPL=rows.reduce((a,r)=>a+r.lucro,0);
-  const totS=rows.reduce((a,r)=>a+r.stake,0);
+  const totS=calcTurnover(rows);   // turnover exclui Void
   const roi=totS>0?(totPL/totS*100):0;
   const W=rows.filter(r=>r.resultado==='W').length;
   const HW=rows.filter(r=>r.resultado==='HW').length;
@@ -393,7 +394,7 @@ function renderDiario(){
   rows.forEach(r=>{
     const t=r.tipster;if(!t)return;
     if(!byTipster[t])byTipster[t]={pl:0,n:0,w:0,l:0,hw:0,hl:0,v:0,s:0,wt:0,stk:0};
-    byTipster[t].pl+=r.lucro;byTipster[t].n++;byTipster[t].s+=r.stake;
+    byTipster[t].pl+=r.lucro;byTipster[t].n++;if(r.resultado!=='V')byTipster[t].s+=r.stake;
     if(r.resultado==='W')byTipster[t].w++;else if(r.resultado==='L')byTipster[t].l++;
     else if(r.resultado==='HW')byTipster[t].hw++;else if(r.resultado==='HL')byTipster[t].hl++;
     else if(r.resultado==='V')byTipster[t].v++;
@@ -521,7 +522,7 @@ function renderSemana(){
   const activeDays=weekDays.filter(d=>rows.some(r=>r.data.slice(0,10)===d));
 
   const totPL=rows.reduce((a,r)=>a+r.lucro,0);
-  const totS=rows.reduce((a,r)=>a+r.stake,0);
+  const totS=calcTurnover(rows);   // turnover exclui Void
   const roi=totS>0?(totPL/totS*100):0;
   const wr=calcWR(rows);
   const W=rows.filter(r=>r.resultado==='W').length;
@@ -546,7 +547,7 @@ function renderSemana(){
   });
   const byTipWeek={};
   rows.forEach(r=>{const t=r.tipster;if(!t)return;if(!byTipWeek[t])byTipWeek[t]={pl:0,n:0,w:0,l:0,hw:0,hl:0,v:0,s:0};
-    byTipWeek[t].pl+=r.lucro;byTipWeek[t].n++;byTipWeek[t].s+=r.stake;
+    byTipWeek[t].pl+=r.lucro;byTipWeek[t].n++;if(r.resultado!=='V')byTipWeek[t].s+=r.stake;
     if(r.resultado==='W')byTipWeek[t].w++;else if(r.resultado==='L')byTipWeek[t].l++;
     else if(r.resultado==='HW')byTipWeek[t].hw++;else if(r.resultado==='HL')byTipWeek[t].hl++;
     else if(r.resultado==='V')byTipWeek[t].v++;
