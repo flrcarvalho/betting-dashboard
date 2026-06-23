@@ -1,6 +1,54 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: auditoria A3/M2/M3, remocao da calcXMDD orfa e rotulo Odd Media Ponderada padronizado — COMPLETO (2026-06-22 sessao 38)
+## Estado atual: apostas Void excluidas de Turnover, ROI e Stake Media em todo o sistema — COMPLETO (2026-06-23 sessao 39)
+
+## Sessao 2026-06-23 (sessao 39) — Void fora de Turnover, ROI e Stake Media
+
+### O que foi feito
+
+Apostas Void (resultado 'V') devolvem a stake e tem lucro 0. Antes, a stake de Void entrava no Turnover (denominador do ROI = Sigma P/L / Sigma stake), entao inflava o denominador e deprimia o ROI. Auditadas todas as formulas de ROI/Turnover (~40 pontos em 7 arquivos) e aplicada uma regra unica.
+
+**Regra aplicada em todo o sistema**
+- A stake de Void sai do Turnover. Por consequencia, sai do ROI e da Stake Media.
+- P/L nao muda (Void ja e 0). ROI = P/L / Turnover continua reconciliando.
+
+**app.js**
+- Novo helper canonico calcTurnover(rows): soma stake so de apostas nao-Void.
+- calcROI passou a usar calcTurnover no denominador.
+
+**Cobertura (Turnover/ROI nao-Void)**
+- overview.js: KPI principal, ROI mensal, heatmap anual.
+- shared.js: calendario (mkCalendarHeatmap), mkKpiGrid.
+- temporal.js: Consolidado, Mensal, Diario, Semana (totais, por-tipster, heatmap mensal).
+- performance.js: Esportes, Bookies, Tipsters (cards, portfolio, comparativo), drills de casa/tipster, _tipMonthTbody, _casaBreakdownTbl, _tipBreakdownTbl, Resultados por Casa, turnover recente r30s/r15s.
+- apostas.js: KPI header.
+- gestao.js: Fornecedores e Contas (decisao do usuario: aplicar tambem).
+
+**Stake Media**
+- Passou a usar denominador de apostas encerradas (d.t / v.t / settled / totT / totN-totV).
+- Reconcilia: Turnover / encerradas = Stake Media.
+
+**Inalterado**
+- P/L, contagem total de apostas (n), detalhe W/HW/L/HL/V.
+- Win Rate (calcWR ja excluia Void).
+- Odd Media (calcAvgOdd segue ponderada sobre todas as bets com odd>0 — fora do escopo desta mudanca).
+
+### Validacao
+- node --check OK nos 7 arquivos.
+
+### Commit desta sessao
+- 287143c fix(metrics): exclui apostas Void do Turnover, ROI e Stake Media em todo o sistema
+
+### Pendente
+- Pagina Metricas: glossario "V — Void" e descricoes de ROI ainda dizem so "nao conta no Win Rate". Atualizar para citar Turnover/ROI/Stake Media no rework da pagina (que sera refeita inteira; nao mexer pontual).
+- Decidir se Odd Media tambem deve excluir Void (fora do escopo de hoje; usuario nao pediu).
+- Pendentes anteriores: tooltip "Max Drawdown" (label XMDD vs calcMDDreais); reexaminar cortes 5/2 da Solidez.
+
+## Proximo passo
+- Verificar no browser: ROI/Turnover/Stake Media coerentes nas views (com base que tenha Voids).
+- Tratar a pagina Metricas (rework) ou o label do tooltip "Max Drawdown".
+
+## Estado anterior: auditoria A3/M2/M3, remocao da calcXMDD orfa e rotulo Odd Media Ponderada padronizado — COMPLETO (2026-06-22 sessao 38)
 
 ## Sessao 2026-06-22 (sessao 38) — Auditoria A3/M2/M3, limpeza e rotulos
 
