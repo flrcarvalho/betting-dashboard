@@ -33,14 +33,8 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
   const mN = mRows.length;
   const mTurnover = mRows.reduce((a,r)=>a+(r.stake||0),0);
   const mROI = mTurnover>0 ? mPL/mTurnover*100 : 0;
-  const mWCount  = mRows.filter(r=>r.resultado==='W').length;
-  const mHWCount = mRows.filter(r=>r.resultado==='HW').length;
-  const mLCount  = mRows.filter(r=>r.resultado==='L').length;
-  const mHLCount = mRows.filter(r=>r.resultado==='HL').length;
-  const mSettled = mWCount + mHWCount + mLCount + mHLCount;
-  const mWR = mSettled>0 ? (mWCount+mHWCount)/mSettled*100 : 0;
-  const mSumOddStake = mRows.reduce((a,r)=>a+((r.odd||0)*(r.stake||0)),0);
-  const mAvgOdd   = mTurnover>0 ? mSumOddStake/mTurnover : 0;
+  const mWR = calcWR(mRows);            // canônico: vitórias / encerradas (exclui V)
+  const mAvgOdd = calcAvgOdd(mRows);     // ponderada pela stake, filtra odd>0 && stake>0
   const mAvgStake = mN>0 ? mTurnover/mN : 0;
 
   // Heatmap: opacidade proporcional ao |P/L|, escala 0.07→0.49
@@ -185,8 +179,8 @@ function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
   const L=rows.filter(r=>r.resultado==='L').length;
   const HL=rows.filter(r=>r.resultado==='HL').length;
   const V=rows.filter(r=>r.resultado==='V').length;
-  const settled=W+HW+L+HL;
-  const wr=settled>0?((W+HW)/settled*100):0;
+  const settled=rows.filter(r=>r.resultado!=='V').length;
+  const wr=calcWR(rows);
   const avgOdd=calcAvgOdd(rows);
   const avgStake=n>0?stake/n:0;
   const betsBreak=[W?`<span class="res-w">W:${W}</span>`:'',HW?`<span class="res-hw">HW:${HW}</span>`:'',L?`<span class="res-l">L:${L}</span>`:'',HL?`<span class="res-hl">HL:${HL}</span>`:'',V?`<span class="res-v">V:${V}</span>`:''].filter(Boolean).join(' ');

@@ -47,8 +47,7 @@ function renderConsolidado(){
   const totV=allTipsters.reduce((a,t)=>a+(annualByT[t]?.v||0),0);
   const tlc=totPL>=0?'var(--pos)':'var(--neg)';
   const trc=totROI>=0?'var(--pos)':'var(--neg)';
-  const totSettled=totW+totHW+totL+totHL;
-  const totWR=totSettled>0?((totW+totHW)/totSettled*100):0;
+  const totWR=calcWR(rows);
   const totDetail=[totW?`W:${totW}`:'',totHW?`HW:${totHW}`:'',totL?`L:${totL}`:'',totHL?`HL:${totHL}`:'',totV?`V:${totV}`:''].filter(Boolean).join(' ');
   const totalAnnualRow=`<tr class="total-row" style="border-bottom:2px solid var(--line);background:var(--field)">
     <td style="font-weight:700;color:var(--ink)">Total</td>
@@ -65,8 +64,7 @@ function renderConsolidado(){
     const tRows=rows.filter(r=>r.tipster===t);
     const turnover=tRows.reduce((a,r)=>a+r.stake,0);
     const roiV=turnover>0?(d.pl/turnover*100):0;
-    const settled=d.w+d.hw+d.l+d.hl;
-    const wr=settled>0?((d.w+d.hw)/settled*100):0;
+    const wr=calcWR(tRows);
     const avgOdd=calcAvgOdd(tRows);
     const avgStake=d.n>0?turnover/d.n:0;
     const lc=d.pl>=0?'var(--pos)':'var(--neg)';
@@ -309,8 +307,7 @@ function renderMensal(){
   const L=rows.filter(r=>r.resultado==='L').length;
   const HL=rows.filter(r=>r.resultado==='HL').length;
   const V=rows.filter(r=>r.resultado==='V').length;
-  const setTot=W+HW+L+HL;
-  const wr=setTot>0?((W+HW)/setTot*100):0;
+  const wr=calcWR(rows);
   const tipTableHTML=mkCard('mensal_tiptable','Tipsters — Comparativo do Mês',
     `<div class="tbl-wrap"><table class="tbl" id="tblMensalTip">
       <thead><tr>${mkTh('Tipster','','l')}${mkTh('Bets','','r')}${mkTh('Resultados','','c')}${mkTh('P/L','','r')}${mkTh('Turnover','','r')}${mkTh('ROI','','r')}${mkTh('Win Rate','','r')}${_mkOddMediaTh('r')}</tr></thead>
@@ -387,7 +384,7 @@ function renderDiario(){
   const L=rows.filter(r=>r.resultado==='L').length;
   const HL=rows.filter(r=>r.resultado==='HL').length;
   const V=rows.filter(r=>r.resultado==='V').length;
-  const wr=((W+HW)/((W+HW+L+HL)||1))*100;
+  const wr=calcWR(rows);
 
   const kpiHTML=mkKpiGrid(rows,{plLabel:'P/L do Dia',contextLabel:'Tipsters Ativos',contextVal:allTipsters.length,contextSub:allTipsters.join(', ')});
 
@@ -526,9 +523,7 @@ function renderSemana(){
   const totPL=rows.reduce((a,r)=>a+r.lucro,0);
   const totS=rows.reduce((a,r)=>a+r.stake,0);
   const roi=totS>0?(totPL/totS*100):0;
-  const wins=rows.filter(r=>['W','HW'].includes(r.resultado)).length;
-  const settled=rows.filter(r=>r.resultado!=='V').length;
-  const wr=settled>0?(wins/settled*100):0;
+  const wr=calcWR(rows);
   const W=rows.filter(r=>r.resultado==='W').length;
   const L=rows.filter(r=>r.resultado==='L').length;
   const HW=rows.filter(r=>r.resultado==='HW').length;
