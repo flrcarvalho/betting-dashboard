@@ -5,11 +5,15 @@ function _mkTipAnchor(label,formula,desc,bench){
   return `<span class="tip-anchor"><button class="metric-info" type="button" aria-label="Sobre ${label}">i</button><div class="metric-tip" role="tooltip" hidden><span class="metric-tip__caret"></span>${formula?`<div class="metric-tip__formula">${formula}</div>`:''}<div class="metric-tip__desc">${desc}</div>${bench?`<div class="metric-tip__bench">${bench}</div>`:''}</div></span>`;
 }
 
+// Tooltip "Odd média ponderada" reusado em tabelas (cabeçalho) e cards .tcard.
+// Quebra após o "=" : linha 1 = "Odd média ponderada =", linha 2 = a fórmula.
+const _ODD_TIP_FORMULA='<span class="lbl">Odd média ponderada</span> <span class="op">=</span><br>Σ(odd <span class="op">×</span> stake) <span class="op">÷</span> Σ(stake)';
+function _mkOddTip(){return _mkTipAnchor('Odd média ponderada',_ODD_TIP_FORMULA,'','');}
+
 function _mkOddMediaTh(align='r',width=''){
   const cls=align==='r'?'th-r':align==='l'?'th-l':'th-c';
   const wS=width?` style="width:${width}"`:'';
-  const anchor=_mkTipAnchor('Odd média pond.','<span class="lbl">Odd média ponderada</span> <span class="op">=</span> Σ(odd <span class="op">×</span> stake) <span class="op">÷</span> Σ(stake)','','');
-  return`<th class="${cls}"${wS}><span class="th-k">Odd média ${anchor}<span class="sort-icon"></span></span></th>`;
+  return`<th class="${cls}"${wS}><span class="th-k">Odd média ${_mkOddTip()}<span class="sort-icon"></span></span></th>`;
 }
 
 function rodapePValue(pv){
@@ -45,7 +49,7 @@ function _mkSportCard(sport,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
     +`<div class="tcard__foot">`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div>`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Stake Média</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${avgStakeStr}</div></div>`
-      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média ${_mkOddTip()}</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div>`
     +`</div>`
     +`</div>`;
@@ -226,7 +230,7 @@ function _mkCasaCard(name,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
     +`<div class="tcard__foot">`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div>`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Stake Média</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${avgStakeStr}</div></div>`
-      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média ${_mkOddTip()}</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div>`
     +`</div>`
     +`</div>`;
@@ -245,7 +249,7 @@ function _renderCasaCards(){
     const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
     return _mkCasaCard(c,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_casaDays[c]||{},_casaAllDays),avgStake,avgOdd);
   }).join('');
-  el.onclick=function(e){const card=e.target.closest('.tcard');if(card&&card.dataset.casa)openCasaDrill(card.dataset.casa);};
+  el.onclick=function(e){if(e.target.closest('.tip-anchor'))return;const card=e.target.closest('.tcard');if(card&&card.dataset.casa)openCasaDrill(card.dataset.casa);};
   document.querySelectorAll('#casaSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
   const dirBtn=document.getElementById('casaDir');
   if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
@@ -406,7 +410,7 @@ function renderCasaDrill(rows){
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu" style="${vS}">${fmtR(s)}</div><div class="kpi-sub" style="${sbS}">volume apostado</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Volume</div><div class="kpi-val neu" style="${vS}">${rows.length.toLocaleString('pt-BR')}</div><div class="kpi-sub" style="${sbS}">apostas no período</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média Pond.</div><div class="kpi-val neu" style="${vS}">${fmtOdd(avgOdd)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média</div><div class="kpi-val neu" style="${vS}">${fmtOdd(avgOdd)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${fmtPct(wr,1,false)}</div><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px"><div style="height:100%;background:var(--accent-2);border-radius:3px;width:${Math.min(100,Math.max(0,wr)).toFixed(1)}%"></div></div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
       `</div>`+
     `</div>`+
@@ -607,7 +611,7 @@ function _mkTipCard(name,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
     +`<div class="tcard__foot">`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Turnover</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${stakeInt}</div></div>`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Stake Média</div><div class="tcard__stat-val"><span class="tcard__cur--sm">R$</span>${avgStakeStr}</div></div>`
-      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
+      +`<div class="tcard__stat"><div class="tcard__stat-lbl">Odd Média ${_mkOddTip()}</div><div class="tcard__stat-val">${avgOddStr}</div></div>`
       +`<div class="tcard__stat"><div class="tcard__stat-lbl">Win Rate</div><div class="tcard__stat-val">${wrStr}</div><div class="tcard__wrbar"><div class="tcard__wrfill" style="width:${wrPct}%"></div></div></div>`
     +`</div>`
     +`</div>`;
@@ -626,7 +630,7 @@ function _renderTipCards(){
     const avgStake=d.n>0?d.s/d.n:0,avgOdd=d.stk>0?d.wt/d.stk:0;
     return _mkTipCard(t,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_tipsterDays[t]||{},_tipsterAllDays),avgStake,avgOdd);
   }).join('');
-  el.onclick=function(e){const card=e.target.closest('.tcard');if(card&&card.dataset.name)openTipsterDrill(card.dataset.name);};
+  el.onclick=function(e){if(e.target.closest('.tip-anchor'))return;const card=e.target.closest('.tcard');if(card&&card.dataset.name)openTipsterDrill(card.dataset.name);};
   document.querySelectorAll('#tipsterSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
   const dirBtn=document.getElementById('tipsterDir');
   if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
@@ -1132,7 +1136,7 @@ function renderResultadosCasa(){
     {l:'P/L Total',v:fmtPL(totPL),c:totPL>=0?'pos':'neg',s:'Turnover: '+fmtR(totS)},
     {l:'ROI',v:fmtPct(totROI,2),c:totROI>=0?'pos':'neg',s:rows.length+' apostas'},
     {l:'Win Rate',v:fmtPct(totWR,1,false),c:'neu',s:`${ents.length} casas`,bar:totWR},
-    {l:'Odd Média Pond.',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
+    {l:'Odd Média',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'ponderada'},
   ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div>${k.bar!==undefined?`<div class="wrc"><div class="t"><div class="f" style="width:${Math.min(100,Math.max(0,k.bar)).toFixed(1)}%"></div></div></div>`:''}<div class="kpi-sub">${k.s}</div></div>`).join('');
   // Gráfico barras ROI por casa
   const vals=ents.map(([,d])=>d.s>0?parseFloat((d.l/d.s*100).toFixed(2)):0);

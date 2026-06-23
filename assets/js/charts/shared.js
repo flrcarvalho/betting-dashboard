@@ -149,7 +149,7 @@ function mkCalendarHeatmap(selMonth, allDados, opts){
       <div class="cal__sub">Σ(P/L)/Σ(turnover)</div>
     </div>
     <div class="cal__kpi">
-      <div class="k"><span class="kpi-pipe"></span> Odd Média Pond.</div>
+      <div class="k"><span class="kpi-pipe"></span> Odd Média</div>
       <div class="v">${mAvgOdd>0?fmtOdd(mAvgOdd):'—'}</div>
       <div class="cal__sub">ponderada</div>
     </div>
@@ -193,7 +193,7 @@ function mkKpiGrid(rows,{plLabel,contextLabel,contextVal,contextSub}){
   ].join('');
   const row2=[
     mkK('Win Rate',fmtPct(wr,1,false),'neu',settled+' encerradas',false,wr),
-    mkK('Odd Média Pond.',fmtOdd(avgOdd),'neu','Σ(odd×stake)/Σ(stake)'),
+    mkK('Odd Média',fmtOdd(avgOdd),'neu','ponderada'),
     mkK('Stake Média',fmtR(avgStake),'neu','por aposta'),
     mkK(contextLabel,contextVal,'neu',contextSub),
   ].join('');

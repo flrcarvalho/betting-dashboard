@@ -1241,6 +1241,9 @@
   letter-spacing: .13em;
   text-transform: uppercase;
   color: var(--ink-mute);
+  display: flex;
+  align-items: center;
+  min-height: 14px;
 }
 .tcard__stat-val {
   font-family: var(--font-mono);

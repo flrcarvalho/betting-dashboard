@@ -51,7 +51,7 @@ function renderApostas(){
     const row2=[
       mkKA('Apostas', apostasFiltered.length.toLocaleString('pt-BR'), 'neu', betsBreak),
       mkKA('Stake Média', fmtR(avgStakeAp), 'neu', 'por aposta'),
-      mkKA('Odd Média Pond.', fmtOdd(avgOddAp), 'neu', 'Σ(odd×stake)/Σ(stake)'),
+      mkKA('Odd Média', fmtOdd(avgOddAp), 'neu', 'ponderada'),
       mkKA('Win Rate', fmtPct(wr,1,false), 'neu', settled+' encerradas', wr),
     ];
     kpiEl.innerHTML=

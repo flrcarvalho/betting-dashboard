@@ -33,7 +33,7 @@ function renderKPI(rows){
   const row2=[
     {l:'Turnover',v:fmtR(stake),c:'neu',s:'volume apostado'},
     {l:'ROI',v:fmtPct(roi,2),c:roi>=0?'pos':'neg',s:n+' apostas'},
-    {l:'Odd Média Pond.',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'Σ(odd×stake)/Σ(stake)'},
+    {l:'Odd Média',v:fmtOdd(calcAvgOdd(rows)),c:'neu',s:'ponderada'},
     {l:'Win Rate',v:fmtPct(wr,1,false),c:'neu',s:settled+' encerradas',bar:wr},
   ];
   const divider=`<div style="grid-column:1/-1;height:1px;background:var(--line-2);margin:2px 0;opacity:.6"></div>`;
