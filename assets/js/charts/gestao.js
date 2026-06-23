@@ -46,17 +46,22 @@ function _buildFirstBetMap(){
   });
 }
 
-// Custo filtrado por data: só contas cuja primeira aposta esteja em [minDate, maxDate]
+// Custo filtrado por data E escopo: só contas cuja primeira aposta esteja em
+// [minDate, maxDate] (custo pertence ao período de aquisição) E que apareçam nos
+// rows filtrados (respeita filtros de casa/tipster/esporte — auditoria A3)
 function calcCostFiltered(rows){
   if(!rows||!rows.length)return{costConta:0};
   if(!_firstBetMap)_buildFirstBetMap();
   const minDate=rows.reduce((m,r)=>r.data<m?r.data:m,'9999-99-99');
   const maxDate=rows.reduce((m,r)=>r.data>m?r.data:m,'0000-00-00');
+  // Contas presentes no recorte filtrado (mesma chave de _firstBetMap)
+  const scope=new Set();
+  rows.forEach(r=>scope.add(normForn(r.fornecedor)+'||'+r.casa+'||'+(r.conta||'__default__')));
   let total=0;
   Object.entries(custoData).forEach(([k,custoPorConta])=>{
     const contaMap=_firstBetMap[k]||{};
-    Object.values(contaMap).forEach(firstDate=>{
-      if(firstDate>=minDate&&firstDate<=maxDate)total+=custoPorConta;
+    Object.entries(contaMap).forEach(([conta,firstDate])=>{
+      if(firstDate>=minDate&&firstDate<=maxDate&&scope.has(k+'||'+conta))total+=custoPorConta;
     });
   });
   return{costConta:total};
