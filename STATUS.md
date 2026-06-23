@@ -1,6 +1,48 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: auditoria matematica — heatmap ROI, p-value, drawdown esperado e determinismo corrigidos — COMPLETO (2026-06-22 sessao 37)
+## Estado atual: auditoria A3/M2/M3, remocao da calcXMDD orfa e rotulo Odd Media Ponderada padronizado — COMPLETO (2026-06-22 sessao 38)
+
+## Sessao 2026-06-22 (sessao 38) — Auditoria A3/M2/M3, limpeza e rotulos
+
+### O que foi feito
+
+Continuacao da auditoria matematica (sessao 37). Corrigidos os pendentes A3, M2 e M3, removida a funcao morta calcXMDD, e padronizado o rotulo "Odd Media Ponderada" em todo o app.
+
+**A3 — custo de contas ignorava filtros (gestao.js)**
+- Bug: calcCostFiltered usava os rows filtrados so para extrair a janela de datas; depois somava o custo de TODAS as contas globais cuja primeira aposta caia na janela. Filtrar uma casa subtraia o custo de todas as casas no P/L Liquido.
+- Fix: adicionada restricao de escopo. So entram contas presentes nos rows filtrados (respeita casa/tipster/esporte), alem da janela de datas. Filtro so-data permanece identico (zero regressao).
+
+**M2 — Win Rate pela fonte unica (shared.js, temporal.js)**
+- 7 sites baseados em rows passaram a usar o canonico calcWR (denominador !=='V'): calendario, mkKpiGrid, e os totais de Consolidado/Mensal/Diario/Semana + por-tipster do Consolidado.
+- Contadores W/HW/L/HL/V mantidos onde alimentam o detalhe. wr2 per-tipster (acumuladores) deixados (ja canonicos por construcao). Zero mudanca numerica hoje.
+
+**M3 — odd media do calendario (shared.js)**
+- Antes dividia Sigma(odd x stake) por mTurnover (todas as stakes, sem filtro).
+- Agora usa calcAvgOdd(mRows): ponderada com filtro odd>0 && stake>0. Voids com stake e odd=0 nao distorcem mais.
+
+**Limpeza — calcXMDD orfa (app.js)**
+- Removida de app.js. Era a unica media simples de odd do codigo ativo. mulberry32 (na mesma linha) preservada. So restava no dashboard.html legado.
+
+**Rotulos — Odd Media Ponderada padronizado**
+- Cards KPI (Overview, Apostas, Diario/Mensal/Semana, calendario, popups): "Odd Media" no topo + sub-texto "ponderada". Removido o "Pond." do rotulo.
+- Cards .tcard (Esportes/Bookies/Tipsters) e cabecalhos de tabela: "Odd Media" + botao (i) com tooltip via helper compartilhado _mkOddTip. Formula quebra apos o "=": linha 1 "Odd media ponderada =", linha 2 "Sigma(odd x stake) / Sigma(stake)".
+- Guard de clique: clicar no (i) nos cards de Bookie/Tipster nao abre o drill.
+- CSS: .tcard__stat-lbl com display:flex, align-items:center, min-height:14px para o (i) de 14px nao desalinhar os valores das 4 colunas.
+
+### Commits desta sessao
+- b51e003 fix(metrics): A3 -- custo de contas respeita filtros de casa/tipster/esporte
+- 28aa8dd fix(metrics): M2/M3 -- WR canonico, odd ponderada no calendario e remove calcXMDD orfa
+- 710f87f fix(ui): padroniza rotulo Odd Media Ponderada (sub-texto + tooltip)
+
+### Pendente
+- Pagina Metricas (card m_odd, app.js:546) sera reformulada inteira em breve. Nao fazer ajustes pontuais nela. Por isso ficou com o rotulo antigo "Odd Media Pond.".
+- Tooltip "Max Drawdown" nos popups Casa/Tipster diz "XMDD" mas mostra calcMDDreais -- corrigir label.
+- A auditoria deixou aberto: reexaminar os cortes 5/2 da escala de Solidez (calcSolidez).
+
+## Proximo passo
+- Decidir a reformulacao da pagina Metricas, ou corrigir o label do tooltip "Max Drawdown".
+
+## Estado anterior: auditoria matematica — heatmap ROI, p-value, drawdown esperado e determinismo corrigidos — COMPLETO (2026-06-22 sessao 37)
 
 ## Sessao 2026-06-22 (sessao 37) — Auditoria matematica completa (C1, C2, A1, A2, M1)
 
