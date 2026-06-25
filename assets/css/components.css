@@ -693,15 +693,17 @@
   padding: 0.75rem var(--sp-3);
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--accent-2);
+  line-height: 1.7;
+  color: var(--ink-soft);
   margin: 0.5rem 0;
 }
+.metric-formula .op { color: var(--accent-2); font-weight: var(--weight-semibold); }
 .metric-desc { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.7; margin: 0.5rem 0; }
 .metric-example {
   background: var(--green-dim);
   border-left: 3px solid var(--pos);
   padding: 0.5rem 0.75rem;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
   font-size: 12px;
   color: var(--ink-soft);
   margin: 0.5rem 0;
@@ -711,11 +713,45 @@
   background: var(--red-dim);
   border-left: 3px solid var(--neg);
   padding: 0.5rem 0.75rem;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
   font-size: 12px;
   color: var(--ink-soft);
   margin: 0.5rem 0;
 }
+/* Nota neutra (regra de cálculo / contexto) — azul informativo, sem conotação pos/neg */
+.metric-note {
+  background: var(--d-info-soft);
+  border-left: 3px solid var(--d-info);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: 0.5rem 0;
+}
+/* Badge de valor ao vivo no header do card de métrica (preenchido por renderMetrics) */
+.metric-live-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.metric-live {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  font-size: 14px;
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  color: var(--ink);
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  background: var(--field);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.metric-live.pos    { color: var(--pos); }
+.metric-live.neg    { color: var(--neg); }
+.metric-live.neu    { color: var(--ink-soft); }
+.metric-live.d-neg  { color: var(--d-neg);  background: var(--d-neg-soft);  border-color: transparent; }
+.metric-live.d-proj { color: var(--d-proj); background: var(--d-proj-soft); border-color: transparent; }
+.metric-live.d-pos  { color: var(--d-pos);  background: var(--d-pos-soft);  border-color: transparent; }
+.metric-live.d-info { color: var(--d-info); background: var(--d-info-soft); border-color: transparent; }
+.metric-live__lbl   { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-right: 4px; }
 .term-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem; }
 .term-card {
   background: var(--field);

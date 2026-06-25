@@ -345,24 +345,57 @@ function renderCustos(rows){
   _renderCustosKpi();
 }
 
-// Metrics knowledge base
+// Metrics knowledge base — preenche a faixa de KPIs de resumo e o badge de valor
+// ao vivo (#mv_*) de cada card. Todos os cálculos vêm das funções canônicas de app.js.
 function renderMetrics(rows){
-  const mddR=calcMDDreais(rows),mddPct=calcMDDpct(rows);
-  // Bootstrap dos P/L reais (mesmo motor dos drill-downs): média = drawdown típico, p95 = cauda de risco
-  const _mc=calcMCdrawdown(rows,10000),xmdd=_mc.xmdd,ddP95=_mc.p95;
-  const pval=calcPValueMC(rows,10000),pl=rows.reduce((a,r)=>a+r.lucro,0);
-  // Profit / Drawdown usa a MÉDIA (xmdd) — idêntico ao profitXmdd dos drill-downs (performance.js)
-  const profDdRaw=xmdd>0?pl/xmdd:null;
-  const profDd=profDdRaw!==null?fmt(profDdRaw,2):'—';
+  // Fundamentais
+  const pl=rows.reduce((a,r)=>a+(r.lucro||0),0);
   const roi=calcROI(rows),wr=calcWR(rows),avgOdd=calcAvgOdd(rows);
-  const stake=rows.reduce((a,r)=>a+r.stake,0);
+  const turn=calcTurnover(rows);
+  const settled=rows.filter(r=>r.resultado!=='V').length;
+  const avgStake=settled>0?turn/settled:0;
+  // Risco & Drawdown
+  const dr=calcDrawdownReal(rows),mddR=dr.mddReais,mddPct=dr.mddPct;
+  const rf=calcRecoveryFactor(rows);
+  // Bootstrap dos P/L reais (mesmo motor dos drill-downs): média = drawdown típico,
+  // p95 = cauda de risco, p99 = cauda extrema.
+  const _mc=calcMCdrawdown(rows,10000),xmdd=_mc.xmdd,ddP95=_mc.p95,ddP99=_mc.p99;
+  const profDdRaw=xmdd>0?pl/xmdd:null;
+  // Significância
+  const pval=calcPValueMC(rows,10000);
+  const sol=calcSolidez({pValue:pval,profitXmdd:profDdRaw!==null?profDdRaw:0,nApostas:rows.length,oddMedia:avgOdd});
+
+  // Preenche um badge: só o texto se cls===undefined (mantém a classe semântica do markup);
+  // troca a classe quando o sinal/limiar é dinâmico (ROI, P/L, RF, Profit/DD, P-Value, Solidez).
+  const setLive=(id,txt,cls)=>{const el=document.getElementById(id);if(!el)return;el.textContent=txt;if(cls!==undefined)el.className='metric-live'+(cls?' '+cls:'');};
+  const plTxt=(pl>=0?'+R$ ':'−R$ ')+fmt(pl,0);
+
+  setLive('mv_roi',fmtPct(roi,2,true),roi>=0?'pos':'neg');
+  setLive('mv_turnover','R$ '+fmt(turn,0));
+  setLive('mv_wr',fmtPct(wr,1,false));
+  setLive('mv_odd',fmtOdd(avgOdd));
+  setLive('mv_stake','R$ '+fmt(avgStake,0));
+  setLive('mv_pl',plTxt,pl>=0?'pos':'neg');
+
+  setLive('mv_mdd_r','R$ '+fmt(mddR,0));
+  setLive('mv_mdd_p',fmtPct(mddPct,2,false));
+  setLive('mv_rf',rf===null?'—':fmtOdd(rf)+'×',rf===null?'neu':rf>=2?'d-pos':rf>=1?'d-info':'d-neg');
+  setLive('mv_xmdd','R$ '+fmt(xmdd,0));
+  setLive('mv_p95','R$ '+fmt(ddP95,0));
+  setLive('mv_p99','R$ '+fmt(ddP99,0));
+  setLive('mv_pdd',profDdRaw===null?'—':fmtOdd(profDdRaw)+'×',profDdRaw===null?'neu':profDdRaw>=2?'d-pos':profDdRaw>=1?'d-info':'d-neg');
+
+  setLive('mv_pval',pval<0.001?'< 0,001':fmt(pval,3),pval<0.05?'d-pos':pval<0.15?'d-info':'neu');
+  setLive('mv_solidez',sol.faixa,sol.score>=0.65?'d-pos':sol.score>=0.45?'d-info':sol.score>=0.25?'d-proj':'d-neg');
+
+  // Faixa de KPIs no topo — resumo headline (não duplica os cards)
   document.getElementById('metricsKPI').innerHTML=[
-    {l:'MDD Real (R$)',v:'R$ '+fmt(mddR,0),c:mddR<5000?'pos':mddR<15000?'neu':'neg'},
-    {l:'MDD Real (%)',v:fmtPct(mddPct,2,false),c:mddPct<15?'pos':mddPct<30?'neu':'neg'},
-    {l:'Drawdown Médio Esperado',v:'R$ '+fmt(xmdd,0),c:xmdd<5000?'pos':xmdd<15000?'neu':'neg'},
-    {l:'Drawdown p95 (risco)',v:'R$ '+fmt(ddP95,0),c:ddP95<5000?'pos':ddP95<15000?'neu':'neg'},
-    {l:'P-Value',v:pval<0.001?'<0,001':fmt(pval,3),c:pval<0.05?'pos':pval<0.15?'neu':'neg'},
-    {l:'Profit / Drawdown',v:profDd,c:profDdRaw!==null&&profDdRaw>=5?'pos':profDdRaw!==null&&profDdRaw>=2?'neu':'neg'},
+    {l:'P/L Líquido',v:plTxt,c:pl>=0?'pos':'neg'},
+    {l:'ROI',v:fmtPct(roi,2,true),c:roi>=0?'pos':'neg'},
+    {l:'Win Rate',v:fmtPct(wr,1,false),c:'neu'},
+    {l:'MDD Real',v:'R$ '+fmt(mddR,0),c:mddPct<15?'pos':mddPct<30?'neu':'neg'},
+    {l:'Drawdown Médio',v:'R$ '+fmt(xmdd,0),c:'neu'},
+    {l:'Nível de Solidez',v:sol.faixa,c:sol.score>=0.65?'pos':sol.score>=0.45?'neu':'neg'},
   ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val ${k.c}">${k.v}</div></div>`).join('');
 }
 

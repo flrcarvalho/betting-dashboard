@@ -554,69 +554,135 @@ function buildHTML(){
         ${buildFilters('metrics',sports,casas)}
         <div class="kpi-grid" id="metricsKPI"></div>
 
-        ${mkCard('m_roi','ROI — Return on Investment',`
-          <div class="metric-desc">Mede o retorno percentual sobre o total apostado. É a métrica mais importante para avaliar a rentabilidade de uma estratégia de longo prazo.</div>
-          <div class="metric-formula">ROI (%) = (Lucro Total / Turnover) × 100</div>
-          <div class="metric-example">Exemplo: Se você apostou R$ 10.000 e teve lucro de R$ 500, seu ROI é +5,00%</div>
-          <div class="metric-warn">Atenção: Um ROI positivo no curto prazo pode ser sorte. Use o P-Value para validar a significância estatística.</div>`)}
+        <div class="metric-section">
+          <div class="metric-title">Fundamentais</div>
 
-        ${mkCard('m_wr','Win Rate',`
-          <div class="metric-desc">Percentual de apostas ganhas sobre o total de apostas encerradas (exclui Void). Um Win Rate alto não garante lucro — depende da odd média.</div>
-          <div class="metric-formula">Win Rate (%) = (W + HW) / (Total − V) × 100</div>
-          <div class="metric-example">Apostas contabilizadas: W (Win), L (Loss), HW (Half Win), HL (Half Loss). Void (V) é excluído pois a stake é devolvida.</div>`)}
+          ${mkCard('m_roi','ROI — Return on Investment',`
+            <div class="metric-desc">Mede o retorno percentual sobre tudo o que foi apostado. É a métrica central de rentabilidade no longo prazo: enquanto o P/L diz <i>quanto</i> você ganhou, o ROI diz <i>com que eficiência</i>.</div>
+            <div class="metric-formula">ROI (%) = (Lucro Líquido <span class="op">÷</span> Turnover) <span class="op">×</span> 100</div>
+            <div class="metric-example">Exemplo: apostou R$ 10.000 (turnover) e lucrou R$ 500 → ROI = +5,00%. A cada R$ 100 apostados, R$ 5 de lucro.</div>
+            <div class="metric-note">O Turnover (denominador) exclui apostas Void — a stake anulada é devolvida e não conta como volume.</div>
+            <div class="metric-warn">ROI positivo no curto prazo pode ser sorte. Confirme a significância com o P-Value.</div>`,`<span class="metric-live" id="mv_roi">—</span>`)}
 
-        ${mkCard('m_odd','Odd Média Pond.',`
-          <div class="metric-desc">Odd média ponderada pela stake apostada em cada evento. É mais precisa que a média simples porque dá mais peso às apostas com maior valor.</div>
-          <div class="metric-formula">Odd Média Pond. = Σ(odd × stake) / Σ(stake)</div>
-          <div class="metric-example">Exemplo: R$ 1.000 em odd 2.0 e R$ 100 em odd 50.0 → Odd Média Pond. = (2.000 + 5.000) / 1.100 = 6,36 (não 26,0)</div>`)}
+          ${mkCard('m_turnover','Turnover — Volume Apostado',`
+            <div class="metric-desc">Volume total efetivamente apostado. É o denominador do ROI e da Stake Média — a base sobre a qual toda a rentabilidade é medida.</div>
+            <div class="metric-formula">Turnover = Σ stake &nbsp;(apenas apostas encerradas)</div>
+            <div class="metric-note">Apostas Void (anuladas) NÃO entram: a stake é devolvida, então não é volume nem afeta ROI/Stake Média.</div>
+            <div class="metric-example">Exemplo: 10 apostas de R$ 100, 1 anulada → Turnover = R$ 900 (não R$ 1.000).</div>`,`<span class="metric-live neu" id="mv_turnover">—</span>`)}
 
-        ${mkCard('m_mdd','MDD — Maximum Drawdown',`
-          <div class="metric-desc">Maior queda acumulada do seu P/L a partir de um pico. Mede o pior momento vivido até determinado ponto da operação.</div>
-          <div class="metric-formula">MDD (R$) = max(pico_acumulado − valor_atual) em todo o histórico</div>
-          <div class="metric-example">Exemplo: Se seu P/L chegou a +R$ 50.000 e depois caiu para +R$ 30.000, seu MDD é R$ 20.000 (40% do pico)</div>
-          <div class="metric-warn">Um MDD elevado indica volatilidade alta. Mesmo com ROI positivo, um MDD grande pode levar ao abandono psicológico da estratégia.</div>`)}
+          ${mkCard('m_wr','Win Rate',`
+            <div class="metric-desc">Percentual de apostas ganhas entre as encerradas. Indicador de consistência — mas sozinho não diz se há lucro.</div>
+            <div class="metric-formula">Win Rate (%) = (W + HW) <span class="op">÷</span> (Total <span class="op">−</span> V) <span class="op">×</span> 100</div>
+            <div class="metric-note">W e HW contam como ganho; L e HL como perda; V (Void) fica de fora do cálculo.</div>
+            <div class="metric-warn">Win Rate alto não garante lucro: ganhar 70% em odd 1,20 ainda pode dar ROI negativo. Leia sempre junto com a Odd Média.</div>`,`<span class="metric-live neu" id="mv_wr">—</span>`)}
 
-        ${mkCard('m_emdd','Drawdown Médio Esperado',`
-          <div class="metric-desc">Drawdown típico que você deve esperar ao longo da operação. Calculado por <b>bootstrap</b>: reamostra os P/L reais das suas apostas (com reposição) milhares de vezes e tira a média dos MDD simulados. Não assume distribuição nem odd/stake uniformes — herda a dispersão real da carteira.</div>
-          <div class="metric-formula">Drawdown Médio = média dos MDD de 10.000 reamostragens dos P/L reais</div>
-          <div class="metric-desc" style="margin-top:.5rem">É o mesmo cálculo usado no Nível de Solidez dos drill-downs — a página Métricas e os popups mostram o mesmo número.</div>`)}
+          ${mkCard('m_odd','Odd Média Ponderada',`
+            <div class="metric-desc">Odd média ponderada pelo tamanho de cada aposta — apostas maiores pesam mais. Mais fiel que a média simples e usada como medida de variância da operação.</div>
+            <div class="metric-formula">Odd Média = Σ(odd <span class="op">×</span> stake) <span class="op">÷</span> Σ(stake)</div>
+            <div class="metric-example">R$ 1.000 em odd 2,00 e R$ 100 em odd 50,00 → (2.000 + 5.000) ÷ 1.100 = 6,36 (não 26,0).</div>`,`<span class="metric-live neu" id="mv_odd">—</span>`)}
 
-        ${mkCard('m_xmdd','Drawdown p95 (risco)',`
-          <div class="metric-desc">O cenário <b>ruim-mas-plausível</b> contra o qual você dimensiona a banca: em 95% das reamostragens o drawdown ficou abaixo deste valor; só 5% foram piores. Risco mora na cauda, não na média — por isso o p95 costuma ser ~2× o Drawdown Médio.</div>
-          <div class="metric-formula">Drawdown p95 = percentil 95 dos MDD de 10.000 reamostragens dos P/L reais</div>
-          <div class="metric-warn">Use o p95 para definir quanta banca segurar; use o Drawdown Médio para a métrica de eficiência (Profit / Drawdown).</div>`)}
+          ${mkCard('m_stake','Stake Média',`
+            <div class="metric-desc">Valor médio apostado por aposta encerrada. Ajuda a entender o tamanho típico de exposição em cada evento.</div>
+            <div class="metric-formula">Stake Média = Turnover <span class="op">÷</span> nº de apostas encerradas</div>
+            <div class="metric-note">Mesmo critério do Turnover: Void fica fora do numerador e do denominador.</div>`,`<span class="metric-live neu" id="mv_stake">—</span>`)}
 
-        ${mkCard('m_pval','P-Value',`
-          <div class="metric-desc">Probabilidade de que seus resultados sejam fruto do acaso (sorte), assumindo que você não tem vantagem real. Quanto menor o P-Value, mais improvável é que seus resultados sejam aleatórios.</div>
-          <div class="metric-formula">P-Value = P(WR ≥ WR_observado | sem habilidade)</div>
-          <div class="term-grid">
-            <div class="term-card"><div class="term-name">&lt; 5% (0.05)</div><div class="term-def">Estatisticamente significativo. Seus resultados provavelmente não são acaso.</div></div>
-            <div class="term-card"><div class="term-name">&lt; 1% (0.01)</div><div class="term-def">Altamente significativo. Evidência forte de edge real.</div></div>
-            <div class="term-card"><div class="term-name">&lt; 0.1% (0.001)</div><div class="term-def">Nível exigido por pesquisadores rigorosos para confirmar edge.</div></div>
-            <div class="term-card"><div class="term-name">&gt; 5%</div><div class="term-def">Não significativo. Mais apostas necessárias para confirmar o edge.</div></div>
-          </div>`)}
+          ${mkCard('m_pl','P/L Líquido',`
+            <div class="metric-desc">Resultado financeiro acumulado: a soma do lucro/prejuízo de cada aposta. É o número que mais importa no fim — entra em todas as métricas de risco abaixo.</div>
+            <div class="metric-formula">P/L = Σ lucro de cada aposta</div>
+            <div class="metric-note">Como cada resultado vira lucro — W: +stake×(odd−1) · L: −stake · HW: +½·stake×(odd−1) · HL: −½·stake · V: 0 (devolvida).</div>`,`<span class="metric-live" id="mv_pl">—</span>`)}
+        </div>
 
-        ${mkCard('m_pemdd','Profit / Drawdown',`
-          <div class="metric-desc">Ratio entre o lucro total e o <b>drawdown médio esperado</b>. Mede a eficiência da estratégia: quanto lucro você gera para cada unidade de risco típico (análogo ao Calmar). Usa a média — não o p95 — para casar com o Nível de Solidez dos drill-downs.</div>
-          <div class="metric-formula">Profit / Drawdown = Lucro Total / Drawdown Médio Esperado</div>
-          <div class="term-grid">
-            <div class="term-card"><div class="term-name">&gt; 5</div><div class="term-def">Método excelente. Alto retorno para o risco tomado.</div></div>
-            <div class="term-card"><div class="term-name">2 – 5</div><div class="term-def">Método bom. Adequado para operação profissional.</div></div>
-            <div class="term-card"><div class="term-name">&lt; 2</div><div class="term-def">Método marginal. Risco elevado em relação ao retorno.</div></div>
-            <div class="term-card"><div class="term-name">&lt; 1</div><div class="term-def">Risco maior que retorno. Revisar estratégia.</div></div>
-          </div>`)}
+        <div class="metric-section">
+          <div class="metric-title">Risco &amp; Drawdown</div>
 
-        ${mkCard('m_gloss','Glossário de Resultados',`
-          <div class="term-grid">
-            <div class="term-card"><div class="term-name">W — Win</div><div class="term-def">Aposta totalmente ganha. Retorno = stake × odd.</div></div>
-            <div class="term-card"><div class="term-name">L — Loss</div><div class="term-def">Aposta totalmente perdida. Retorno = 0. Lucro = −stake.</div></div>
-            <div class="term-card"><div class="term-name">HW — Half Win</div><div class="term-def">Metade da stake ganha, metade devolvida. Ocorre em handicap asiático. Retorno = (stake/2)×odd + stake/2.</div></div>
-            <div class="term-card"><div class="term-name">HL — Half Loss</div><div class="term-def">Metade da stake perdida, metade devolvida. Retorno = stake/2. Lucro = −stake/2.</div></div>
-            <div class="term-card"><div class="term-name">V — Void</div><div class="term-def">Aposta anulada. Stake devolvida integralmente. Não conta no Win Rate.</div></div>
-            <div class="term-card"><div class="term-name">Turnover</div><div class="term-def">Soma total de todas as stakes apostadas. Também chamado de Volume apostado.</div></div>
-            <div class="term-card"><div class="term-name">Edge / Value</div><div class="term-def">Vantagem real sobre a casa. Existe quando a odd oferecida é maior que a probabilidade real do evento.</div></div>
-            <div class="term-card"><div class="term-name">Bankroll</div><div class="term-def">Capital total disponível para apostas. O gerenciamento do bankroll define o tamanho das stakes e controla o risco de ruína.</div></div>
-          </div>`)}
+          ${mkCard('m_mdd','Max Drawdown Real',`
+            <div class="metric-desc">A maior queda <b>real</b> que a banca já sofreu, medida do pico ao vale seguinte. Mede o pior momento já vivido — em reais e em percentual da banca.</div>
+            <div class="metric-formula">MDD (R$) = máx(pico_acumulado <span class="op">−</span> saldo_atual)<br>MDD (%) = MDD <span class="op">÷</span> (Banca base + pico) <span class="op">×</span> 100</div>
+            <div class="metric-note">Calculado sobre o P/L agregado por dia e percorrido em ordem cronológica. A planilha não vem ordenada por data, então a ordenação é obrigatória — R$ e % saem do mesmo episódio pico→vale.</div>
+            <div class="metric-example">Saldo +R$ 50.000 (pico) → +R$ 30.000 (vale) → MDD = R$ 20.000.</div>
+            <div class="metric-warn">MDD alto = volatilidade alta. Mesmo com ROI positivo, um drawdown grande pode levar ao abandono psicológico da estratégia.</div>`,`<span class="metric-live-wrap"><span class="metric-live d-neg" id="mv_mdd_r">—</span><span class="metric-live d-neg" id="mv_mdd_p">—</span></span>`)}
+
+          ${mkCard('m_rf','Recovery Factor',`
+            <div class="metric-desc">Quantas vezes o lucro total cobre a maior queda já vivida (o Max Drawdown real). Quanto maior, mais eficiente a operação em transformar risco realizado em resultado.</div>
+            <div class="metric-formula">Recovery Factor = Lucro Total <span class="op">÷</span> MDD Real (R$)</div>
+            <div class="term-grid">
+              <div class="term-card"><div class="term-name">&gt; 5×</div><div class="term-def">Excelente — o lucro domina largamente a maior queda.</div></div>
+              <div class="term-card"><div class="term-name">2× – 5×</div><div class="term-def">Bom — lucro consistente acima do risco vivido.</div></div>
+              <div class="term-card"><div class="term-name">1× – 2×</div><div class="term-def">Marginal — risco e retorno próximos.</div></div>
+              <div class="term-card"><div class="term-name">&lt; 1×</div><div class="term-def">Ruim — a maior queda superou o lucro acumulado.</div></div>
+            </div>`,`<span class="metric-live" id="mv_rf">—</span>`)}
+
+          ${mkCard('m_emdd','Drawdown Médio Esperado',`
+            <div class="metric-desc">A queda <b>típica</b> que você deve esperar ao longo da operação. Não é o que aconteceu — é o que tende a acontecer, dada a dispersão dos seus resultados.</div>
+            <div class="metric-formula">Drawdown Médio = média dos MDD de 10.000 reamostragens (bootstrap) dos P/L reais</div>
+            <div class="metric-note">O bootstrap reamostra seus próprios resultados milhares de vezes — herda a dispersão real da carteira, sem supor distribuição teórica. É o mesmo número exibido no Nível de Solidez dos drill-downs.</div>`,`<span class="metric-live d-proj" id="mv_xmdd">—</span>`)}
+
+          ${mkCard('m_p95','Drawdown p95 (risco)',`
+            <div class="metric-desc">O cenário <b>ruim-mas-plausível</b> para dimensionar a banca: em 95% das reamostragens a queda ficou abaixo deste valor; só 5% foram piores.</div>
+            <div class="metric-formula">Drawdown p95 = percentil 95 dos MDD de 10.000 reamostragens</div>
+            <div class="metric-warn">Risco mora na cauda, não na média — o p95 costuma ser ~2× o Drawdown Médio. Use-o para decidir quanta banca segurar.</div>`,`<span class="metric-live d-proj" id="mv_p95">—</span>`)}
+
+          ${mkCard('m_p99','DD Extremo (p99)',`
+            <div class="metric-desc">O pior caso plausível: pior que 99% das reamostragens (1 em 100). Serve de margem de segurança extra para a gestão de banca.</div>
+            <div class="metric-formula">DD Extremo = percentil 99 dos MDD de 10.000 reamostragens</div>
+            <div class="metric-note">Não é "o máximo possível" — é a cauda extrema simulada. Chamado de DD Extremo para não confundir com o Max Drawdown real (fato histórico).</div>`,`<span class="metric-live d-proj" id="mv_p99">—</span>`)}
+
+          ${mkCard('m_pemdd','Profit / Drawdown',`
+            <div class="metric-desc">Eficiência da estratégia: quanto lucro para cada unidade de risco típico (análogo ao Calmar). Usa o Drawdown Médio — não o p95 — para casar com o Nível de Solidez.</div>
+            <div class="metric-formula">Profit / Drawdown = Lucro Total <span class="op">÷</span> Drawdown Médio Esperado</div>
+            <div class="term-grid">
+              <div class="term-card"><div class="term-name">&gt; 5</div><div class="term-def">Método excelente. Alto retorno para o risco tomado.</div></div>
+              <div class="term-card"><div class="term-name">2 – 5</div><div class="term-def">Método bom. Adequado para operação profissional.</div></div>
+              <div class="term-card"><div class="term-name">&lt; 2</div><div class="term-def">Método marginal. Risco elevado em relação ao retorno.</div></div>
+              <div class="term-card"><div class="term-name">&lt; 1</div><div class="term-def">Risco maior que retorno. Revisar estratégia.</div></div>
+            </div>`,`<span class="metric-live" id="mv_pdd">—</span>`)}
+        </div>
+
+        <div class="metric-section">
+          <div class="metric-title">Significância Estatística</div>
+
+          ${mkCard('m_pval','P-Value',`
+            <div class="metric-desc">A probabilidade de que seu resultado seja <b>só sorte</b>, supondo que você não tenha vantagem real (edge). Quanto menor, mais improvável que seja acaso.</div>
+            <div class="metric-formula">P-Value = bootstrap t-test sobre os resíduos de (lucro ~ yₒ <span class="op">·</span> stake), 10.000 reamostragens · H₀ = sem edge</div>
+            <div class="metric-note">Testa se o seu lucro por unidade apostada resiste ao acaso — NÃO é um teste sobre o Win Rate. Precisa de ≥ 30 apostas; abaixo disso o resultado fica inconclusivo.</div>
+            <div class="term-grid">
+              <div class="term-card"><div class="term-name">&lt; 5% (0,05)</div><div class="term-def">Significativo. Seus resultados provavelmente não são acaso.</div></div>
+              <div class="term-card"><div class="term-name">&lt; 1% (0,01)</div><div class="term-def">Altamente significativo. Evidência forte de edge real.</div></div>
+              <div class="term-card"><div class="term-name">&lt; 0,1% (0,001)</div><div class="term-def">Nível exigido por pesquisadores rigorosos para confirmar edge.</div></div>
+              <div class="term-card"><div class="term-name">&gt; 5%</div><div class="term-def">Inconclusivo. Mais apostas necessárias para confirmar o edge.</div></div>
+            </div>`,`<span class="metric-live" id="mv_pval">—</span>`)}
+
+          ${mkCard('m_solidez','Nível de Solidez',`
+            <div class="metric-desc">Selo de qualidade composto que resume <b>4 pilares</b> numa nota (0 a 1) e numa faixa. Responde de uma vez: "dá para confiar nesta operação?".</div>
+            <div class="metric-formula">Score = (Edge<span class="op">×</span>3 + Folga<span class="op">×</span>3 + Amostra<span class="op">×</span>2 + Variância<span class="op">×</span>2) <span class="op">÷</span> 10</div>
+            <div class="term-grid">
+              <div class="term-card"><div class="term-name">Edge · peso 3</div><div class="term-def">P-Value — o resultado é estatisticamente significativo?</div></div>
+              <div class="term-card"><div class="term-name">Folga · peso 3</div><div class="term-def">Profit / Drawdown — o lucro folga bem sobre o risco típico?</div></div>
+              <div class="term-card"><div class="term-name">Amostra · peso 2</div><div class="term-def">Nº de apostas — há histórico suficiente para confiar?</div></div>
+              <div class="term-card"><div class="term-name">Variância · peso 2</div><div class="term-def">Odd Média — odds moderadas pesam menos no risco.</div></div>
+            </div>
+            <div class="metric-note">Faixas: ≥ 0,85 Muito Alta · ≥ 0,65 Alta · ≥ 0,45 Média · ≥ 0,25 Baixa · &lt; 0,25 Muito Baixa.</div>`,`<span class="metric-live" id="mv_solidez">—</span>`)}
+        </div>
+
+        <div class="metric-section">
+          <div class="metric-title">Glossário</div>
+
+          ${mkCard('m_gloss','Resultados &amp; Termos',`
+            <div class="term-grid">
+              <div class="term-card"><div class="term-name">W — Win</div><div class="term-def">Aposta totalmente ganha. Retorno = stake × odd.</div></div>
+              <div class="term-card"><div class="term-name">L — Loss</div><div class="term-def">Aposta totalmente perdida. Retorno = 0. Lucro = −stake.</div></div>
+              <div class="term-card"><div class="term-name">HW — Half Win</div><div class="term-def">Metade da stake ganha, metade devolvida (handicap asiático). Retorno = (stake/2)×odd + stake/2.</div></div>
+              <div class="term-card"><div class="term-name">HL — Half Loss</div><div class="term-def">Metade da stake perdida, metade devolvida. Retorno = stake/2. Lucro = −stake/2.</div></div>
+              <div class="term-card"><div class="term-name">V — Void</div><div class="term-def">Aposta anulada. Stake devolvida integralmente. Fica fora de Turnover, ROI, Stake Média e Win Rate.</div></div>
+              <div class="term-card"><div class="term-name">Turnover</div><div class="term-def">Volume apostado: soma das stakes das apostas <b>encerradas</b> (exclui Void).</div></div>
+              <div class="term-card"><div class="term-name">Edge / Value</div><div class="term-def">Vantagem real sobre a casa. Existe quando a odd oferecida é maior que a probabilidade real do evento.</div></div>
+              <div class="term-card"><div class="term-name">Bankroll</div><div class="term-def">Capital total disponível. O gerenciamento do bankroll define o tamanho das stakes e controla o risco de ruína.</div></div>
+              <div class="term-card"><div class="term-name">Banca base</div><div class="term-def">Referência fixa (R$ 100.000) usada como denominador do MDD em % e das simulações.</div></div>
+              <div class="term-card"><div class="term-name">Bootstrap</div><div class="term-def">Reamostragem dos próprios resultados, com reposição, milhares de vezes — gera a distribuição de cenários de drawdown.</div></div>
+              <div class="term-card"><div class="term-name">Percentil (p95 / p99)</div><div class="term-def">Valor abaixo do qual ficam 95% (ou 99%) dos cenários simulados. Quanto maior o percentil, mais para a cauda do risco.</div></div>
+              <div class="term-card"><div class="term-name">Drawdown</div><div class="term-def">Distância entre o pico acumulado e um vale posterior. Mede o tamanho de uma queda.</div></div>
+            </div>`)}
+        </div>
       </div>
 
     </div></main>
