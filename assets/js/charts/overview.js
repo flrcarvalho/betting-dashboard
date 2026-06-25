@@ -196,12 +196,14 @@ function renderOvStreaks(rows){
   if(!el||!rows.length)return;
   const _td=calcTopoDrawdown(rows);
   const _rf=calcRecoveryFactor(rows);
-  const _mddR=calcMDDreais(rows);
-  const _mddP=calcMDDpct(rows);
+  const _dd=calcDrawdownReal(rows);
+  const _mddR=_dd.mddReais;
+  const _mddP=_dd.mddPct;
   const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
   const vS='font-size:16px';
   const sbS='margin-top:auto;padding-top:6px';
   const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+  const _mddBench=_dd.troughDate?`<span class="lbl">vale em ${_fmtD(_dd.troughDate)}</span> · <span class="thr">quanto menor, melhor</span>`:'<span class="thr">quanto menor, melhor</span>';
   el.innerHTML=
     `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
       `<div class="kpi" style="${kS}">`+
@@ -215,7 +217,7 @@ function renderOvStreaks(rows){
         `<div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div>`+
       `</div>`+
       `<div class="kpi" style="${kS}">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">MDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior perda</b> do topo ao fundo, em R$, no período.','<span class="thr">quanto menor, melhor</span>')}</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">MDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior queda real</b> do pico ao vale da banca, medida <b>dia a dia</b> em ordem cronológica — a mesma curva do gráfico.',_mddBench)}</div>`+
         `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div>`+
         `<div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div>`+
       `</div>`+
@@ -248,12 +250,12 @@ function renderOvRisco(rows){
         `<div class="kpi-sub" style="${sbS}">${_pv<0.001?'resultado robusto':_pv<0.05?'rejeita o acaso':'inconclusivo'}</div>`+
       `</div>`+
       `<div class="kpi" style="${kS}">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica esperada</b> nas 10.000 simulações de Monte Carlo.','<span class="lbl">projetado · média</span>')}</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica projetada</b> (média das 10.000 simulações de Monte Carlo). <b>Não aconteceu</b> — é estimativa.','<span class="lbl">projetado · média</span>')}</div>`+
         `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.xmdd)}</div>`+
         `<div class="kpi-sub" style="${sbS}">projetado · média</div>`+
       `</div>`+
       `<div class="kpi" style="${kS}">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Máximo ${_mkTipAnchor('DD Máximo','<span class="lbl">pior</span> DD simulado','Pior queda plausível (<b>1 em 100</b> cenários). Dimensiona a banca.','<span class="lbl">projetado · cauda</span>')}</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Extremo ${_mkTipAnchor('DD Extremo','<span class="lbl">pior</span> DD simulado (p99)','Pior queda plausível (<b>1 em 100</b> cenários) — <b>não aconteceu</b>, é projeção de 10.000 reamostragens. Dimensiona a banca.','<span class="lbl">projetado · cauda · p99</span>')}</div>`+
         `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.p99)}</div>`+
         `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
       `</div>`+

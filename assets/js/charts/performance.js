@@ -380,8 +380,9 @@ function renderCasaDrill(rows){
   const plLiq=pl-custoTotal;
   const roiLiq=s>0?plLiq/s*100:0;
 
-  const _td=calcTopoDrawdown(rows),_rf=calcRecoveryFactor(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows);
+  const _td=calcTopoDrawdown(rows),_rf=calcRecoveryFactor(rows),_dd=calcDrawdownReal(rows),_mddR=_dd.mddReais,_mddP=_dd.mddPct;
   const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+  const _mddBench=_dd.troughDate?`<span class="lbl">vale em ${_fmtD(_dd.troughDate)}</span> · <span class="thr">quanto menor, melhor</span>`:'<span class="thr">quanto menor, melhor</span>';
 
   const body=document.getElementById('casaDrillBody');
   if(!body)return;
@@ -424,11 +425,11 @@ function renderCasaDrill(rows){
       `<div class="chart-wrap" style="height:220px"><canvas id="casaDrillLine"></canvas></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Cenário Atual</div>`+
+      `<div class="analise-popup-section-title">Cenário Atual <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(dados reais · histórico)</span></div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico ${_mkTipAnchor('Topo Histórico','','Maior saldo que esta casa <b>já atingiu</b> no período.','<span class="lbl">marco</span>')}</div><div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(_td.topo)}</div><div class="kpi-sub" style="${sbS}">atingido em ${_fmtD(_td.topoData)}</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual ${_mkTipAnchor('Drawdown Atual','<span class="lbl">DD</span> <span class="op">=</span> Topo <span class="op">→</span> Saldo atual','Quanto o saldo nesta casa está <b>abaixo do último pico</b>, agora.','<span class="thr">perto de 0</span> <span class="good">é o ideal</span>')}</div><div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_td.ddAtual)}</div><div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div></div>`+
-        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">XMDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior perda</b> do topo ao fundo nesta casa.','<span class="thr">quanto menor, melhor</span>')}</div><div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div><div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">MDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior queda real</b> do pico ao vale nesta casa, medida <b>dia a dia</b> em ordem cronológica.',_mddBench)}</div><div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div><div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div></div>`+
         `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor ${_mkTipAnchor('Recovery Factor','<span class="lbl">RF</span> <span class="op">=</span> Lucro <span class="op">÷</span> Máx. Drawdown','Quantas vezes o lucro total <b>cobre a maior queda</b>.','<span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="thr">&gt; 5</span> <span class="good">muito bom</span>')}</div><div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div><div class="kpi-sub" style="${sbS}">qualidade</div></div>`+
       `</div>`+
     `</div>`+
@@ -687,10 +688,11 @@ function renderTipsterDrill(rows){
   const roiCls=roi>=0?'pos':'neg';
 
   // Diagnóstico de risco
-  const _td=calcTopoDrawdown(rows),_mc=calcMCdrawdown(rows,10000),_rf=calcRecoveryFactor(rows),_pv=calcPValueMC(rows),_mddR=calcMDDreais(rows),_mddP=calcMDDpct(rows),_profit=_td.atual;
+  const _td=calcTopoDrawdown(rows),_mc=calcMCdrawdown(rows,10000),_rf=calcRecoveryFactor(rows),_pv=calcPValueMC(rows),_dd=calcDrawdownReal(rows),_mddR=_dd.mddReais,_mddP=_dd.mddPct,_profit=_td.atual;
   const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});
   const _solCor=_sol.score>=0.65?'var(--d-pos)':_sol.score>=0.45?'var(--d-proj)':'var(--d-neg)';
   const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+  const _mddBench=_dd.troughDate?`<span class="lbl">vale em ${_fmtD(_dd.troughDate)}</span> · <span class="thr">quanto menor, melhor</span>`:'<span class="thr">quanto menor, melhor</span>';
 
   const body=document.getElementById('tipsterDrillBody');
   if(!body)return;
@@ -721,7 +723,7 @@ function renderTipsterDrill(rows){
       `<div class="chart-wrap" style="height:220px"><canvas id="tipsterDrillLine"></canvas></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Cenário Atual</div>`+
+      `<div class="analise-popup-section-title">Cenário Atual <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(dados reais · histórico)</span></div>`+
       `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
         `<div class="kpi" style="${kS}">`+
           `<div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico ${_mkTipAnchor('Topo Histórico','','Maior saldo que a banca <b>já atingiu</b> no período.','<span class="lbl">marco</span>')}</div>`+
@@ -734,7 +736,7 @@ function renderTipsterDrill(rows){
           `<div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">XMDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior perda</b> do topo ao fundo, em R$, no período.','<span class="thr">quanto menor, melhor</span>')}</div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">MDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior queda real</b> do pico ao vale da banca, medida <b>dia a dia</b> em ordem cronológica — a mesma curva do gráfico.',_mddBench)}</div>`+
           `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div>`+
           `<div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div>`+
         `</div>`+
@@ -754,12 +756,12 @@ function renderTipsterDrill(rows){
           `<div class="kpi-sub" style="${sbS}">${_pv<0.001?'resultado robusto':_pv<0.05?'rejeita o acaso':'inconclusivo'}</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica esperada</b> nas 10.000 simulações de Monte Carlo.','<span class="lbl">projetado · média</span>')}</div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica projetada</b> (média das 10.000 simulações de Monte Carlo). <b>Não aconteceu</b> — é estimativa.','<span class="lbl">projetado · média</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.xmdd)}</div>`+
           `<div class="kpi-sub" style="${sbS}">projetado · média</div>`+
         `</div>`+
         `<div class="kpi" style="${kS}">`+
-          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Máximo ${_mkTipAnchor('DD Máximo','<span class="lbl">pior</span> DD simulado','Pior queda plausível (<b>1 em 100</b> cenários). Dimensiona a banca.','<span class="lbl">projetado · cauda</span>')}</div>`+
+          `<div class="kpi-label"><span class="kpi-pipe"></span>DD Extremo ${_mkTipAnchor('DD Extremo','<span class="lbl">pior</span> DD simulado (p99)','Pior queda plausível (<b>1 em 100</b> cenários) — <b>não aconteceu</b>, é projeção de 10.000 reamostragens. Dimensiona a banca.','<span class="lbl">projetado · cauda · p99</span>')}</div>`+
           `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.p99)}</div>`+
           `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
         `</div>`+
