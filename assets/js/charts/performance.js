@@ -42,7 +42,7 @@ function _mkSportCard(sport,pl,roi,stake,wr,bets,sparkSVG,avgStake,avgOdd){
   const wrStr=fmtPct(wr,1,false);
   const wrPct=Math.min(wr,100).toFixed(1);
   const esc=sport.replace(/"/g,'&quot;');
-  return`<div class="tcard">`
+  return`<div class="tcard" data-sport="${esc}">`
     +`<div class="tcard__top"><span class="tcard__casa-hdr">${mkSpChip(sport)}<span class="nametag__nm" title="${esc}">${sport}</span></span><span class="tcard__vol"><b>${betsStr}</b>apostas</span></div>`
     +`<div class="tcard__hero"><span class="tcard__pl ${plCls}"><span class="tcard__cur">${plSign} R$</span>${plAmt}</span><div class="tcard__roi"><span class="tcard__roi-lbl">ROI</span><span class="tcard__roi-val ${roiCls}">${roiStr}</span></div></div>`
     +sparkSVG
@@ -68,6 +68,7 @@ function _renderSportCards(){
     const avgStake=d.t>0?d.s/d.t:0,avgOdd=d.stk>0?d.wt/d.stk:0;
     return _mkSportCard(sport,d.l,roi,d.s,wr,d.n,_tipSparkSVG(_sportDays[sport]||{},_sportAllDays),avgStake,avgOdd);
   }).join('');
+  el.onclick=function(e){if(e.target.closest('.tip-anchor'))return;const card=e.target.closest('.tcard');if(card&&card.dataset.sport)openSportDrill(card.dataset.sport);};
   document.querySelectorAll('#sportSeg button').forEach(btn=>btn.classList.toggle('active',btn.dataset.k===k));
   const dirBtn=document.getElementById('sportDir');
   if(dirBtn)dirBtn.textContent=dir<0?'↓':'↑';
@@ -355,7 +356,7 @@ function _casaBreakdownTbl(rows,dimKey,labelFn,maxVisible=10,tableId=''){
     rest.forEach(([,d])=>{agg.l+=d.l;agg.s+=d.s;agg.n+=d.n;agg.w+=d.w;agg.t+=d.t;agg.wt+=d.wt;agg.stk+=d.stk;});
     tRows+=mkRow([String(rest.length),agg],true,'Outros',rest.map(([k])=>k).join(' · '),false);
   }
-  const th=dimKey==='tipster'?'Tipster':'Esporte';
+  const th=dimKey==='tipster'?'Tipster':dimKey==='casa'?'Casa':'Esporte';
   const idAttr=tableId?` id="${tableId}"`:'';
   const oddTh=_mkOddMediaTh('r','88px');
   return`<table class="tbl"${idAttr}><thead><tr>${mkTh(th,'','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','','r')+mkTh('ROI','','r')+mkTh('Win Rate','','r')+mkTh('Stake média','','r')+oddTh}</tr></thead><tbody>${tRows}</tbody></table>`;
@@ -564,6 +565,240 @@ window.saveCasaDrill=async function(){
   canvas.toBlob(blob=>{
     const url=URL.createObjectURL(blob);
     const a=Object.assign(document.createElement('a'),{href:url,download:'bookie-'+((_casaDrillBaseName||'drill').replace(/\s+/g,'_'))+'.png'});
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
+  },'image/png');
+};
+
+// ── Sport drill-down ─────────────────────────────────────────────────────────
+let _sportDrillEscHandler=null;
+let _sportDrillBaseName=null,_sportDrillBaseRows=[],_sportDrillPeriodSt={qd:0,qt:''};
+
+function _sliceSportDrillRows(){
+  const st=_sportDrillPeriodSt;
+  if(!st.qd&&!st.qt)return _sportDrillBaseRows;
+  const today=new Date().toISOString().slice(0,10);
+  let df='',dt='';
+  if(st.qt==='hoje'){df=dt=today;}
+  else if(st.qt==='wtd'){df=_wtdStart();dt=today;}
+  else if(st.qt==='mtd'){df=_mtdStart();dt=today;}
+  else if(st.qt==='ytd'){df=new Date().getFullYear()+'-01-01';dt=today;}
+  else if(st.qd>0){df=new Date(Date.now()-st.qd*864e5).toISOString().slice(0,10);}
+  return _sportDrillBaseRows.filter(r=>{
+    if(df&&r.data<df)return false;
+    if(dt&&r.data>dt)return false;
+    return true;
+  });
+}
+
+function _updateSportDrillChips(){
+  const st=_sportDrillPeriodSt;
+  const bar=document.getElementById('sportDrillPeriodBar');
+  if(!bar)return;
+  bar.querySelectorAll('.qbtn').forEach(b=>{
+    let a=false;
+    if(b.dataset.all)a=(st.qd===0&&!st.qt);
+    else if(b.dataset.days)a=(st.qd===parseInt(b.dataset.days));
+    else if(b.dataset.qt)a=(st.qt===b.dataset.qt);
+    b.classList.toggle('active',a);
+  });
+}
+
+window.setDrillSportQuick=function(d){_sportDrillPeriodSt={qd:d,qt:''};_updateSportDrillChips();renderSportDrill(_sliceSportDrillRows());};
+window.setDrillSportType=function(qt){_sportDrillPeriodSt={qd:0,qt:qt};_updateSportDrillChips();renderSportDrill(_sliceSportDrillRows());};
+window.setDrillSportAll=function(){_sportDrillPeriodSt={qd:0,qt:''};_updateSportDrillChips();renderSportDrill(_sliceSportDrillRows());};
+
+function renderSportDrill(rows){
+  const pl=rows.reduce((a,r)=>a+r.lucro,0);
+  const s=calcTurnover(rows);   // turnover exclui Void
+  const roi=s>0?pl/s*100:0;
+  const settled=rows.filter(r=>r.resultado!=='V');
+  const wins=settled.filter(r=>['W','HW'].includes(r.resultado)).length;
+  const wr=settled.length>0?wins/settled.length*100:0;
+  const wt=rows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.odd*r.stake:a,0);
+  const stk=rows.reduce((a,r)=>r.odd>0&&r.stake>0?a+r.stake:a,0);
+  const avgOdd=stk>0?wt/stk:0;
+  const avgStake=settled.length?s/settled.length:0;   // turnover ÷ encerradas (exclui Void)
+  const plCls=pl>=0?'pos':'neg';
+  const roiCls=roi>=0?'pos':'neg';
+
+  const _td=calcTopoDrawdown(rows),_rf=calcRecoveryFactor(rows),_dd=calcDrawdownReal(rows),_mddR=_dd.mddReais,_mddP=_dd.mddPct;
+  const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+  const _mddBench=_dd.troughDate?`<span class="lbl">vale em ${_fmtD(_dd.troughDate)}</span> · <span class="thr">quanto menor, melhor</span>`:'<span class="thr">quanto menor, melhor</span>';
+
+  const body=document.getElementById('sportDrillBody');
+  if(!body)return;
+
+  const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
+  const sbS='margin-top:auto;padding-top:6px';
+  const vS='font-size:16px';
+
+  body.innerHTML=
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Resultado Geral</div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:stretch;width:100%;margin-bottom:8px">`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>P/L</div><div class="kpi-val ${plCls}" style="${vS}">${fmtPL(pl)}</div><div class="kpi-sub" style="${sbS}">resultado no período</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>ROI</div><div class="kpi-val ${roiCls}" style="${vS}">${fmtPct(roi,2)}</div><div class="kpi-sub" style="${sbS}">Σ(P/L)/Σ(turnover)</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Turnover</div><div class="kpi-val neu" style="${vS}">${fmtR(s)}</div><div class="kpi-sub" style="${sbS}">volume apostado</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Win Rate</div><div class="kpi-val neu" style="${vS}">${fmtPct(wr,1,false)}</div><div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px"><div style="height:100%;background:var(--accent-2);border-radius:3px;width:${Math.min(100,Math.max(0,wr)).toFixed(1)}%"></div></div><div class="kpi-sub" style="${sbS}">taxa de acerto</div></div>`+
+      `</div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:stretch;width:100%">`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Volume</div><div class="kpi-val neu" style="${vS}">${rows.length.toLocaleString('pt-BR')}</div><div class="kpi-sub" style="${sbS}">apostas no período</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Encerradas</div><div class="kpi-val neu" style="${vS}">${settled.length.toLocaleString('pt-BR')}</div><div class="kpi-sub" style="${sbS}">exclui Void</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Stake Média</div><div class="kpi-val neu" style="${vS}">${fmtR(avgStake)}</div><div class="kpi-sub" style="${sbS}">por aposta</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Odd Média</div><div class="kpi-val neu" style="${vS}">${fmtOdd(avgOdd)}</div><div class="kpi-sub" style="${sbS}">ponderada</div></div>`+
+      `</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Evolução</div>`+
+      `<div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:20px;height:2px;background:#2E8BFF;border-radius:1px;flex-shrink:0"></span>P/L acumulado</span>`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(43,192,126,.8);border-radius:2px;flex-shrink:0"></span>Dia positivo</span>`+
+        `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(229,82,75,.8);border-radius:2px;flex-shrink:0"></span>Dia negativo</span>`+
+      `</div>`+
+      `<div class="chart-wrap" style="height:220px"><canvas id="sportDrillLine"></canvas></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Cenário Atual <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(dados reais · histórico)</span></div>`+
+      `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Topo Histórico ${_mkTipAnchor('Topo Histórico','','Maior saldo que este esporte <b>já atingiu</b> no período.','<span class="lbl">marco</span>')}</div><div class="fdc-kpi__value" data-state="pos" style="${vS}">${fmtPL(_td.topo)}</div><div class="kpi-sub" style="${sbS}">atingido em ${_fmtD(_td.topoData)}</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Drawdown Atual ${_mkTipAnchor('Drawdown Atual','<span class="lbl">DD</span> <span class="op">=</span> Topo <span class="op">→</span> Saldo atual','Quanto o saldo neste esporte está <b>abaixo do último pico</b>, agora.','<span class="thr">perto de 0</span> <span class="good">é o ideal</span>')}</div><div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_td.ddAtual)}</div><div class="kpi-sub" style="${sbS}">${fmtPct(_td.ddAtualPct*100,1,false)} do topo</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">MDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior queda real</b> do pico ao vale neste esporte, medida <b>dia a dia</b> em ordem cronológica.',_mddBench)}</div><div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div><div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div></div>`+
+        `<div class="kpi" style="${kS}"><div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor ${_mkTipAnchor('Recovery Factor','<span class="lbl">RF</span> <span class="op">=</span> Lucro <span class="op">÷</span> Máx. Drawdown','Quantas vezes o lucro total <b>cobre a maior queda</b>.','<span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="thr">&gt; 5</span> <span class="good">muito bom</span>')}</div><div class="fdc-kpi__value" data-state="info" style="${vS}">${_rf!==null?fmtOdd(_rf)+'×':'—'}</div><div class="kpi-sub" style="${sbS}">qualidade</div></div>`+
+      `</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Análise Mensal</div>`+
+      `<div class="tbl-wrap drill-tbl"><table class="tbl" id="sportDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','','r')+mkTh('ROI','','r')+mkTh('Win Rate','','r')+mkTh('Stake média','','r')+_mkOddMediaTh('r','88px')}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Por Casa</div>`+
+      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'casa',casaCell,10,'sportDrillTblCasa')}</div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Por Tipster</div>`+
+      `<div class="tbl-wrap drill-tbl">${_casaBreakdownTbl(rows,'tipster',t=>t,10,'sportDrillTblTipster')}</div>`+
+    `</div>`;
+
+  // Gráfico Resultado Geral
+  const byDayCh={};rows.forEach(r=>{const k=r.data.slice(0,10);byDayCh[k]=(byDayCh[k]||0)+r.lucro;});
+  const daysCh=Object.keys(byDayCh).sort();
+  if(daysCh.length>=2){
+    const dpL=daysCh.map(k=>byDayCh[k]);
+    let cum=0;const cumPLCh=dpL.map(v=>{cum+=v;return parseFloat(cum.toFixed(2));});
+    const labelStep=Math.max(1,Math.floor(daysCh.length/14));
+    const lbl=daysCh.map((d,i)=>{if(i%labelStep!==0&&i!==daysCh.length-1)return'';const p=d.split('-');return p[2]+'/'+p[1];});
+    const ptR=cumPLCh.map((_,i)=>i===cumPLCh.length-1?5:0);
+    mkChart('sportDrillLine',{type:'bar',data:{labels:lbl,datasets:[
+      {type:'line',data:cumPLCh,borderColor:'#2E8BFF',
+       backgroundColor:(ctx)=>{const c=ctx.chart,{ctx:cx,chartArea:ca}=c;if(!ca)return'rgba(46,139,255,0)';const g=cx.createLinearGradient(0,ca.top,0,ca.bottom);g.addColorStop(0,'rgba(46,139,255,.16)');g.addColorStop(1,'rgba(46,139,255,0)');return g;},
+       tension:.4,fill:true,borderWidth:2,pointRadius:ptR,pointBackgroundColor:'#2E8BFF',pointBorderColor:isDark()?'#12161D':'#ffffff',pointBorderWidth:2,yAxisID:'y1',label:'P/L acumulado'},
+      {type:'bar',data:dpL,backgroundColor:dpL.map(v=>v>=0?'rgba(43,192,126,.55)':'rgba(229,82,75,.55)'),hoverBackgroundColor:dpL.map(v=>v>=0?'rgba(43,192,126,.8)':'rgba(229,82,75,.8)'),borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return daysCh[i]?.split('-').reverse().join('/')||'';},}}},
+      scales:{x:{display:false},y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{color:gc()},border:{display:false},position:'left'},y1:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{display:false},border:{display:false},position:'right'}}
+    }});
+  }
+
+  // Tooltip para linhas "Outros"
+  const tip=_getOutrosTip();
+  body.addEventListener('mouseover',function(e){
+    const anchor=e.target.closest('.outros-anchor');
+    if(!anchor)return;
+    const names=anchor.dataset.outros||'';
+    tip.textContent=names;
+    const r=anchor.getBoundingClientRect();
+    tip.style.display='block';
+    const tw=tip.offsetWidth;
+    tip.style.left=Math.min(r.left,window.innerWidth-tw-16)+'px';
+    tip.style.top=(r.bottom+6)+'px';
+  });
+  body.addEventListener('mouseout',function(e){
+    if(!e.target.closest('.outros-anchor'))return;
+    tip.style.display='none';
+  });
+
+  setTimeout(()=>{
+    makeSortable('sportDrillTblMensal',[1,2,3,4,5,6,7]);
+    makeSortable('sportDrillTblCasa',[1,2,3,4,5,6,7]);
+    makeSortable('sportDrillTblTipster',[1,2,3,4,5,6,7]);
+  },0);
+}
+
+function openSportDrill(sport){
+  const overlay=document.getElementById('sportDrillOverlay');
+  if(!overlay)return;
+  const nameEl=document.getElementById('sportDrillName');
+  if(nameEl)nameEl.textContent=sport;
+  const chipEl=document.getElementById('sportDrillChip');
+  if(chipEl)chipEl.innerHTML=mkSpChip(sport);
+
+  const ca=msGet('ca_sports');
+  _sportDrillBaseName=sport;
+  _sportDrillBaseRows=DADOS.filter(r=>{
+    if(r.esporte!==sport)return false;
+    if(ca.size>0&&!ca.has(r.casa))return false;
+    return true;
+  });
+  _sportDrillPeriodSt={qd:0,qt:''};
+  _updateSportDrillChips();
+
+  overlay.style.display='flex';
+  document.body.style.overflow='hidden';
+  const modal=document.getElementById('sportDrillModal');
+  if(modal)modal.scrollTop=0;
+
+  renderSportDrill(_sliceSportDrillRows());
+
+  if(_sportDrillEscHandler)document.removeEventListener('keydown',_sportDrillEscHandler);
+  _sportDrillEscHandler=function(e){if(e.key==='Escape')closeSportDrill();};
+  document.addEventListener('keydown',_sportDrillEscHandler);
+}
+window.openSportDrill=openSportDrill;
+
+function closeSportDrill(e){
+  if(e&&e.target!==document.getElementById('sportDrillOverlay'))return;
+  const overlay=document.getElementById('sportDrillOverlay');
+  if(overlay)overlay.style.display='none';
+  document.body.style.overflow='';
+  if(_sportDrillEscHandler){document.removeEventListener('keydown',_sportDrillEscHandler);_sportDrillEscHandler=null;}
+}
+window.closeSportDrill=closeSportDrill;
+
+window.copySportDrill=async function(){
+  const modal=document.getElementById('sportDrillModal');
+  if(!modal)return;
+  const btn=modal.querySelector('.copy-sport-drill-btn');
+  const btnOrig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const ok=await _waitH2C();
+  if(!ok){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  const{canvas}=await _buildDrillCanvas(modal);
+  if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  canvas.toBlob(async blob=>{
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
+    }catch(e){
+      if(btn){btn.innerHTML='✗';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},1500);}
+    }
+  },'image/png');
+};
+
+window.saveSportDrill=async function(){
+  const modal=document.getElementById('sportDrillModal');
+  if(!modal)return;
+  const btn=modal.querySelector('.save-sport-drill-btn');
+  const btnOrig=btn?btn.innerHTML:null;
+  if(btn){btn.disabled=true;btn.innerHTML='…';}
+  const ok=await _waitH2C();
+  if(!ok){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  const{canvas}=await _buildDrillCanvas(modal);
+  if(!canvas){if(btn){btn.disabled=false;btn.innerHTML=btnOrig;}return;}
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=Object.assign(document.createElement('a'),{href:url,download:'esporte-'+((_sportDrillBaseName||'drill').replace(/\s+/g,'_'))+'.png'});
     a.click();
     setTimeout(()=>URL.revokeObjectURL(url),5000);
     if(btn){btn.innerHTML='✓';setTimeout(()=>{btn.disabled=false;btn.innerHTML=btnOrig;},2000);}
