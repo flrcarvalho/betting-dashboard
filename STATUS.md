@@ -1,6 +1,32 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: Max Drawdown real por dia cronologico + separacao real/simulado + p-value em 10.000 sims — COMPLETO (2026-06-25 sessao 40)
+## Estado atual: card Max Drawdown mostra periodo pico-vale e duracao em dias — COMPLETO (2026-06-25 sessao 41)
+
+## Sessao 2026-06-25 (sessao 41) — Periodo e duracao no card Max Drawdown
+
+### O que foi feito
+
+Card Max Drawdown do Cenario Atual (Visao Geral) ganhou o periodo e a duracao no sub-texto.
+
+**overview.js (renderOvCusto)**
+- Novo sub-texto do Max Drawdown: "15,9% · 18/03 a 08/04 · 21 dias". Antes era "15,9% · pior real".
+- Helpers locais: _fmtDC (data DD/MM sem ano) e _ddDias (diferenca em dias entre peakDate e troughDate).
+- Dados vem do mesmo episodio que calcDrawdownReal ja retorna (peakDate, troughDate). Coerente com R$, % e grafico.
+- "pior real" saiu por ser redundante com o selo "DADOS REAIS · HISTORICO" do painel. Fallback mantem "pior real" se faltar data.
+
+### Nota
+- Os dias contam a fase de queda (pico a vale), nao incluem o tempo de recuperacao ate voltar ao pico. Nao rastreamos data de recuperacao.
+
+### Pendente
+- Card Max Drawdown identico no popup drill-down de tipster (performance.js, linhas 695/741) ainda mostra "pior real". Aplicar a mesma melhoria la para nao divergir. Usuario nao confirmou ainda.
+- Verificar perf do painel de risco com p-value em 10.000 (pendente da sessao 40).
+- Pagina Metricas: rework completo pendente.
+
+## Proximo passo
+- Aplicar periodo/duracao no card Max Drawdown do drill-down de tipster (performance.js).
+- Testar performance do painel de risco no browser.
+
+## Estado anterior: Max Drawdown real por dia cronologico + separacao real/simulado + p-value em 10.000 sims — COMPLETO (2026-06-25 sessao 40)
 
 ## Sessao 2026-06-25 (sessao 40) — Bug do Max Drawdown real e selo de simulacoes
 

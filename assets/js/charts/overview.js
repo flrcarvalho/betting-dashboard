@@ -203,6 +203,10 @@ function renderOvStreaks(rows){
   const vS='font-size:16px';
   const sbS='margin-top:auto;padding-top:6px';
   const _fmtD=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+  const _fmtDC=d=>{if(!d)return'—';const p=d.slice(0,10).split('-');return p[2]+'/'+p[1];};
+  const _ddDias=(a,b)=>{if(!a||!b)return null;return Math.round((new Date(b.slice(0,10))-new Date(a.slice(0,10)))/86400000);};
+  const _mddDias=_ddDias(_dd.peakDate,_dd.troughDate);
+  const _mddSub=(_dd.peakDate&&_dd.troughDate)?`${fmtPct(_mddP,1,false)} · ${_fmtDC(_dd.peakDate)}→${_fmtDC(_dd.troughDate)} · ${_mddDias} dia${_mddDias===1?'':'s'}`:`${fmtPct(_mddP,1,false)} · pior real`;
   const _mddBench=_dd.troughDate?`<span class="lbl">vale em ${_fmtD(_dd.troughDate)}</span> · <span class="thr">quanto menor, melhor</span>`:'<span class="thr">quanto menor, melhor</span>';
   el.innerHTML=
     `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
@@ -219,7 +223,7 @@ function renderOvStreaks(rows){
       `<div class="kpi" style="${kS}">`+
         `<div class="kpi-label"><span class="kpi-pipe"></span>Max Drawdown ${_mkTipAnchor('Max Drawdown','<span class="lbl">MDD</span> <span class="op">=</span> Pico <span class="op">→</span> Vale','A <b>maior queda real</b> do pico ao vale da banca, medida <b>dia a dia</b> em ordem cronológica — a mesma curva do gráfico.',_mddBench)}</div>`+
         `<div class="fdc-kpi__value" data-state="real" style="${vS}">${fmtPL(-_mddR)}</div>`+
-        `<div class="kpi-sub" style="${sbS}">${fmtPct(_mddP,1,false)} · pior real</div>`+
+        `<div class="kpi-sub" style="${sbS}">${_mddSub}</div>`+
       `</div>`+
       `<div class="kpi" style="${kS}">`+
         `<div class="kpi-label"><span class="kpi-pipe"></span>Recovery Factor ${_mkTipAnchor('Recovery Factor','<span class="lbl">RF</span> <span class="op">=</span> Lucro <span class="op">÷</span> Máx. Drawdown','Quantas vezes o lucro total <b>cobre a maior queda</b> da banca.','<span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="thr">&gt; 5</span> <span class="good">muito bom</span>')}</div>`+
