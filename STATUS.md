@@ -1,6 +1,38 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: card Max Drawdown mostra periodo pico-vale e duracao em dias — COMPLETO (2026-06-25 sessao 41)
+## Estado atual: drill-down de Esportes + fix de datas no Max Drawdown — COMPLETO (2026-06-25 sessao 42)
+
+## Sessao 2026-06-25 (sessao 42) — Drill-down de Esportes e ano nas datas do Max Drawdown
+
+### O que foi feito
+
+**1. Drill-down de Esportes (commit 81afa2c)**
+
+Os cards da aba Esportes nao abriam popup. A infraestrutura nunca tinha sido feita (faltavam data-attribute, handler de clique e a funcao de drill). Replicado o padrao de Bookies, sem custo.
+
+- app.js (buildHTML): novo markup #sportDrillOverlay/#sportDrillModal/#sportDrillBody/#sportDrillPeriodBar. Eyebrow ESPORTE, chip via mkSpChip, botoes copy/save/fechar.
+- performance.js: card clicavel. data-sport no _mkSportCard + el.onclick delegado no _renderSportCards (ignora .tip-anchor).
+- performance.js: openSportDrill/renderSportDrill/closeSportDrill, estado e period bar (_sliceSportDrillRows, _updateSportDrillChips, setDrillSportQuick/Type/All), copySportDrill/saveSportDrill.
+- Secoes do popup: Resultado Geral (8 KPIs em 4x2, sem custo) · Evolucao (canvas sportDrillLine) · Cenario Atual (Topo · DD Atual · Max DD · Recovery Factor) · Analise Mensal · Por Casa · Por Tipster.
+- openSportDrill respeita o multiselect de casa da pagina (ca_sports) e tem periodo proprio.
+- _casaBreakdownTbl ganhou rotulo "Casa" quando dimKey==='casa' (era so tipster/esporte).
+
+**2. Fix de datas no card Max Drawdown (commit 5295d4d)**
+
+- overview.js (renderOvCusto): sub-texto passou a "15,9% · 18/03/2026 - 08/04/2026 - 21 dias". Antes "15,9% · 18/03→08/04 · 21 dias".
+- Datas com ano completo (usa _fmtD) e separador " - " no lugar de seta e middot. _fmtDC orfao removido.
+- So formatacao. Calculo (calcDrawdownReal) intacto.
+
+### Pendente
+- Card Max Drawdown nos drills de tipster/casa/esporte (performance.js) ainda usa o sub "pior real", sem o periodo pico-vale. Decidir se padroniza com o do Overview.
+- Verificar perf do painel de risco com p-value em 10.000 (pendente da sessao 40).
+- Pagina Metricas: rework completo pendente.
+
+## Proximo passo
+- Testar o drill de Esportes no browser (clicar num card, conferir secoes, copy/save PNG).
+- Avaliar padronizar o sub do Max Drawdown (periodo + dias) nos popups de drill.
+
+## Estado anterior: card Max Drawdown mostra periodo pico-vale e duracao em dias — COMPLETO (2026-06-25 sessao 41)
 
 ## Sessao 2026-06-25 (sessao 41) — Periodo e duracao no card Max Drawdown
 

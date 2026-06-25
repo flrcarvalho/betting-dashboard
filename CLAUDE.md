@@ -35,8 +35,13 @@ assets/js/
                           (+ getAvailableMonths/Days/Weeks e helpers de navegação)
     performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
                           + _sportEnts, _sportDays, _sportAllDays, _sportSort (estado sort Esportes)
-                          + _mkSportCard, _renderSportCards — grid .tcard para esportes
+                          + _mkSportCard, _renderSportCards — grid .tcard para esportes (card clicável via data-sport → openSportDrill)
                           + window.sportSortBy(k), window.sportSortDir() — sort bar Esportes
+                          + openSportDrill(sport), closeSportDrill() — popup drill-down Esportes (molde Bookies, sem custo)
+                          + renderSportDrill(rows) — 6 seções: Resultado Geral (4×2, sem custo), Evolução, Cenário Atual, Mensal, Por Casa, Por Tipster
+                          + _sliceSportDrillRows(), _updateSportDrillChips() — período do popup Esportes
+                          + window.setDrillSportQuick/Type/All — chips período Esportes
+                          + window.copySportDrill(), window.saveSportDrill() — copy/save PNG popup Esportes
                           + _casaEnts, _casaDays, _casaAllDays, _casaSort (estado sort Bookies)
                           + _mkCasaCard, _renderCasaCards — grid .tcard para casas
                           + window.casaSortBy(k), window.casaSortDir() — sort bar Bookies
@@ -44,7 +49,7 @@ assets/js/
                           + renderCasaDrill(rows) — 6 seções: KPIs, gráfico, Cenário Atual, Mensal, Por Tipster, Por Esporte
                           + _sliceCasaDrillRows(), _updateCasaDrillChips() — período do popup Bookies
                           + window.setDrillCasaQuick/Type/All — chips período Bookies
-                          + _casaBreakdownTbl(rows, dimKey, labelFn, maxVisible=10) — top 10 + Outros com tooltip
+                          + _casaBreakdownTbl(rows, dimKey, labelFn, maxVisible=10, tableId='') — top 10 + Outros com tooltip; header rotula tipster/casa/esporte (reusado no drill de Esportes)
                           + _getOutrosTip() — singleton tooltip fixo para linha "Outros"
                           + window.copyCasaDrill(), window.saveCasaDrill() — copy/save PNG popup Bookies
                           + _tipSparkSVG, _mkTipCard, _renderTipCards (T-1 — cards de tipster)
