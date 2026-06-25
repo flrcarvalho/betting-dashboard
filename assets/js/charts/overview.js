@@ -234,7 +234,7 @@ function renderOvRisco(rows){
   const el=document.getElementById('ovRiscoContent');
   if(!el||!rows.length)return;
   const _mc=calcMCdrawdown(rows,10000);
-  const _pv=calcPValueMC(rows);
+  const _pv=calcPValueMC(rows,10000);
   const _td=calcTopoDrawdown(rows);
   const _profit=_td.atual;
   const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});

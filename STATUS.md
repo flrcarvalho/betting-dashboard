@@ -1,6 +1,44 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: apostas Void excluidas de Turnover, ROI e Stake Media em todo o sistema — COMPLETO (2026-06-23 sessao 39)
+## Estado atual: Max Drawdown real por dia cronologico + separacao real/simulado + p-value em 10.000 sims — COMPLETO (2026-06-25 sessao 40)
+
+## Sessao 2026-06-25 (sessao 40) — Bug do Max Drawdown real e selo de simulacoes
+
+### Contexto
+
+Fernando notou que o "Max Drawdown" do card Cenario Atual (Visao Geral) mostrava -R$ 70.800,12, valor que nao aparece no grafico Resultado Geral.
+
+Causa-raiz: calcMDDreais e calcMDDpct acumulavam o P/L na ordem bruta da planilha, sem ordenar por data. A planilha vem organizada por casa/parceiro, nao por data, entao a curva acumulada ficava fora de ordem temporal e gerava um vale que nunca aconteceu. Valor correto por dia: -R$ 56.341,44 (15,9%), episodio 18/03 a 08/04.
+
+### O que foi feito
+
+**Fase 1+2 (commit 5909814)**
+- Novo calcDrawdownReal(rows) em app.js: agrega P/L por dia, ordena cronologico (igual a renderBankroll) e devolve mddReais, mddPct, peakDate, troughDate do mesmo episodio pico-vale. R$ e % sempre coerentes.
+- calcMDDreais e calcMDDpct viram wrappers de calcDrawdownReal. calcRecoveryFactor herda.
+- Propagado para overview, gestao e performance (x2).
+
+**Fase 3 (commit 2a84d10)**
+- Separacao visual real vs simulado. Cenario Atual = realizado (badge "dados reais · historico"). Diagnostico de Risco = Monte Carlo (badge "simulado").
+- "DD Maximo" renomeado para "DD Extremo" (p99), evita colisao com "Max Drawdown" real.
+- Tooltips e regra documentada no CLAUDE.md.
+
+**Fase 4 (commit desta sessao)**
+- Selo "Monte Carlo · 10.000" cobria todo o painel de risco, mas calcPValueMC rodava 3.000 sims (adaptive: com n=25.430 cai para 3000), enquanto calcMCdrawdown ja rodava 10.000.
+- Decisao do usuario: padronizar em 10.000. calcPValueMC(rows) passou a calcPValueMC(rows, 10000) nos 3 pontos de uso (overview.js:237, gestao.js:353, performance.js:691).
+- Selo "10.000" agora vale para o painel inteiro. O default adaptive da funcao fica intacto para chamadas sem argumento.
+
+### Validacao
+- Grep confirma zero chamadas calcPValueMC(rows) sem argumento restantes.
+
+### Pendente
+- Verificar no browser se o painel de risco (Visao Geral e drill de tipster) ficou lento com o p-value em 10.000. calcMCdrawdown ja pagava esse custo, entao deve ser ~2x o tempo anterior. Se travar, otimizar.
+- Pagina Metricas: rework completo pendente (ver sessao 39).
+
+## Proximo passo
+- Testar performance do painel de risco no browser com base completa.
+- Tratar a pagina Metricas (rework).
+
+## Estado anterior: apostas Void excluidas de Turnover, ROI e Stake Media em todo o sistema — COMPLETO (2026-06-23 sessao 39)
 
 ## Sessao 2026-06-23 (sessao 39) — Void fora de Turnover, ROI e Stake Media
 

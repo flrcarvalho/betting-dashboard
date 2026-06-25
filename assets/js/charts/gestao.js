@@ -350,7 +350,7 @@ function renderMetrics(rows){
   const mddR=calcMDDreais(rows),mddPct=calcMDDpct(rows);
   // Bootstrap dos P/L reais (mesmo motor dos drill-downs): média = drawdown típico, p95 = cauda de risco
   const _mc=calcMCdrawdown(rows,10000),xmdd=_mc.xmdd,ddP95=_mc.p95;
-  const pval=calcPValueMC(rows),pl=rows.reduce((a,r)=>a+r.lucro,0);
+  const pval=calcPValueMC(rows,10000),pl=rows.reduce((a,r)=>a+r.lucro,0);
   // Profit / Drawdown usa a MÉDIA (xmdd) — idêntico ao profitXmdd dos drill-downs (performance.js)
   const profDdRaw=xmdd>0?pl/xmdd:null;
   const profDd=profDdRaw!==null?fmt(profDdRaw,2):'—';
