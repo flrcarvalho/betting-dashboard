@@ -127,8 +127,28 @@ function calcTurnover(rows){return rows.reduce((a,r)=>a+(r.resultado!=='V'?r.sta
 function calcROI(rows){const s=calcTurnover(rows),l=rows.reduce((a,r)=>a+r.lucro,0);return s>0?(l/s)*100:0;}
 function calcWR(rows){const v=rows.filter(r=>['W','HW'].includes(r.resultado));const t=rows.filter(r=>r.resultado!=='V');return t.length>0?(v.length/t.length)*100:0;}
 function calcAvgOdd(rows){const real=rows.filter(r=>r.odd>0&&r.stake>0);const ss=real.reduce((a,r)=>a+r.stake,0);return ss>0?real.reduce((a,r)=>a+r.odd*r.stake,0)/ss:0;}
-function calcMDDreais(rows){let cum=0,peak=0,mdd=0;for(const r of rows){cum+=r.lucro;if(cum>peak)peak=cum;const dd=peak-cum;if(dd>mdd)mdd=dd;}return mdd;}
-function calcMDDpct(rows){let bank=BASE_BANK,peak=BASE_BANK,mdd=0;for(const r of rows){bank+=r.lucro;if(bank>peak)peak=bank;const dd=(peak-bank)/peak*100;if(dd>mdd)mdd=dd;}return mdd;}
+// Drawdown REAL da carteira — fonte única de verdade.
+// Agrega o P/L por DIA e percorre a curva em ordem CRONOLÓGICA (igual ao gráfico
+// "Resultado Geral" em renderBankroll). A planilha de origem NÃO vem ordenada por data
+// (é organizada por casa → parceiro, com linhas em branco), então a ordenação aqui é
+// OBRIGATÓRIA: sem ela o drawdown seria o vale de uma curva fora de ordem — uma queda que
+// nunca aconteceu. R$ e % saem do MESMO episódio pico→vale, sempre coerentes entre si.
+// Retorna {mddReais, mddPct, peakDate, troughDate}.
+function calcDrawdownReal(rows){
+  const byDay={};
+  for(const r of rows){const k=(r.data||'').slice(0,10);if(!k)continue;byDay[k]=(byDay[k]||0)+(r.lucro||0);}
+  const days=Object.keys(byDay).sort();
+  let cum=0,peak=0,peakDay=null,mdd=0,mddPct=0,peakDate=null,troughDate=null;
+  for(const d of days){
+    cum+=byDay[d];
+    if(cum>peak){peak=cum;peakDay=d;}
+    const dd=peak-cum;
+    if(dd>mdd){mdd=dd;mddPct=dd/(BASE_BANK+peak)*100;peakDate=peakDay;troughDate=d;}
+  }
+  return{mddReais:mdd,mddPct:mddPct,peakDate:peakDate,troughDate:troughDate};
+}
+function calcMDDreais(rows){return calcDrawdownReal(rows).mddReais;}
+function calcMDDpct(rows){return calcDrawdownReal(rows).mddPct;}
 function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
 function calcPValueMC(rows,sims){var n=rows.length;if(n<30)return 1;sims=sims||(n>10000?3000:(n>3000?5000:10000));var L=new Float64Array(n),S=new Float64Array(n),sumL=0,sumS=0;for(var i=0;i<n;i++){L[i]=+rows[i].lucro||0;S[i]=+rows[i].stake||0;sumL+=L[i];sumS+=S[i];}if(sumS<=0)return 1;var yObs=sumL/sumS,r0=new Float64Array(n),q0=0;for(var j=0;j<n;j++){r0[j]=L[j]-yObs*S[j];q0+=r0[j]*r0[j];}var seObs=Math.sqrt(q0)/sumS;if(seObs<=0)return 1;var tObs=yObs/seObs;var seed=((n*2654435761)^(Math.round(Math.abs(sumL)*1000)|0))>>>0,rng=mulberry32(seed),cnt=0;for(var s=0;s<sims;s++){var rs=0,ss=0,rr=0,rsa=0,ssq=0;for(var b=0;b<n;b++){var k=(rng()*n)|0,rk=r0[k],sk=S[k];rs+=rk;ss+=sk;rr+=rk*rk;rsa+=rk*sk;ssq+=sk*sk;}if(ss<=0)continue;var ys=rs/ss,su2=rr-2*ys*rsa+ys*ys*ssq;if(su2>0&&ys*ss/Math.sqrt(su2)>=tObs)cnt++;}return(cnt+1)/(sims+1);}
 function calcMCdrawdown(rows,sims){
