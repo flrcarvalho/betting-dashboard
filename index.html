@@ -18,10 +18,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Design System CSS -->
-  <link rel="stylesheet" href="assets/css/tokens.css">
-  <link rel="stylesheet" href="assets/css/layout.css">
-  <link rel="stylesheet" href="assets/css/components.css">
+  <!-- Design System CSS — ?v= força o navegador a recarregar após edições (cache-busting) -->
+  <link rel="stylesheet" href="assets/css/tokens.css?v=2">
+  <link rel="stylesheet" href="assets/css/layout.css?v=2">
+  <link rel="stylesheet" href="assets/css/components.css?v=2">
 
   <!-- Aparência init: aplica tema antes do render para evitar flash -->
   <script>
@@ -47,16 +47,16 @@
 <!-- html2canvas (export popup) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 
-<!-- App — ordem de carregamento respeitada com defer -->
-<script src="assets/js/data.js"              defer></script>
-<script src="assets/js/filters.js"           defer></script>
-<script src="assets/js/charts/shared.js"     defer></script>
-<script src="assets/js/charts/gestao.js"     defer></script>
-<script src="assets/js/charts/overview.js"   defer></script>
-<script src="assets/js/charts/temporal.js"   defer></script>
-<script src="assets/js/charts/performance.js" defer></script>
-<script src="assets/js/charts/apostas.js"    defer></script>
-<script src="assets/js/app.js"               defer></script>
+<!-- App — ordem de carregamento respeitada com defer. ?v= = cache-busting: bump ao editar -->
+<script src="assets/js/data.js?v=2"              defer></script>
+<script src="assets/js/filters.js?v=2"           defer></script>
+<script src="assets/js/charts/shared.js?v=2"     defer></script>
+<script src="assets/js/charts/gestao.js?v=2"     defer></script>
+<script src="assets/js/charts/overview.js?v=2"   defer></script>
+<script src="assets/js/charts/temporal.js?v=2"   defer></script>
+<script src="assets/js/charts/performance.js?v=2" defer></script>
+<script src="assets/js/charts/apostas.js?v=2"    defer></script>
+<script src="assets/js/app.js?v=2"               defer></script>
 
 </body>
 </html>

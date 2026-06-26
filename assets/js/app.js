@@ -452,7 +452,7 @@ function buildHTML(){
       </nav>
       <div class="sidebar-bottom">
         <button class="update-btn" onclick="loadData(true)">↻ Atualizar dados</button>
-        <div class="last-update" id="lastUpdate"><span class="pulse-dot"></span><span id="lastUpdateText">${new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
+        <div class="last-update" id="lastUpdate"><span class="pulse-dot"></span><span id="lastUpdateText">carregando…</span></div>
       </div>
     </aside>
     <main class="main"><div class="main-content">
@@ -877,11 +877,18 @@ function _idbSetData(val){
     tx.onerror=()=>reject(tx.error);
   }));
 }
+// Mostra QUANDO O SERVIDOR reconstruiu os dados (builtAt), não quando o navegador buscou.
+// Assim, se o gatilho rebuildCache travar, o horário fica visivelmente velho.
 function _setLastUpdate(ms,updating){
   const lu=document.getElementById('lastUpdateText');
   if(!lu)return;
-  const d=new Date(ms||Date.now());
-  let txt=d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  let txt;
+  if(ms){
+    const d=new Date(ms);
+    txt='dados de '+d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }else{
+    txt='carregando…';
+  }
   if(updating)txt+=' · atualizando…';
   lu.textContent=txt;
 }
@@ -906,7 +913,8 @@ async function loadData(force){
         buildHTML();
         applyAparencia();
         window._dataLoadMs=cached.savedAt||Date.now();
-        _setLastUpdate(cached.savedAt,true); // mostra a hora do cache + "atualizando…"
+        window._dataBuiltMs=cached.builtAt||cached.savedAt||Date.now();
+        _setLastUpdate(window._dataBuiltMs,true); // mostra a hora de build do servidor + "atualizando…"
         servedFromCache=true;
       }
     }catch(e){/* IndexedDB indisponível (modo privado etc.) — segue para o loader */}
@@ -920,7 +928,7 @@ async function loadData(force){
   }
 
   // ── 2) Busca dados frescos (em paralelo com a UI já visível, quando houver cache) ──
-  if(!_rebuild)_setLastUpdate(window._dataLoadMs,true); // refresh manual: feedback "atualizando…"
+  if(!_rebuild)_setLastUpdate(window._dataBuiltMs,true); // refresh manual: feedback "atualizando…"
   let _fetchErr=null;
   try{
     // Boot/revalidação em 2º plano usam o cache rápido do Drive; o clique manual em
@@ -931,7 +939,9 @@ async function loadData(force){
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
     DADOS=normalizeDados(json.data);
     auditCasas(DADOS);
-    _idbSetData({data:json.data,savedAt:Date.now()}).catch(()=>{}); // grava cache sem bloquear
+    // builtAt = quando o servidor reconstruiu o cache (fonte de verdade da frescura dos dados)
+    window._dataBuiltMs=json.builtAt?Date.parse(json.builtAt):Date.now();
+    _idbSetData({data:json.data,savedAt:Date.now(),builtAt:window._dataBuiltMs}).catch(()=>{}); // grava cache sem bloquear
   }catch(err){
     _fetchErr=err.message||'Falha na conexão';
     if(!servedFromCache)DADOS=[]; // com cache, mantém o dado velho; sem cache, zera
@@ -941,10 +951,10 @@ async function loadData(force){
   if(servedFromCache||!_rebuild){
     if(!_fetchErr){
       window._dataLoadMs=Date.now();
-      _setLastUpdate(Date.now(),false);
+      _setLastUpdate(window._dataBuiltMs,false);
       if(_lastPage)renderPage(_lastPage); // redesenha a view ativa com o dado novo
     }else{
-      _setLastUpdate(window._dataLoadMs,false); // mantém o que já está na tela
+      _setLastUpdate(window._dataBuiltMs,false); // mantém o que já está na tela
       if(!servedFromCache)_errBanner(_fetchErr); // refresh manual falhou e não há cache em tela
     }
     return;
@@ -964,7 +974,7 @@ async function loadData(force){
   if(_fetchErr){
     _errBanner(_fetchErr);
   }else{
-    _setLastUpdate(Date.now(),false);
+    _setLastUpdate(window._dataBuiltMs,false);
     window._dataLoadMs=Date.now();
   }
 }
