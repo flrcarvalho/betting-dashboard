@@ -1,6 +1,41 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: aba Metricas reconstruida e performance (cache local, Web Worker, Apps Script v6) - COMPLETO (2026-06-25 sessao 43)
+## Estado atual: secao Resultados consolidada (5 abas viraram 1) + fix do bug de title - COMPLETO (2026-06-26 sessao 44)
+
+## Sessao 2026-06-26 (sessao 44) - Consolidacao da secao Resultados + fix de bug
+
+### Contexto
+Fernando nao usava as abas Consolidado, Mensal, Diario, Semana e Por Casa (fase 1 do projeto) e pediu auditoria. Conclusao: Por Casa duplica a aba Bookies; as outras tres sao a mesma visao em zooms diferentes; o unico recurso exclusivo e a matriz tipster x tempo. Decisao do Fernando: opcao A (consolidar tudo em uma aba) + opcao C (trazer analises que nao existiam).
+
+### Bug encontrado
+As celulas da matriz Evolucao Mensal apareciam com texto sobreposto e ">" vazando. Causa: fmtPL() devolve HTML com aspas (class="money...") e estava dentro de title="". A aspa fechava o atributo no meio. O mesmo bug existia no heatmap da Overview (overview.js).
+
+### O que foi feito (commit d9e078f)
+1. Nova aba unica "Resultados" (temporal.js reescrito como renderResultados).
+   - KPIs do periodo, Matriz tipster x tempo com seletor Ano/Mes/Semana (hero), grafico Resultado Geral, Calendario navegavel.
+   - 3 analises novas: Desempenho por Dia da Semana; Contribuicao & Consistencia (Peso no P/L que soma 100%, Volatilidade = desvio dos P/L mensais, Forma 30d, Melhor/Pior mes); Correlacao entre tipsters (top 8 por turnover, Pearson do P/L mensal).
+   - Bug do title corrigido: helper _txtPL(v) gera texto puro para tooltips.
+2. Removido todo o legado (frontend + logica): renderConsolidado/Mensal/Diario/Semana/ResultadosCasa, os window.* de navegacao, helpers (getAvailableMonths/Weeks etc.), blocos de pagina, PAGE_META, roteamento e msInit. A aba daily oculta tambem saiu.
+3. overview.js: mesmo bug de title corrigido no heatmap.
+4. Nav: grupo Resultados agora com 1 item (Resultados). Code.gs nao foi tocado (serve dados genericos, sem logica por pagina).
+5. CLAUDE.md atualizado (tabela de views, arquivos, regra anti-regressao: fmtPL/fmtR nunca dentro de title="").
+
+### Validacao
+- node --check ok nos 4 arquivos JS.
+- Smoke test com dados sinteticos: renderiza nos 3 modos da matriz, navegacao e sort ok, e confirma ausencia de HTML dentro de title=. Passou.
+- Backup dos originais em Backups/resultados-merge-<timestamp>/.
+- Falta o render visual no browser (a pagina puxa dados do Apps Script remoto).
+
+### Pendente
+- Conferir no browser apos o deploy: a aba Resultados renderizando, os 3 modos da matriz, o calendario e os 3 paineis novos.
+- Avaliar o nome do item de nav (hoje grupo "Resultados" com item "Resultados", leve eco). Alternativa: "Matriz & Analises" ou mover para o grupo Analise.
+- (herdado) Estender o worker do Monte Carlo para Metricas e drill de tipster, ou fazer gzip do Apps Script.
+- (herdado) Card Max Drawdown nos drills ainda usa "pior real" sem periodo pico-vale.
+
+## Proximo passo
+- Validar a aba Resultados no browser apos o deploy do GitHub Pages.
+
+## Estado anterior: aba Metricas reconstruida e performance (cache local, Web Worker, Apps Script v6) - COMPLETO (2026-06-25 sessao 43)
 
 ## Sessao 2026-06-25 (sessao 43) — Performance: abertura e navegacao
 
