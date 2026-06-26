@@ -11,7 +11,9 @@ Design system no CLAUDE.md da pasta-mãe `FDC Capital/`.
 ## Arquivos principais
 
 ```
-index.html              → entrada principal (carrega os CSS e JS abaixo)
+index.html              → entrada principal (carrega os CSS e JS abaixo). Assets locais têm
+                          ?v=N (cache-busting) — BUMPAR o N ao editar qualquer CSS/JS, senão o
+                          navegador serve a versão antiga.
 dashboard.html          → versão legada standalone (v25, HTML monolítico com CSS inline)
 assets/css/
   tokens.css            → variáveis CSS (cores, tipografia, espaçamento, dark+light)
@@ -82,10 +84,16 @@ assets/js/
                           showPage(), APARENCIA/applyAparencia()/setAparencia(), utilitários de UI
                           favicon(domain), mkSpChip(sport), mkHouseChip(nome), casaCell(), sportCell(),
                           auditCasas(dados)
-                          window._dataLoadMs — timestamp do último loadData (usado em #tipsterDrillMeta)
-                          + loadData usa cache local IndexedDB (_idbOpen/_idbGetData/_idbSetData)
+                          window._dataLoadMs — timestamp do último fetch (usado em #tipsterDrillMeta)
+                          window._dataBuiltMs — builtAt do servidor (quando o cache do Drive foi
+                            reconstruído); persistido no IndexedDB. _setLastUpdate exibe "dados de
+                            DD/MM HH:MM" usando este valor — NÃO a hora do fetch (assim um gatilho
+                            travado fica visível). Não confundir com _dataLoadMs.
+                          + loadData(force) usa cache local IndexedDB (_idbOpen/_idbGetData/_idbSetData)
                             em stale-while-revalidate: boot instantâneo + revalidação em 2º plano
                             (payload de ~8MB excede o localStorage). _setLastUpdate/_errBanner.
+                            force=true (botão "Atualizar dados" e retry do banner) anexa ?refresh=1 à
+                            URL → reconstrução ao vivo (~98s); boot/revalidação usam o cache rápido.
                           + Monte Carlo memoizado: calcMCdrawdown/calcPValueMC são wrappers com
                             cache (_mcCache/_pvCache) por _rowsSig(rows); corpos = _calcMCdrawdownRaw/
                             _calcPValueMCraw. mcComputeAsync — roda o MC em Web Worker (gerado das

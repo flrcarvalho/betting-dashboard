@@ -1,6 +1,35 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: secao Resultados consolidada (5 abas viraram 1) + fix do bug de title - COMPLETO (2026-06-26 sessao 44)
+## Estado atual: fix da atualizacao de dados (botao Atualizar ao vivo) + cache-busting + builtAt na sidebar - COMPLETO (2026-06-26 sessao 45)
+
+## Sessao 2026-06-26 (sessao 45) - Frescura de dados (botao Atualizar, cache-busting, builtAt)
+
+### Contexto
+Fernando adicionou apostas novas e elas nao apareciam no dashboard, mesmo clicando em "Atualizar dados". Sintoma surgiu apos a migracao para o Apps Script v6 (cache no Drive) da sessao 43.
+
+### Diagnostico (com teste direto na URL)
+- O doGet v6 normal devolve o cache do Drive. O botao "Atualizar dados" chamava loadData() com fetch sem parametro, ou seja, so re-lia o cache velho. As apostas novas so entrariam quando o gatilho rebuildCache rodasse.
+- Teste direto na URL: GET normal e GET ?refresh=1 (98s, leitura ao vivo) devolveram os mesmos 25698 registros, ja com as apostas de hoje (06-26, 14 linhas). Ou seja, o backend estava correto; o que faltava era o botao forcar a leitura ao vivo e o navegador estar com JS/IndexedDB velho.
+
+### O que foi feito
+1. fix(refresh) commit 7decc5b: loadData(force). Quando force, anexa ?refresh=1 a URL (reconstrucao ao vivo). Botao "Atualizar dados" e botao de retry do banner passaram a chamar loadData(true). Boot e revalidacao em 2o plano seguem no cache rapido.
+2. feat(frescura) commit b041497:
+   - Cache-busting: ?v=2 nos 3 CSS e 9 JS locais do index.html. Edicoes de codigo passam a carregar sem depender de hard reload. Bumpar o N a cada edicao.
+   - Sidebar mostra o builtAt do servidor: loadData captura json.builtAt (quando o servidor reconstruiu o cache) em window._dataBuiltMs, persistido no IndexedDB. _setLastUpdate exibe "dados de DD/MM HH:MM" em vez da hora do fetch. Se o gatilho travar, o horario fica visivelmente velho. _dataLoadMs (hora do fetch) intacto, ainda usado no #tipsterDrillMeta.
+
+### Validacao
+- node --check ok em app.js. Teste real da URL confirmou ?refresh=1 funcionando (98s) e apostas de hoje presentes.
+- Fernando confirmou: apos Ctrl+Shift+R as apostas novas apareceram.
+- Decisao: NAO usar LockService no Code.gs. A corrida entre gatilho e refresh manual e inofensiva (setContent atomico, payload completo dos dois lados) e o lock so adicionaria modo de falha.
+
+### Pendente (lado do Fernando, fora do codigo)
+- Conferir no editor do Apps Script, em Acionadores, se existe o rebuildCache por tempo (30 min). Agora da pra monitorar pela sidebar: se "dados de ..." nunca avancar sozinho, o gatilho nao esta ativo.
+- Corrigir na planilha a aposta com data 2026-06-27 (provavel typo, aparece como aposta futura).
+
+## Proximo passo
+- Validar o gatilho rebuildCache nos Acionadores e corrigir a data 06-27 na planilha.
+
+## Estado anterior: secao Resultados consolidada (5 abas viraram 1) + fix do bug de title - COMPLETO (2026-06-26 sessao 44)
 
 ## Sessao 2026-06-26 (sessao 44) - Consolidacao da secao Resultados + fix de bug
 
