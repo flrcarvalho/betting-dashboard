@@ -150,8 +150,58 @@ function calcDrawdownReal(rows){
 function calcMDDreais(rows){return calcDrawdownReal(rows).mddReais;}
 function calcMDDpct(rows){return calcDrawdownReal(rows).mddPct;}
 function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
-function calcPValueMC(rows,sims){var n=rows.length;if(n<30)return 1;sims=sims||(n>10000?3000:(n>3000?5000:10000));var L=new Float64Array(n),S=new Float64Array(n),sumL=0,sumS=0;for(var i=0;i<n;i++){L[i]=+rows[i].lucro||0;S[i]=+rows[i].stake||0;sumL+=L[i];sumS+=S[i];}if(sumS<=0)return 1;var yObs=sumL/sumS,r0=new Float64Array(n),q0=0;for(var j=0;j<n;j++){r0[j]=L[j]-yObs*S[j];q0+=r0[j]*r0[j];}var seObs=Math.sqrt(q0)/sumS;if(seObs<=0)return 1;var tObs=yObs/seObs;var seed=((n*2654435761)^(Math.round(Math.abs(sumL)*1000)|0))>>>0,rng=mulberry32(seed),cnt=0;for(var s=0;s<sims;s++){var rs=0,ss=0,rr=0,rsa=0,ssq=0;for(var b=0;b<n;b++){var k=(rng()*n)|0,rk=r0[k],sk=S[k];rs+=rk;ss+=sk;rr+=rk*rk;rsa+=rk*sk;ssq+=sk*sk;}if(ss<=0)continue;var ys=rs/ss,su2=rr-2*ys*rsa+ys*ys*ssq;if(su2>0&&ys*ss/Math.sqrt(su2)>=tObs)cnt++;}return(cnt+1)/(sims+1);}
-function calcMCdrawdown(rows,sims){
+// ── Memoização do Monte Carlo ────────────────────────────────────────────────
+// calcMCdrawdown e calcPValueMC são funções PURAS (semente derivada dos dados),
+// então o resultado só depende de (conjunto de rows, sims). Voltar a uma aba com
+// o mesmo filtro recalculava ~254M iterações à toa — o cache abaixo torna isso
+// instantâneo. A assinatura (n + somas de P/L, stake e |P/L|) é O(n) barata e
+// distingue conjuntos diferentes com colisão desprezível. Cache em memória, por
+// sessão; invalida sozinho quando o filtro/dados mudam (assinatura nova).
+var _mcCache=Object.create(null), _pvCache=Object.create(null);
+function _rowsSig(rows){var n=rows.length,sl=0,ss=0,sa=0;for(var i=0;i<n;i++){var lv=+rows[i].lucro||0;sl+=lv;ss+=+rows[i].stake||0;sa+=lv<0?-lv:lv;}return n+'|'+sl.toFixed(2)+'|'+ss.toFixed(2)+'|'+sa.toFixed(2);}
+function calcMCdrawdown(rows,sims){var k=(sims||5000)+'@'+_rowsSig(rows);var h=_mcCache[k];if(h)return h;return _mcCache[k]=_calcMCdrawdownRaw(rows,sims);}
+function calcPValueMC(rows,sims){var k=(sims||0)+'@'+_rowsSig(rows);var h=_pvCache[k];if(h!==undefined)return h;return _pvCache[k]=_calcPValueMCraw(rows,sims);}
+// ── Web Worker do Monte Carlo (não trava a UI) ───────────────────────────────
+// O código do worker é GERADO a partir das mesmas funções _calcMCdrawdownRaw e
+// _calcPValueMCraw (via .toString()) — garante número idêntico ao cálculo síncrono,
+// sem duplicar a matemática. mcComputeAsync devolve uma Promise; alimenta o MESMO
+// cache da memoização (_mcCache/_pvCache), então cache-hit resolve na hora (sem
+// spinner). Fallback: se o navegador bloquear Worker (ex.: file://), computa em
+// sync ADIADO (setTimeout) — a UI ao menos pinta antes de o cálculo travar.
+var _mcWorker=null,_mcWorkerTried=false,_mcReqId=0,_mcPending=Object.create(null);
+function _mcSyncFromArrays(L,S,sims){var n=L.length,rows=new Array(n);for(var i=0;i<n;i++)rows[i]={lucro:L[i],stake:S[i]};return{mc:_calcMCdrawdownRaw(rows,sims),pv:_calcPValueMCraw(rows,sims)};}
+function _getMcWorker(){
+  if(_mcWorkerTried)return _mcWorker;
+  _mcWorkerTried=true;
+  try{
+    var src=mulberry32.toString()+'\n'+_calcMCdrawdownRaw.toString()+'\n'+_calcPValueMCraw.toString()+'\n'+
+      'self.onmessage=function(e){var d=e.data,n=d.L.length,rows=new Array(n);for(var i=0;i<n;i++)rows[i]={lucro:d.L[i],stake:d.S[i]};'+
+      'try{var mc=_calcMCdrawdownRaw(rows,d.sims),pv=_calcPValueMCraw(rows,d.sims);self.postMessage({id:d.id,mc:mc,pv:pv});}'+
+      'catch(err){self.postMessage({id:d.id,err:String(err)});}};';
+    _mcWorker=new Worker(URL.createObjectURL(new Blob([src],{type:'application/javascript'})));
+    _mcWorker.onmessage=function(e){var d=e.data,p=_mcPending[d.id];if(!p)return;delete _mcPending[d.id];p.resolve(d.err?_mcSyncFromArrays(p.L,p.S,p.sims):{mc:d.mc,pv:d.pv});};
+    _mcWorker.onerror=function(){_mcWorker=null;for(var id in _mcPending){var p=_mcPending[id];delete _mcPending[id];p.resolve(_mcSyncFromArrays(p.L,p.S,p.sims));}};
+  }catch(e){_mcWorker=null;}
+  return _mcWorker;
+}
+function mcComputeAsync(rows,sims){
+  var sig=_rowsSig(rows),mcK=(sims||5000)+'@'+sig,pvK=(sims||0)+'@'+sig;
+  var hMc=_mcCache[mcK],hPv=_pvCache[pvK];
+  if(hMc&&hPv!==undefined)return Promise.resolve({mc:hMc,pv:hPv});
+  var n=rows.length,L=new Float64Array(n),S=new Float64Array(n);
+  for(var i=0;i<n;i++){L[i]=+rows[i].lucro||0;S[i]=+rows[i].stake||0;}
+  var done=function(res){_mcCache[mcK]=res.mc;_pvCache[pvK]=res.pv;return res;};
+  var w=_getMcWorker();
+  if(w){
+    return new Promise(function(resolve){
+      var id=++_mcReqId;_mcPending[id]={resolve:resolve,L:L,S:S,sims:sims};
+      try{w.postMessage({id:id,L:L,S:S,sims:sims});}catch(err){delete _mcPending[id];resolve(_mcSyncFromArrays(L,S,sims));}
+    }).then(done);
+  }
+  return new Promise(function(resolve){setTimeout(function(){resolve(_mcSyncFromArrays(L,S,sims));},0);}).then(done);
+}
+function _calcPValueMCraw(rows,sims){var n=rows.length;if(n<30)return 1;sims=sims||(n>10000?3000:(n>3000?5000:10000));var L=new Float64Array(n),S=new Float64Array(n),sumL=0,sumS=0;for(var i=0;i<n;i++){L[i]=+rows[i].lucro||0;S[i]=+rows[i].stake||0;sumL+=L[i];sumS+=S[i];}if(sumS<=0)return 1;var yObs=sumL/sumS,r0=new Float64Array(n),q0=0;for(var j=0;j<n;j++){r0[j]=L[j]-yObs*S[j];q0+=r0[j]*r0[j];}var seObs=Math.sqrt(q0)/sumS;if(seObs<=0)return 1;var tObs=yObs/seObs;var seed=((n*2654435761)^(Math.round(Math.abs(sumL)*1000)|0))>>>0,rng=mulberry32(seed),cnt=0;for(var s=0;s<sims;s++){var rs=0,ss=0,rr=0,rsa=0,ssq=0;for(var b=0;b<n;b++){var k=(rng()*n)|0,rk=r0[k],sk=S[k];rs+=rk;ss+=sk;rr+=rk*rk;rsa+=rk*sk;ssq+=sk*sk;}if(ss<=0)continue;var ys=rs/ss,su2=rr-2*ys*rsa+ys*ys*ssq;if(su2>0&&ys*ss/Math.sqrt(su2)>=tObs)cnt++;}return(cnt+1)/(sims+1);}
+function _calcMCdrawdownRaw(rows,sims){
   sims=sims||5000;
   var n=rows.length;
   if(n<2)return{xmdd:0,p50:0,p95:0,p99:0};
@@ -838,11 +888,80 @@ window.deleteCG=function(idx){
   ctSave(); renderCustoTipster();
 };
 
+// ── Cache local (IndexedDB) ──────────────────────────────────────────────────
+// O payload do Apps Script tem ~8 MB — excede o limite do localStorage (~5 MB),
+// por isso o cache de dados vai em IndexedDB. Guarda o json.data CRU (re-normaliza
+// ao ler, para acompanhar mudanças no normalizeDados). Estratégia: stale-while-
+// revalidate — boot instantâneo com o último dado salvo + atualização em 2º plano.
+const _IDB_NAME='fdc_dash', _IDB_STORE='kv', _IDB_KEY='dados_v1';
+function _idbOpen(){
+  return new Promise((resolve,reject)=>{
+    let req;
+    try{req=indexedDB.open(_IDB_NAME,1);}catch(e){return reject(e);}
+    req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(_IDB_STORE))db.createObjectStore(_IDB_STORE);};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+function _idbGetData(){
+  return _idbOpen().then(db=>new Promise((resolve,reject)=>{
+    const rq=db.transaction(_IDB_STORE,'readonly').objectStore(_IDB_STORE).get(_IDB_KEY);
+    rq.onsuccess=()=>resolve(rq.result||null);
+    rq.onerror=()=>reject(rq.error);
+  }));
+}
+function _idbSetData(val){
+  return _idbOpen().then(db=>new Promise((resolve,reject)=>{
+    const tx=db.transaction(_IDB_STORE,'readwrite');
+    tx.objectStore(_IDB_STORE).put(val,_IDB_KEY);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  }));
+}
+function _setLastUpdate(ms,updating){
+  const lu=document.getElementById('lastUpdateText');
+  if(!lu)return;
+  const d=new Date(ms||Date.now());
+  let txt=d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  if(updating)txt+=' · atualizando…';
+  lu.textContent=txt;
+}
+function _errBanner(msg){
+  const banner=document.createElement('div');
+  banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(229,82,75,0.12);border-bottom:1px solid rgba(229,82,75,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#E5524B';
+  banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${msg}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(229,82,75,0.4);color:#E5524B;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#E5524B;cursor:pointer;font-size:14px">×</button>`;
+  document.body.appendChild(banner);
+}
+
 async function loadData(){
-  document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><div class="loader-content"><img src="brand/fdc-logo-horizontal-dark.svg" alt="FDC Capital" style="width:676px;max-width:88vw;display:block;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div></div>`;
-  // Fase 1: animação CSS 0→70% em 2s — contador JS sincronizado
-  let _pctRAF;const _pctT0=Date.now();
-  (function _tick(){const pEl=document.getElementById('loaderPct');if(!pEl)return;const t=Math.min((Date.now()-_pctT0)/90000,1);const e=1-Math.pow(1-t,3);pEl.textContent=Math.round(e*90)+'%';if(t<1)_pctRAF=requestAnimationFrame(_tick);})();
+  const _rebuild=!document.getElementById('page-overview'); // primeira carga? (DOM ainda não montado)
+  let servedFromCache=false;
+
+  // ── 1) Primeira carga: tenta o cache local para boot instantâneo ───────────
+  if(_rebuild){
+    try{
+      const cached=await _idbGetData();
+      if(cached&&Array.isArray(cached.data)&&cached.data.length){
+        DADOS=normalizeDados(cached.data);
+        auditCasas(DADOS);
+        buildHTML();
+        applyAparencia();
+        window._dataLoadMs=cached.savedAt||Date.now();
+        _setLastUpdate(cached.savedAt,true); // mostra a hora do cache + "atualizando…"
+        servedFromCache=true;
+      }
+    }catch(e){/* IndexedDB indisponível (modo privado etc.) — segue para o loader */}
+
+    // Sem cache: loader original (0→90% calibrado para o fetch longo)
+    if(!servedFromCache){
+      document.getElementById('root').innerHTML=`<div class="loader" id="loaderEl"><div class="loader-content"><img src="brand/fdc-logo-horizontal-dark.svg" alt="FDC Capital" style="width:676px;max-width:88vw;display:block;object-fit:contain;opacity:.97" draggable="false"><div class="loader-bottom"><div class="loader-bar-wrap"><div class="loader-bar-fill p1" id="loaderBar"></div></div><div class="loader-pct" id="loaderPct">0%</div></div></div></div>`;
+      const _pctT0=Date.now();
+      (function _tick(){const pEl=document.getElementById('loaderPct');if(!pEl)return;const t=Math.min((Date.now()-_pctT0)/90000,1);const e=1-Math.pow(1-t,3);pEl.textContent=Math.round(e*90)+'%';if(t<1)requestAnimationFrame(_tick);})();
+    }
+  }
+
+  // ── 2) Busca dados frescos (em paralelo com a UI já visível, quando houver cache) ──
+  if(!_rebuild)_setLastUpdate(window._dataLoadMs,true); // refresh manual: feedback "atualizando…"
   let _fetchErr=null;
   try{
     const res=await fetch(APPS_SCRIPT_URL);
@@ -850,11 +969,26 @@ async function loadData(){
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
     DADOS=normalizeDados(json.data);
     auditCasas(DADOS);
+    _idbSetData({data:json.data,savedAt:Date.now()}).catch(()=>{}); // grava cache sem bloquear
   }catch(err){
     _fetchErr=err.message||'Falha na conexão';
-    DADOS=[];
+    if(!servedFromCache)DADOS=[]; // com cache, mantém o dado velho; sem cache, zera
   }
-  // Fase 2: fetch retornou → completa barra em 0.3s, depois fade out
+
+  // ── 3a) DOM já montado (cache servido OU refresh manual): atualiza silencioso ──
+  if(servedFromCache||!_rebuild){
+    if(!_fetchErr){
+      window._dataLoadMs=Date.now();
+      _setLastUpdate(Date.now(),false);
+      if(_lastPage)renderPage(_lastPage); // redesenha a view ativa com o dado novo
+    }else{
+      _setLastUpdate(window._dataLoadMs,false); // mantém o que já está na tela
+      if(!servedFromCache)_errBanner(_fetchErr); // refresh manual falhou e não há cache em tela
+    }
+    return;
+  }
+
+  // ── 3b) Primeira carga sem cache: completa o loader, faz fade e monta a UI ──
   const bar=document.getElementById('loaderBar');
   const loader=document.getElementById('loaderEl');
   const pctEl=document.getElementById('loaderPct');
@@ -866,13 +1000,9 @@ async function loadData(){
   buildHTML();
   applyAparencia();
   if(_fetchErr){
-    const banner=document.createElement('div');
-    banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(229,82,75,0.12);border-bottom:1px solid rgba(229,82,75,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#E5524B';
-    banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${_fetchErr}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(229,82,75,0.4);color:#E5524B;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#E5524B;cursor:pointer;font-size:14px">×</button>`;
-    document.body.appendChild(banner);
+    _errBanner(_fetchErr);
   }else{
-    const lu=document.getElementById('lastUpdateText');
-    if(lu)lu.textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    _setLastUpdate(Date.now(),false);
     window._dataLoadMs=Date.now();
   }
 }

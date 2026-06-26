@@ -233,45 +233,72 @@ function renderOvStreaks(rows){
 }
 
 // ── Card de diagnóstico de risco na Visão Geral ──
+// Monte Carlo (p-value, DD Médio, DD Extremo, Solidez) roda em Web Worker via
+// mcComputeAsync: o painel pinta na hora com "calculando…" e os valores entram
+// quando o worker responde. Cache-hit (mesmo filtro) resolve no mesmo frame —
+// sem flash de spinner (microtask antes do paint). _reqId evita corrida quando
+// o usuário troca de filtro/aba antes de o cálculo anterior voltar.
+let _ovRiscoReq=0;
 function renderOvRisco(rows){
   const el=document.getElementById('ovRiscoContent');
   if(!el||!rows.length)return;
-  const _mc=calcMCdrawdown(rows,10000);
-  const _pv=calcPValueMC(rows,10000);
-  const _td=calcTopoDrawdown(rows);
-  const _profit=_td.atual;
-  const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});
-  const _solCor=_sol.score>=0.65?'var(--d-pos)':_sol.score>=0.45?'var(--d-proj)':'var(--d-neg)';
   const kS='display:flex;flex-direction:column;min-width:0;overflow:visible';
   const vS='font-size:16px';
   const sbS='margin-top:auto;padding-top:6px';
-  el.innerHTML=
+  const spin='<span style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-mute);font-family:var(--font-mono);font-size:11px"><svg width="14" height="14" viewBox="0 0 16 16" style="flex-shrink:0"><circle cx="8" cy="8" r="6" fill="none" stroke="var(--ink-mute)" stroke-width="2" stroke-dasharray="26" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/></circle></svg>calculando…</span>';
+  // tooltips estáticos (não dependem do Monte Carlo)
+  const tipDDmed=_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica projetada</b> (média das 10.000 simulações de Monte Carlo). <b>Não aconteceu</b> — é estimativa.','<span class="lbl">projetado · média</span>');
+  const tipDDext=_mkTipAnchor('DD Extremo','<span class="lbl">pior</span> DD simulado (p99)','Pior queda plausível (<b>1 em 100</b> cenários) — <b>não aconteceu</b>, é projeção de 10.000 reamostragens. Dimensiona a banca.','<span class="lbl">projetado · cauda · p99</span>');
+  const tipSol=_mkTipAnchor('Nível de Solidez','<span class="lbl">índice composto</span>','P-value, drawdown e consistência <b>num selo só</b>.','<span class="lbl">Escala</span> <span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="good">Baixa → Alta</span>');
+  // monta o painel; cada slot dinâmico é preenchido com `spin` (skeleton) ou o valor final
+  const _frame=(pvLabel,pvVal,pvSub,ddMed,ddExt,solBlock)=>
     `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.75rem">`+
       `<div class="kpi" style="${kS}">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span>p-value ${_mkTipAnchor('P-Value','<span class="lbl">p</span> <span class="op">=</span> P(resultado <span class="lbl">|</span> acaso)','Probabilidade do resultado ser <b>mero acaso</b>. Quanto menor, mais confiável o <b>edge</b>.',rodapePValue(_pv))}</div>`+
-        `<div class="fdc-kpi__value" data-state="${_pv<0.05?'pos':'proj'}" style="${vS}">${_pv<0.001?'< 0,001':fmt(_pv,4)}</div>`+
-        `<div class="kpi-sub" style="${sbS}">${_pv<0.001?'resultado robusto':_pv<0.05?'rejeita o acaso':'inconclusivo'}</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>p-value ${pvLabel}</div>`+
+        `<div class="fdc-kpi__value" data-state="${pvVal.state}" style="${vS}">${pvVal.html}</div>`+
+        `<div class="kpi-sub" style="${sbS}">${pvSub}</div>`+
       `</div>`+
       `<div class="kpi" style="${kS}">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${_mkTipAnchor('DD Médio','<span class="lbl">média</span> dos DD simulados','Queda <b>típica projetada</b> (média das 10.000 simulações de Monte Carlo). <b>Não aconteceu</b> — é estimativa.','<span class="lbl">projetado · média</span>')}</div>`+
-        `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.xmdd)}</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Médio ${tipDDmed}</div>`+
+        `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${ddMed}</div>`+
         `<div class="kpi-sub" style="${sbS}">projetado · média</div>`+
       `</div>`+
       `<div class="kpi" style="${kS}">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Extremo ${_mkTipAnchor('DD Extremo','<span class="lbl">pior</span> DD simulado (p99)','Pior queda plausível (<b>1 em 100</b> cenários) — <b>não aconteceu</b>, é projeção de 10.000 reamostragens. Dimensiona a banca.','<span class="lbl">projetado · cauda · p99</span>')}</div>`+
-        `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${fmtPL(-_mc.p99)}</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>DD Extremo ${tipDDext}</div>`+
+        `<div class="fdc-kpi__value" data-state="proj" style="${vS}">${ddExt}</div>`+
         `<div class="kpi-sub" style="${sbS}">projetado · 1 em 100</div>`+
       `</div>`+
       `<div class="kpi" style="${kS}">`+
-        `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez ${_mkTipAnchor('Nível de Solidez','<span class="lbl">índice composto</span>','P-value, drawdown e consistência <b>num selo só</b>.','<span class="lbl">Escala</span> <span class="scale"><i></i><i></i><i></i><i class="on"></i><i class="on"></i></span> <span class="good">Baixa → Alta</span>')}</div>`+
-        `<div class="fdc-risk-meter" style="margin-top:auto">`+
-          `<span class="fdc-risk-meter__tag" style="color:${_solCor}">${_sol.faixa}</span>`+
-          `<div class="fdc-risk-meter__track">`+
-            `<span class="fdc-risk-meter__knob" style="--value:${(_sol.score*100).toFixed(1)}%"></span>`+
-          `</div>`+
-        `</div>`+
+        `<div class="kpi-label"><span class="kpi-pipe"></span>Nível de Solidez ${tipSol}</div>`+
+        `${solBlock}`+
       `</div>`+
     `</div>`;
+  // skeleton: tooltip de p-value sem rodapé (depende do valor), valores = spinner
+  const pvTipSkel=_mkTipAnchor('P-Value','<span class="lbl">p</span> <span class="op">=</span> P(resultado <span class="lbl">|</span> acaso)','Probabilidade do resultado ser <b>mero acaso</b>. Quanto menor, mais confiável o <b>edge</b>.','');
+  el.innerHTML=_frame(pvTipSkel,{state:'proj',html:spin},'<span style="color:var(--ink-mute)">—</span>',spin,spin,
+    `<div class="fdc-risk-meter" style="margin-top:auto">${spin}</div>`);
+  // dispara o cálculo (worker) e preenche quando voltar — descarta se já houve novo render
+  const req=++_ovRiscoReq;
+  mcComputeAsync(rows,10000).then(({mc:_mc,pv:_pv})=>{
+    if(req!==_ovRiscoReq||!document.getElementById('ovRiscoContent'))return;
+    const _td=calcTopoDrawdown(rows);
+    const _profit=_td.atual;
+    const _sol=calcSolidez({pValue:_pv,profitXmdd:_mc.xmdd>0?_profit/_mc.xmdd:0,nApostas:rows.length,oddMedia:calcAvgOdd(rows)});
+    const _solCor=_sol.score>=0.65?'var(--d-pos)':_sol.score>=0.45?'var(--d-proj)':'var(--d-neg)';
+    const pvTip=_mkTipAnchor('P-Value','<span class="lbl">p</span> <span class="op">=</span> P(resultado <span class="lbl">|</span> acaso)','Probabilidade do resultado ser <b>mero acaso</b>. Quanto menor, mais confiável o <b>edge</b>.',rodapePValue(_pv));
+    el.innerHTML=_frame(
+      pvTip,
+      {state:_pv<0.05?'pos':'proj',html:_pv<0.001?'< 0,001':fmt(_pv,4)},
+      _pv<0.001?'resultado robusto':_pv<0.05?'rejeita o acaso':'inconclusivo',
+      fmtPL(-_mc.xmdd),
+      fmtPL(-_mc.p99),
+      `<div class="fdc-risk-meter" style="margin-top:auto">`+
+        `<span class="fdc-risk-meter__tag" style="color:${_solCor}">${_sol.faixa}</span>`+
+        `<div class="fdc-risk-meter__track">`+
+          `<span class="fdc-risk-meter__knob" style="--value:${(_sol.score*100).toFixed(1)}%"></span>`+
+        `</div>`+
+      `</div>`);
+  });
 }
 
 // ── Card de custo na Visão Geral ──
