@@ -451,7 +451,7 @@ function buildHTML(){
         ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">${icon}</svg>${label}</div>`).join('')}
       </nav>
       <div class="sidebar-bottom">
-        <button class="update-btn" onclick="loadData()">↻ Atualizar dados</button>
+        <button class="update-btn" onclick="loadData(true)">↻ Atualizar dados</button>
         <div class="last-update" id="lastUpdate"><span class="pulse-dot"></span><span id="lastUpdateText">${new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
       </div>
     </aside>
@@ -888,11 +888,11 @@ function _setLastUpdate(ms,updating){
 function _errBanner(msg){
   const banner=document.createElement('div');
   banner.style.cssText='position:fixed;top:44px;left:220px;right:0;z-index:9998;background:rgba(229,82,75,0.12);border-bottom:1px solid rgba(229,82,75,0.3);padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--font-mono);color:#E5524B';
-  banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${msg}</span><button onclick="loadData()" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(229,82,75,0.4);color:#E5524B;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#E5524B;cursor:pointer;font-size:14px">×</button>`;
+  banner.innerHTML=`<span>⚠ Não foi possível carregar os dados — ${msg}</span><button onclick="loadData(true)" style="margin-left:auto;padding:4px 12px;background:transparent;border:1px solid rgba(229,82,75,0.4);color:#E5524B;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">↻ Tentar novamente</button><button onclick="this.parentElement.remove()" style="padding:2px 8px;background:transparent;border:none;color:#E5524B;cursor:pointer;font-size:14px">×</button>`;
   document.body.appendChild(banner);
 }
 
-async function loadData(){
+async function loadData(force){
   const _rebuild=!document.getElementById('page-overview'); // primeira carga? (DOM ainda não montado)
   let servedFromCache=false;
 
@@ -923,7 +923,10 @@ async function loadData(){
   if(!_rebuild)_setLastUpdate(window._dataLoadMs,true); // refresh manual: feedback "atualizando…"
   let _fetchErr=null;
   try{
-    const res=await fetch(APPS_SCRIPT_URL);
+    // Boot/revalidação em 2º plano usam o cache rápido do Drive; o clique manual em
+    // "Atualizar dados" (force=true) força reconstrução ao vivo da planilha (?refresh=1).
+    const url=force?APPS_SCRIPT_URL+(APPS_SCRIPT_URL.includes('?')?'&':'?')+'refresh=1':APPS_SCRIPT_URL;
+    const res=await fetch(url);
     const json=await res.json();
     if(!json.ok)throw new Error(json.error||'Erro desconhecido');
     DADOS=normalizeDados(json.data);
