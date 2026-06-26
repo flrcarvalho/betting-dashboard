@@ -1,6 +1,6 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: performance — cache local + Web Worker do Monte Carlo + Apps Script v6 — COMPLETO (2026-06-25 sessao 43)
+## Estado atual: aba Metricas reconstruida e performance (cache local, Web Worker, Apps Script v6) - COMPLETO (2026-06-25 sessao 43)
 
 ## Sessao 2026-06-25 (sessao 43) — Performance: abertura e navegacao
 
@@ -33,11 +33,52 @@ Fernando reportou lentidao para abrir o dashboard e para navegar entre abas, pio
 - gzip no Apps Script (Utilities.gzip + DecompressionStream no browser) para encurtar a 1a carga de dados (~137s) sem cortar colunas.
 - Confirmar no browser apos o deploy: abertura instantanea no 2o load, spinner nos cards de risco, volta instantanea, numeros identicos aos de antes.
 - (herdado) Card Max Drawdown nos drills de tipster/casa/esporte ainda usa "pior real" sem o periodo pico-vale.
-- (herdado) Pagina Metricas: rework completo pendente.
+- Pagina Metricas: rework completo FEITO nesta data em terminal paralelo (commit 735977e). Ver bloco "sessao 43, paralela - Metricas" abaixo.
 
 ## Proximo passo
 - Validar no browser apos o deploy do GitHub Pages.
 - Estender o worker para Metricas e drill de tipster, ou fazer o gzip do Apps Script.
+
+## Sessao 2026-06-25 (sessao 43, paralela) - Reconstrucao completa da aba Metricas
+
+### O que foi feito
+
+Aba Metricas refeita do zero (commit 735977e, anterior ao commit de performance 6318629). Era 9 cards planos cobrindo ~6 metricas, com 3 erros factuais e sem a camada de cor --d-*. Agora sao 4 secoes cobrindo as 14 metricas que o codigo calcula, cada card com explicacao para leigo + formula real + benchmark + badge de valor ao vivo.
+
+Diagnostico por 3 agentes (mapeamento, design, formulas). Achado: o desastre de tokens legados estava no dashboard.html legado, nao na aba viva (que ja usava tokens canonicos).
+
+**components.css**
+- Tokeniza border-radius 4px -> var(--r-xs) em .metric-example e .metric-warn.
+- Novo .metric-live: badge de valor no header, variantes pos/neg/neu e --d-neg/-proj/-pos/-info.
+- Novo .metric-note: caixa azul neutra para regras de calculo.
+- .metric-formula em camadas: variaveis --ink-soft, operadores .op em --accent-2.
+
+**app.js (buildHTML)**
+- page-metrics trocada por 4 secoes: Fundamentais (ROI, Turnover, Win Rate, Odd Media, Stake Media, P/L), Risco & Drawdown (Max DD R$/%, Recovery Factor, DD Medio, p95, DD Extremo p99, Profit/DD), Significancia (P-Value, Nivel de Solidez), Glossario (12 termos). Cada card com badge #mv_*.
+
+**gestao.js (renderMetrics)**
+- Reescrita. Calcula via funcoes canonicas e preenche cada #mv_* + a faixa de KPIs de resumo. Chama calcMCdrawdown/calcPValueMC com 10.000, agora memoizadas pelo trabalho de performance (mesma assinatura, reusa o cache da Visao Geral).
+
+**3 erros factuais corrigidos**
+- Turnover: explicita a exclusao de Void (era "soma de todas as stakes").
+- MDD: formula real MDD/(BASE_BANK+pico)*100 + nota de agregacao por dia cronologica.
+- P-Value: bootstrap t-test sobre residuos lucro~yo*stake (nao mais teste de Win Rate).
+
+### Validacao
+- node --check OK em app.js e gestao.js. Badges #mv_* casados entre markup e render, sem residuos do antigo m_xmdd.
+
+### Backup
+- Backups/metrics-rework-<timestamp>/ com components.css, app.js e gestao.js antes da edicao.
+
+### Commit
+- 735977e feat(metrics): reconstroi aba Metricas em 4 secoes com valor ao vivo
+
+### Pendente
+- Revisar a aba no browser: badges ao vivo, cores --d-*, layout das 4 secoes.
+- renderMetrics ainda roda Monte Carlo sincrono no 1o acesso (instantaneo na repeticao pela memoizacao). Aplicar mcComputeAsync/worker aqui fica como melhoria, alinhado ao pendente da sessao 43 (performance).
+
+## Proximo passo
+- Revisar a aba Metricas no browser e ajustar textos/benchmarks se preciso.
 
 ## Estado anterior: drill-down de Esportes + fix de datas no Max Drawdown — COMPLETO (2026-06-25 sessao 42)
 

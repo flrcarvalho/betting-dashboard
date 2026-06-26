@@ -114,7 +114,7 @@ Code.gs                 → referência do Apps Script v6 (NÃO é carregado pel
 | `parceiros` | Fornecedores & Parceiros | Turnover/lucro por conta e fornecedor |
 | `custos` | Custos de Contas | Custo de aquisição por conta (salvo em localStorage) |
 | `custos_tipster` | Custo de Tipsters | Assinaturas e pagamentos a tipsters (localStorage) |
-| `metrics` | Métricas | Base de conhecimento: ROI, WR, MDD, Drawdown Médio Esperado (xmdd), Drawdown p95, P-Value |
+| `metrics` | Métricas | Base de conhecimento em 4 seções (Fundamentais · Risco & Drawdown · Significância · Glossário): 14 métricas com explicação para leigo + fórmula real + benchmark + badge de valor ao vivo (`#mv_*`). Render: `renderMetrics` em `gestao.js` |
 
 ---
 
