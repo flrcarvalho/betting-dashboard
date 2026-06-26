@@ -163,7 +163,8 @@ function renderHeatmap(rows){
       if(byM[k]){
         const v=byM[k].l;
         const roi=byM[k].s>0?fmtPct(v/byM[k].s*100,2,false):'0,00%';
-        html+=`<td class="heat-cell" style="background:${heatBg(v)};color:${heatTxt(v)}" title="${MESES_CURTOS[m]}/${ano}: ${fmtPL(v)} (ROI ${roi})">${roi}</td>`;
+        const ttl=`${MESES_CURTOS[m]}/${ano}: ${(v>=0?'+':'−')+'R$ '+fmt(Math.abs(v))} (ROI ${roi})`;
+        html+=`<td class="heat-cell" style="background:${heatBg(v)};color:${heatTxt(v)}" title="${ttl}">${roi}</td>`;
       } else html+=`<td class="heat-empty"></td>`;
     }
     html+='</tr>';

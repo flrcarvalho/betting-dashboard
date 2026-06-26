@@ -33,9 +33,20 @@ assets/js/
                           renderHeatmap, renderOvHeatmap, renderOvStreaks, renderOvCusto
                           + renderOvRisco — ASSÍNCRONO: pinta o painel com spinner "calculando…"
                             e preenche via mcComputeAsync (Web Worker). Guarda de corrida _ovRiscoReq.
-    temporal.js         → renderConsolidado, renderMensal, renderDiario, renderSemana
-                          (+ getAvailableMonths/Days/Weeks e helpers de navegação)
-    performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
+    temporal.js         → renderResultados — aba ÚNICA "Resultados" (consolidou as antigas
+                          Consolidado/Mensal/Diário/Semana/Por Casa). Seções: KPIs, Matriz
+                          tipster×tempo (modos Ano/Mês/Semana), Resultado Geral (gráfico),
+                          Calendário, e 3 análises novas (Dia da Semana, Contribuição &
+                          Consistência, Correlação entre tipsters).
+                          + _resMatrixHTML(rows,cols,colKeyOf) — matriz genérica; title="" usa
+                            _txtPL (texto puro — fmtPL devolve HTML e NÃO entra em atributo)
+                          + _resMatrixSection, _resWeekdayHTML, _resContribHTML, _resCorrHTML
+                          + _resHeat(maxAbs), _resMonday(d), _txtPL(v), _resChartData(rows)
+                          + estado: window._resMatMode/_resMatMonth/_resMatWeek/_resCalMonth/
+                            _resContribSort
+                          + callbacks: setResMatMode, resMatNav, resCalNav, resCalSel,
+                            resContribSortBy, resContribSortDir
+    performance.js      → renderSport, renderCasa, renderTipsters (renderResultadosCasa removido)
                           + _sportEnts, _sportDays, _sportAllDays, _sportSort (estado sort Esportes)
                           + _mkSportCard, _renderSportCards — grid .tcard para esportes (card clicável via data-sport → openSportDrill)
                           + window.sportSortBy(k), window.sportSortDir() — sort bar Esportes
@@ -106,11 +117,7 @@ Code.gs                 → referência do Apps Script v6 (NÃO é carregado pel
 | `casas` | Bookies | Performance e ROI por bookmaker |
 | `apostas` | Apostas | Espelho completo da base com scroll virtual |
 | `tipsters` | Tipsters | Análise comparativa e individual |
-| `consolidado` | Consolidado | Resumo anual e evolução mensal |
-| `mensal` | Mensal | Análise detalhada do mês selecionado |
-| `diario` | Diário | Análise detalhada do dia selecionado |
-| `semana` | Semana | Análise da semana (seg → dom) |
-| `resultados_casa` | Por Casa | Performance por bookmaker |
+| `resultados` | Resultados | Aba única (consolidou Consolidado/Mensal/Diário/Semana/Por Casa). Matriz tipster×tempo (Ano/Mês/Semana) + calendário + gráfico + 3 análises novas: Dia da Semana, Contribuição & Consistência, Correlação. Render: `renderResultados` em `temporal.js` |
 | `parceiros` | Fornecedores & Parceiros | Turnover/lucro por conta e fornecedor |
 | `custos` | Custos de Contas | Custo de aquisição por conta (salvo em localStorage) |
 | `custos_tipster` | Custo de Tipsters | Assinaturas e pagamentos a tipsters (localStorage) |
@@ -276,6 +283,7 @@ fato realizado, ou vermelho para uma projeção estatística, confunde o leitor.
 - Filtros são por página e independentes entre si (estado em `FS[page]`).
 - `fmtPL`: sinal colado sem espaço (`+R$`/`−R$`), usa minus tipográfico U+2212. `.money-sign` em `0.76em`, cor `var(--ink-soft)` (neutro) — a cor pos/neg fica exclusiva do `.money-val` (número).
 - **Formatação numérica — fonte única de verdade** (`app.js`): `fmt(v,d)` para moeda; `fmtPct(v,d=2,signed=true)` para percentual pt-BR com sinal `+`/`−` e `%` colado; `fmtOdd(v)` para odd com 2 casas pt-BR. Nunca usar `.toFixed(N)+'%'` ou `.replace('.',',')` fora destes helpers. CSS widths e coords SVG usam `.toFixed()` diretamente (valores de layout, não display).
+- **`fmtPL`/`fmtR` devolvem HTML (spans `.money-*`) — NUNCA dentro de atributo `title=""`** (a aspa de `class="..."` fecha o atributo e vaza o resto como texto/markup quebrado). Em tooltips nativos use texto puro: `(v>=0?'+':'−')+'R$ '+fmt(Math.abs(v))` — em `temporal.js` o helper `_txtPL(v)` encapsula isso. No conteúdo de elemento (entre tags) `fmtPL` é normal.
 - Sidebar bottom: `#lastUpdate` é flexbox com `.pulse-dot` + `#lastUpdateText`.
 - **Win Rate (WR) é NEUTRO** — nunca usar `pos`/`neg` no WR. Verde/vermelho somente em P/L, ROI e badges de win/loss. Locais: `mkCalendarHeatmap` (shared.js), `mkKpiGrid` (shared.js), `renderKPI` (overview.js).
 - **Void fora de Turnover/ROI/Stake Média** — apostas Void (`resultado === 'V'`) devolvem a stake (lucro 0) e **não entram** no Turnover, no ROI nem na Stake Média, em todo o sistema. Fonte de verdade: `calcTurnover(rows)` em `app.js` (soma stake de não-Void); `calcROI` usa esse denominador. Em código novo, sempre usar `calcTurnover` — nunca `rows.reduce((a,r)=>a+r.stake,0)` para turnover. Em mapas de agregação, guardar `map.s += r.stake` com `if(r.resultado!=='V')`; o campo `t` do mapa = nº de encerradas. **Stake Média = Turnover ÷ encerradas** (denominador `d.t`/`v.t`/`settled`, nunca `d.n`/total). Inalterados: P/L, contagem total `n`, detalhe `W/HW/L/HL/V`, e `calcAvgOdd` (Odd Média segue ponderada sobre todas as bets com odd>0).

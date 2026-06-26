@@ -355,11 +355,7 @@ const PAGE_META={
   'casas':          ['Bookies',                  'performance e ROI por bookmaker'],
   'apostas':        ['Apostas',                  'espelho completo da base de dados'],
   'tipsters':       ['Tipsters',                 'análise comparativa e individual'],
-  'consolidado':    ['Consolidado',              'resumo anual e evolução mensal'],
-  'mensal':         ['Mensal',                   'análise detalhada do mês selecionado'],
-  'diario':         ['Diário',                   'análise detalhada do dia selecionado'],
-  'semana':         ['Semana',                   'análise da semana selecionada'],
-  'resultados_casa':['Por Casa',                 'performance por bookmaker'],
+  'resultados':     ['Resultados',               'matriz por período, calendário e análises'],
   'parceiros':      ['Fornecedores & Parceiros', 'turnover, lucro e período por conta'],
   'custos':         ['Custos de Contas',         'custo de aquisição por conta e fornecedor'],
   'custos_tipster': ['Custo de Tipsters',        'assinaturas, serviços e pagamentos'],
@@ -389,7 +385,6 @@ function renderPage(id){
   _filterCache={};_lastPage=id;_lastPageSig=_pageSig(id);
   const rows=filtrarPagina(id);
   if(id==='overview'){renderKPI(rows);renderBankroll(rows);renderROIMonthly(rows);renderOddsDist(rows);renderOvCusto();renderOvStreaks(rows);renderOvRisco(rows);renderOvHeatmap();}
-  else if(id==='daily'||id==='consolidado'){renderConsolidado();}
   else if(id==='sports'){renderSport(rows);}
   else if(id==='casas'){renderCasa(rows);}
   else if(id==='tipsters'){renderTipsters();}
@@ -398,10 +393,7 @@ function renderPage(id){
   else if(id==='custos'){renderCustos(rows);}
   else if(id==='custos_tipster'){renderCustoTipster();}
   else if(id==='metrics'){renderMetrics(filtrarPagina('metrics'));}
-  else if(id==='mensal'){renderMensal();}
-  else if(id==='diario'){renderDiario();}
-  else if(id==='semana'){renderSemana();}
-  else if(id==='resultados_casa'){renderResultadosCasa();}
+  else if(id==='resultados'){renderResultados();}
 }
 
 // KPI
@@ -409,7 +401,7 @@ function buildHTML(){
   const tipsters=[...new Set(DADOS.map(r=>r.tipster).filter(Boolean))].sort();
   const sports=[...new Set(DADOS.map(r=>r.esporte).filter(Boolean))].sort();
   const casas=[...new Set(DADOS.map(r=>r.casa).filter(Boolean))].sort();
-  ['overview','analise','daily','sports','casas','apostas','tipsters','parceiros','custos','metrics','consolidado','mensal','diario','semana','resultados_casa'].forEach(p=>{msInit('sp_'+p);msInit('ca_'+p);msInit('ti_'+p);});
+  ['overview','sports','casas','apostas','tipsters','resultados','parceiros','custos','metrics'].forEach(p=>{msInit('sp_'+p);msInit('ca_'+p);msInit('ti_'+p);});
   msInit('tipsters');
 
   document.getElementById('root').innerHTML=`
@@ -448,11 +440,7 @@ function buildHTML(){
         ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">${icon}</svg>${label}</div>`).join('')}
         <div class="nav-group">Resultados</div>
         ${[
-          ['consolidado','Consolidado','<path d="M1 4h14M1 8h14M1 12h8"/><rect x="1" y="2" width="14" height="12" rx="1"/>'],
-          ['mensal','Mensal','<rect x="1" y="3" width="14" height="11" rx="1"/><path d="M5 1v4M11 1v4M1 7h14"/>'],
-          ['diario','Diário','<circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/>'],
-          ['semana','Semana','<rect x="1" y="3" width="14" height="11" rx="1"/><path d="M1 7h14M5 1v4M11 1v4M4 11h2M7 11h2M10 11h2"/>'],
-          ['resultados_casa','Por Casa','<path d="M1 4h14M1 8h14M1 12h8"/><circle cx="12" cy="12" r="3"/>'],
+          ['resultados','Resultados','<rect x="1" y="1" width="14" height="14" rx="1"/><path d="M1 6h14M1 11h14M6 1v14M11 1v14"/>'],
         ].map(([id,label,icon])=>`<div class="nav-item" id="nav-${id}" onclick="showPage('${id}')"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">${icon}</svg>${label}</div>`).join('')}
         <div class="nav-group">Gestão</div>
         ${[
@@ -482,16 +470,10 @@ function buildHTML(){
         ${mkCard('ov_heatmap','Calendário','<div id="ovHeatmapContent"></div>')}
       </div>
 
-      <!-- CONSOLIDADO -->
-      <div class="page" id="page-consolidado">
-        ${buildFilters('consolidado',sports,casas)}
-        <div id="consolidadoContent"></div>
-      </div>
-
-      <!-- DIÁRIO (legado, mantido para compatibilidade) -->
-      <div class="page" id="page-daily" style="display:none">
-        ${buildFilters('daily',sports,casas)}
-        <div id="dailyContent"></div>
+      <!-- RESULTADOS (matriz por período + calendário + análises) -->
+      <div class="page" id="page-resultados">
+        ${buildFilters('resultados',sports,casas,tipsters)}
+        <div id="resultadosContent"></div>
       </div>
 
       <!-- ESPORTES -->
@@ -548,14 +530,6 @@ function buildHTML(){
         ${mkCard('tipster_comp','Comparativo Geral','<div class="tbl-wrap" id="tipsterCompTable"></div>')}
       </div>
 
-      <!-- RESULTADOS POR CASA -->
-      <div class="page" id="page-resultados_casa">
-        ${buildFilters('resultados_casa',sports,casas,tipsters)}
-        <div class="kpi-grid" id="resultadosCasaKPI"></div>
-        ${mkCard('res_casa_bars','ROI por Casa','<div id="resultadosCasaBars" style="padding:.25rem 0"></div>')}
-        ${mkCard('res_casa_table','Detalhamento por Casa','<div class="tbl-wrap" id="resultadosCasaTable"></div>')}
-      </div>
-
       <!-- FORNECEDORES & PARCEIROS -->
       <div class="page" id="page-parceiros">
         ${buildFilters('parceiros',sports,casas)}
@@ -577,21 +551,6 @@ function buildHTML(){
             <p style="font-size:11px;color:var(--ink-mute);margin-bottom:.75rem;font-family:var(--font-sans)">💡 Insira o custo de cada conta por fornecedor/casa. O total é calculado pelo nº de contas. Valores salvos permanentemente no navegador.</p>
             <div id="costTableWrap"></div>`)}
         </div>
-      </div>
-
-      <!-- MENSAL -->
-      <div class="page" id="page-mensal">
-        <div id="mensalContent"></div>
-      </div>
-
-      <!-- DIÁRIO (nova aba) -->
-      <div class="page" id="page-diario">
-        <div id="diarioContent"></div>
-      </div>
-
-      <!-- SEMANA -->
-      <div class="page" id="page-semana">
-        <div id="semanaContent"></div>
       </div>
 
       <!-- CUSTO DE TIPSTERS -->
