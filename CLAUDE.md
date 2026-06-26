@@ -31,6 +31,8 @@ assets/js/
                           + _renderCustosKpi — faixa de 4 KPIs em #custosKpi (atualiza em tempo real)
     overview.js         → renderKPI, renderBankroll, renderROIMonthly, renderOddsDist,
                           renderHeatmap, renderOvHeatmap, renderOvStreaks, renderOvCusto
+                          + renderOvRisco — ASSÍNCRONO: pinta o painel com spinner "calculando…"
+                            e preenche via mcComputeAsync (Web Worker). Guarda de corrida _ovRiscoReq.
     temporal.js         → renderConsolidado, renderMensal, renderDiario, renderSemana
                           (+ getAvailableMonths/Days/Weeks e helpers de navegação)
     performance.js      → renderSport, renderCasa, renderTipsters, renderResultadosCasa
@@ -70,7 +72,19 @@ assets/js/
                           favicon(domain), mkSpChip(sport), mkHouseChip(nome), casaCell(), sportCell(),
                           auditCasas(dados)
                           window._dataLoadMs — timestamp do último loadData (usado em #tipsterDrillMeta)
+                          + loadData usa cache local IndexedDB (_idbOpen/_idbGetData/_idbSetData)
+                            em stale-while-revalidate: boot instantâneo + revalidação em 2º plano
+                            (payload de ~8MB excede o localStorage). _setLastUpdate/_errBanner.
+                          + Monte Carlo memoizado: calcMCdrawdown/calcPValueMC são wrappers com
+                            cache (_mcCache/_pvCache) por _rowsSig(rows); corpos = _calcMCdrawdownRaw/
+                            _calcPValueMCraw. mcComputeAsync — roda o MC em Web Worker (gerado das
+                            próprias funções via toString, número idêntico) e alimenta o mesmo cache;
+                            fallback síncrono adiado se Worker indisponível.
 brand/                  → logos e favicons FDC Capital
+Code.gs                 → referência do Apps Script v6 (NÃO é carregado pelo site). doGet serve
+                          JSON pré-construído de arquivo no Drive; rebuildCache() (gatilho 1h) faz o
+                          getData() pesado em 2º plano; ?refresh=1 força. Fonte de verdade é o que
+                          está colado/implantado no editor do Google Apps Script.
 ```
 
 ---

@@ -1,6 +1,45 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: drill-down de Esportes + fix de datas no Max Drawdown — COMPLETO (2026-06-25 sessao 42)
+## Estado atual: performance — cache local + Web Worker do Monte Carlo + Apps Script v6 — COMPLETO (2026-06-25 sessao 43)
+
+## Sessao 2026-06-25 (sessao 43) — Performance: abertura e navegacao
+
+### Contexto
+Fernando reportou lentidao para abrir o dashboard e para navegar entre abas, pior ao voltar para a Visao Geral. Dois gargalos confirmados por medicao.
+
+### Diagnostico
+- Abertura: fetch do Apps Script levava 137-212s por requisicao. Causa: recalculo das formulas da planilha a cada doGet (nao era cold start; a 2a chamada veio mais lenta). Payload de 7,9 MB. A medicao mostrou tambem que servir 8 MB pelo ContentService e um piso lento por si so (cache no servidor sozinho cai apenas para ~137s).
+- Navegacao: Monte Carlo (calcMCdrawdown + calcPValueMC, 10.000 sims cada) rodava sincrono na thread principal sobre ~25.430 apostas, sem cache. ~508M iteracoes por render. Dispara em Visao Geral (boot e todo filtro), Metricas e drill de tipster.
+
+### O que foi feito (commit 6318629)
+1. Apps Script v6 (Code.gs, novo no repo como referencia)
+   - doGet serve JSON pre-construido de um arquivo no Drive (betting-dashboard-cache.json). rebuildCache() roda o getData() pesado e grava o cache. Gatilho de tempo (a cada 1h) chama rebuildCache em 2o plano. ?refresh=1 forca reconstrucao. getData() intacto, nenhuma coluna cortada.
+   - Ja colado, autorizado e implantado pelo Fernando (nova versao, mesma URL). Endpoint passou a servir do cache (builtAt presente na resposta).
+2. Cache local IndexedDB (app.js, loadData)
+   - stale-while-revalidate: boot instantaneo com o ultimo dado salvo + revalidacao em 2o plano. IndexedDB porque 8 MB excede o localStorage (~5 MB). 3 casos: 1a carga com cache, 1a carga sem cache (loader original), refresh manual (DOM ja montado, feedback "atualizando...").
+3. Memoizacao do Monte Carlo (app.js)
+   - calcMCdrawdown/calcPValueMC viraram wrappers com cache (_mcCache/_pvCache) por assinatura de rows (_rowsSig: n + somas de P/L, stake e |P/L|). Corpos renomeados para _calcMCdrawdownRaw/_calcPValueMCraw. Voltar a aba com mesmo filtro reusa o resultado.
+4. Web Worker do Monte Carlo (app.js + overview.js)
+   - mcComputeAsync: worker gerado das proprias funcoes via toString() (numero identico ao sincrono). Alimenta o mesmo cache da memoizacao. Fallback sincrono adiado se Worker indisponivel (ex.: file://).
+   - renderOvRisco assincrono: o painel pinta na hora com spinner "calculando..." nos 4 cards de risco; os valores entram quando o worker responde. Guarda de corrida (_ovRiscoReq) descarta resultado obsoleto.
+
+### Validacao
+- Sintaxe ok (node --check) em app.js e overview.js.
+- Medicao do endpoint apos v6: 200 OK, count 25430, builtAt presente (cache servido).
+- Site hospedado em http/https (worker funciona 100%). Commit pushado para main; deploy via GitHub Pages.
+
+### Pendente
+- Aplicar o padrao worker (mcComputeAsync) tambem em Metricas (gestao.js renderMetrics) e no drill de tipster (performance.js, linha ~926). Hoje ainda calculam sincrono no 1o acesso, mas ficam instantaneos na repeticao pela memoizacao (cache compartilhado com a Visao Geral).
+- gzip no Apps Script (Utilities.gzip + DecompressionStream no browser) para encurtar a 1a carga de dados (~137s) sem cortar colunas.
+- Confirmar no browser apos o deploy: abertura instantanea no 2o load, spinner nos cards de risco, volta instantanea, numeros identicos aos de antes.
+- (herdado) Card Max Drawdown nos drills de tipster/casa/esporte ainda usa "pior real" sem o periodo pico-vale.
+- (herdado) Pagina Metricas: rework completo pendente.
+
+## Proximo passo
+- Validar no browser apos o deploy do GitHub Pages.
+- Estender o worker para Metricas e drill de tipster, ou fazer o gzip do Apps Script.
+
+## Estado anterior: drill-down de Esportes + fix de datas no Max Drawdown — COMPLETO (2026-06-25 sessao 42)
 
 ## Sessao 2026-06-25 (sessao 42) — Drill-down de Esportes e ano nas datas do Max Drawdown
 
