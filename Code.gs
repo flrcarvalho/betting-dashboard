@@ -1,22 +1,28 @@
 // ============================================================
-//  BETTING DASHBOARD — Apps Script v6 (cache pré-construído)
+//  BETTING DASHBOARD — Apps Script v6.1 (cache pré-construído)
 //  Cole este código em: Extensões > Apps Script > Code.gs
 //
-//  MUDANÇA-CHAVE vs v5:
-//    O recálculo das fórmulas da planilha (que custava ~150-210s
-//    por requisição) deixa de rodar quando VOCÊ abre o dashboard.
-//    Agora um gatilho agendado roda rebuildCache() em segundo plano
-//    e guarda o JSON pronto num arquivo no Drive. O doGet só LÊ esse
-//    arquivo e devolve (~1-2s). getData() permanece IDÊNTICO ao v5.
+//  MUDANÇA-CHAVE vs v6:
+//    getData() deixa de ler a planilha via SpreadsheetApp (que
+//    ESPERA o recálculo das fórmulas e estourava o teto de 6 min
+//    do gatilho → "Exceeded maximum execution time"). Agora lê os
+//    VALORES JÁ ARMAZENADOS via Sheets API (serviço avançado):
+//    Sheets.Spreadsheets.Values.get com UNFORMATTED_VALUE. Não
+//    força recálculo, é uma única chamada HTTP e roda em segundos.
+//    O contrato de saída (campos do JSON) é IDÊNTICO ao v6.
 //
-//  PASSO A PASSO DE INSTALAÇÃO (ver instruções detalhadas no chat):
+//  PASSO A PASSO DE INSTALAÇÃO (importante: 2 e 3 são NOVOS):
 //    1) Cole este arquivo inteiro no Code.gs.
-//    2) Rode rebuildCache() uma vez à mão (autoriza o acesso ao Drive).
-//    3) Acionadores (relógio) > adicionar > rebuildCache > a cada 30 min.
-//    4) Implantar > Gerenciar implantações > Editar > Nova versão.
+//    2) Editor > Serviços (＋, painel esquerdo) > "Google Sheets API"
+//       > Adicionar. O identificador TEM que ficar como "Sheets".
+//    3) Rode rebuildCache() uma vez à mão (reautoriza os acessos).
+//    4) Acionadores (relógio) > o gatilho rebuildCache a cada 30 min
+//       já existente continua valendo (não precisa recriar).
+//    5) Implantar > Gerenciar implantações > Editar > Nova versão.
 // ============================================================
 
 const SHEET_NAME = "DB Apostas";
+const SPREADSHEET_ID = "15UgB5yLtlNbMzTn3nYKFpeXA69C0iwHvTPGeFafq6Rs";
 
 const COL_DATA      = 1;   // A
 const COL_ESPORTE   = 2;   // B
@@ -67,9 +73,9 @@ function doGet(e) {
 }
 
 // ------------------------------------------------------------
-// rebuildCache — roda o getData() pesado, monta o JSON pronto,
-// grava no Drive e devolve a string (reusada pelo doGet quando
-// precisa servir ao vivo). Esta é a função do gatilho agendado.
+// rebuildCache — roda o getData() (agora rápido), monta o JSON
+// pronto, grava no Drive e devolve a string (reusada pelo doGet
+// quando precisa servir ao vivo). É a função do gatilho agendado.
 // ------------------------------------------------------------
 function rebuildCache() {
   const t0 = Date.now();
@@ -107,44 +113,67 @@ function readCache() {
 }
 
 // ------------------------------------------------------------
-// Lê e normaliza os dados  —  IDÊNTICO AO v5 (não tocar)
+// Helpers de leitura
+// ------------------------------------------------------------
+
+// Célula segura: arrays da Sheets API são "ragged" (linhas com
+// células finais vazias vêm mais curtas). Evita "undefined".
+function _cell(row, i) {
+  return (i < row.length && row[i] != null) ? row[i] : "";
+}
+
+// Serial do Sheets (dias desde 1899-12-30) → "yyyy-MM-dd".
+// Usa componentes UTC para não deslocar o dia pelo fuso (BRT).
+// 25569 = dias entre 1899-12-30 e 1970-01-01.
+function _serialToISO(serial) {
+  const n = Math.floor(serial);
+  const d = new Date((n - 25569) * 86400000);
+  const m   = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return d.getUTCFullYear() + "-" + m + "-" + day;
+}
+
+// ------------------------------------------------------------
+// Lê e normaliza os dados — via Sheets API (sem recálculo).
+// Contrato de saída IDÊNTICO ao v6.
 // ------------------------------------------------------------
 function getData() {
-  const ss = SpreadsheetApp.openById('15UgB5yLtlNbMzTn3nYKFpeXA69C0iwHvTPGeFafq6Rs');
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) throw new Error(`Aba "${SHEET_NAME}" não encontrada.`);
+  const resp = Sheets.Spreadsheets.Values.get(
+    SPREADSHEET_ID,
+    SHEET_NAME + "!A2:L",
+    { valueRenderOption: "UNFORMATTED_VALUE", dateTimeRenderOption: "SERIAL_NUMBER" }
+  );
 
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
-
-  const values = sheet.getRange(2, 1, lastRow - 1, 12).getValues();
+  const values = resp.values || [];
   const rows   = [];
 
   values.forEach(row => {
 
     // ── Resultado — única validação obrigatória ────────────
-    const resultado = String(row[COL_RESULTADO - 1]).trim().toUpperCase();
+    const resultado = String(_cell(row, COL_RESULTADO - 1)).trim().toUpperCase();
     if (!["W","L","V","HW","HL"].includes(resultado)) return;
 
     // ── Coluna L — deve ser número válido ──────────────────
-    const rawPL = row[COL_PL - 1];
+    const rawPL = _cell(row, COL_PL - 1);
     if (typeof rawPL !== 'number') return;  // ignora se não for número nativo
     const lucro = parseFloat(rawPL.toFixed(2));
 
     // ── Stake ──────────────────────────────────────────────
-    const rawStake = row[COL_STAKE - 1];
+    const rawStake = _cell(row, COL_STAKE - 1);
     const stake = typeof rawStake === 'number' ? rawStake : 0;
     if (stake <= 0) return;
 
     // ── Odd ────────────────────────────────────────────────
-    const rawOdd = row[COL_ODD - 1];
+    const rawOdd = _cell(row, COL_ODD - 1);
     const odd = typeof rawOdd === 'number' ? rawOdd : parseFloat(String(rawOdd).replace(",",".")) || 0;
 
     // ── Data ───────────────────────────────────────────────
-    const rawData = row[COL_DATA - 1];
+    // UNFORMATTED_VALUE + SERIAL_NUMBER: datas chegam como número
+    // (serial). Texto "DD/MM/YYYY" continua string (fallback).
+    const rawData = _cell(row, COL_DATA - 1);
     let dataISO = "";
-    if (rawData instanceof Date && !isNaN(rawData)) {
-      dataISO = Utilities.formatDate(rawData, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    if (typeof rawData === 'number' && rawData > 0) {
+      dataISO = _serialToISO(rawData);
     } else {
       const parts = String(rawData).split("/");
       if (parts.length === 3) {
@@ -154,21 +183,21 @@ function getData() {
     if (!dataISO) return;
 
     // ── Parceiro ───────────────────────────────────────────
-    const parceiroRaw = String(row[COL_PARCEIRO - 1]).trim();
+    const parceiroRaw = String(_cell(row, COL_PARCEIRO - 1)).trim();
     let conta = parceiroRaw, fornecedor = "";
     const m = parceiroRaw.match(/^(.+?)\s*\[(.+?)\]$/);
     if (m) { conta = m[1].trim(); fornecedor = m[2].trim(); }
 
     rows.push({
       data:      dataISO,
-      esporte:   String(row[COL_ESPORTE   - 1]).trim(),
-      tipster:   String(row[COL_TIPSTER   - 1]).trim(),
-      casa:      String(row[COL_CASA      - 1]).trim(),
+      esporte:   String(_cell(row, COL_ESPORTE   - 1)).trim(),
+      tipster:   String(_cell(row, COL_TIPSTER   - 1)).trim(),
+      casa:      String(_cell(row, COL_CASA      - 1)).trim(),
       parceiro:  parceiroRaw,
       conta,
       fornecedor,
-      aposta:    String(row[COL_APOSTA    - 1]).trim(),
-      descricao: String(row[COL_DESCRICAO - 1]).trim(),
+      aposta:    String(_cell(row, COL_APOSTA    - 1)).trim(),
+      descricao: String(_cell(row, COL_DESCRICAO - 1)).trim(),
       stake,
       odd,
       resultado,
@@ -180,7 +209,7 @@ function getData() {
 }
 
 // ------------------------------------------------------------
-// Teste — agora também mostra o tempo de leitura ao vivo
+// Teste — mostra o tempo de leitura (agora deve ser segundos)
 // ------------------------------------------------------------
 function testar() {
   const t0 = Date.now();
@@ -188,7 +217,7 @@ function testar() {
   const segs = ((Date.now() - t0) / 1000).toFixed(1);
   const lucroTotal = rows.reduce((a, r) => a + r.lucro, 0);
   const stakeTotal = rows.reduce((a, r) => a + r.stake, 0);
-  Logger.log("Leitura ao vivo: " + segs + "s");
+  Logger.log("Leitura via Sheets API: " + segs + "s");
   Logger.log("Total apostas: " + rows.length);
   Logger.log("Lucro total: R$ " + lucroTotal.toFixed(2));
   Logger.log("Stake total: R$ " + stakeTotal.toFixed(2));

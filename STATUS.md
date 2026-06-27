@@ -1,6 +1,36 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: fix da atualizacao de dados (botao Atualizar ao vivo) + cache-busting + builtAt na sidebar - COMPLETO (2026-06-26 sessao 45)
+## Estado atual: fix do timeout do gatilho rebuildCache (getData via Sheets API) - COMPLETO (2026-06-26 sessao 46)
+
+## Sessao 2026-06-26 (sessao 46) - Fix do timeout do gatilho rebuildCache
+
+### Contexto
+O gatilho rebuildCache (30 min) falhava de forma intermitente com "Exceeded maximum execution time". E-mail do Google Apps Script reportou 7 falhas em 7 dias (taxa 7,29%). Cada falha rodava ~6 min e era morta pelo teto do Apps Script. Quando falhava, o cache do Drive nao era reconstruido e a sidebar mostrava dados velhos.
+
+### Diagnostico
+Causa raiz no getData() do Code.gs: lia a planilha via SpreadsheetApp.openById().getRange().getValues(), que ESPERA o recalculo das formulas (coluna L / P-L e formula). Quando a planilha estava suja, o recalculo sincrono passava de 6 min. O teto de 6 min nao pode ser aumentado em conta Google pessoal.
+
+### O que foi feito (Code.gs v6.1)
+1. getData() reescrito para ler via Sheets API (servico avancado): Sheets.Spreadsheets.Values.get(ID, "DB Apostas!A2:L", {valueRenderOption: UNFORMATTED_VALUE, dateTimeRenderOption: SERIAL_NUMBER}). Le valores ja armazenados, sem forcar recalculo. Uma chamada HTTP.
+2. Helper _cell(row, i): arrays da Sheets API sao ragged (linhas com celulas finais vazias vem mais curtas). Evita "undefined".
+3. Helper _serialToISO(serial): converte serial do Sheets (dias desde 1899-12-30) para yyyy-MM-dd usando componentes UTC, para o fuso BRT nao deslocar a data um dia.
+4. Contrato de saida (campos do JSON) IDENTICO ao v6. data.js, normalizacao e front nao precisaram mudar.
+5. CLAUDE.md atualizado (descricao do Code.gs).
+
+### Validacao (Fernando rodou no editor)
+- testar(): leitura via Sheets API em 4,2s (era ~6 min). 25.698 apostas.
+- rebuildCache(): 25.698 apostas em 4,1s, 7,83 MB gravados.
+- Dashboard: P/L Bruto +R$ 289.223,57 bate com o log. ROI do log (4,59%, stake cru) difere do dashboard (4,86%) por design: dashboard exclui Void do turnover (calcTurnover).
+- Fernando habilitou o servico Google Sheets API (identificador Sheets), reautorizou e publicou nova versao da implantacao.
+
+### Pendente (lado do Fernando, fora do codigo)
+- A taxa de erros de 7,29% e a janela de 7 dias e inclui as falhas antigas; deve cair sozinha. Se em ~1 dia aparecer falha NOVA de rebuildCache, reabrir.
+- Corrigir na planilha a aposta com data 2026-06-27 (provavel typo, aposta futura) - pendente da sessao 45.
+
+## Proximo passo
+- Monitorar a taxa de erros do gatilho por ~1 dia. Corrigir a data 06-27 na planilha.
+
+## Estado anterior: fix da atualizacao de dados (botao Atualizar ao vivo) + cache-busting + builtAt na sidebar - COMPLETO (2026-06-26 sessao 45)
 
 ## Sessao 2026-06-26 (sessao 45) - Frescura de dados (botao Atualizar, cache-busting, builtAt)
 

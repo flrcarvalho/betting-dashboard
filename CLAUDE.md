@@ -100,10 +100,15 @@ assets/js/
                             próprias funções via toString, número idêntico) e alimenta o mesmo cache;
                             fallback síncrono adiado se Worker indisponível.
 brand/                  → logos e favicons FDC Capital
-Code.gs                 → referência do Apps Script v6 (NÃO é carregado pelo site). doGet serve
-                          JSON pré-construído de arquivo no Drive; rebuildCache() (gatilho 1h) faz o
-                          getData() pesado em 2º plano; ?refresh=1 força. Fonte de verdade é o que
-                          está colado/implantado no editor do Google Apps Script.
+Code.gs                 → referência do Apps Script v6.1 (NÃO é carregado pelo site). doGet serve
+                          JSON pré-construído de arquivo no Drive; rebuildCache() (gatilho 30min)
+                          reconstrói em 2º plano; ?refresh=1 força. getData() lê via Sheets API
+                          (serviço avançado `Sheets.Spreadsheets.Values.get`, UNFORMATTED_VALUE) —
+                          NÃO via SpreadsheetApp.getValues() (forçava recálculo de fórmulas e
+                          estourava o teto de 6min do gatilho → "Exceeded maximum execution time").
+                          Helpers _cell (arrays ragged) e _serialToISO (serial→data por UTC). Requer
+                          serviço "Google Sheets API" habilitado no editor (identificador `Sheets`).
+                          Fonte de verdade é o que está colado/implantado no editor do Google Apps Script.
 ```
 
 ---
