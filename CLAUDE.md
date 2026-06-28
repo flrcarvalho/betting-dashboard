@@ -33,6 +33,12 @@ assets/js/
                           + _renderCustosKpi — faixa de 4 KPIs em #custosKpi (atualiza em tempo real)
     overview.js         → renderKPI, renderBankroll, renderROIMonthly, renderOddsDist,
                           renderHeatmap, renderOvHeatmap, renderOvStreaks, renderOvCusto
+                          + renderOddsDist(rows, canvasId='chartOddsDist') — combo barras
+                            (apostas por faixa de odd) + linhas Win Rate% e ROI%. O 2º param
+                            permite reusar o gráfico em outro canvas (drill de tipster).
+                          + renderBankroll usa legend:{display:false}; a legenda é HTML no
+                            mkCard (traço azul P/L acumulado + quadrados Dia positivo/negativo),
+                            igual à dos drill-downs.
                           + renderOvRisco — ASSÍNCRONO: pinta o painel com spinner "calculando…"
                             e preenche via mcComputeAsync (Web Worker). Guarda de corrida _ovRiscoReq.
     temporal.js         → renderResultados — aba ÚNICA "Resultados" (consolidou as antigas
@@ -72,6 +78,8 @@ assets/js/
                           + window.tipsterSortBy(k), window.tipsterSortDir() (callbacks sort bar)
                           + openTipsterDrill(nome), closeTipsterDrill() (T-6 — popup drill-down)
                           + renderTipsterDrill(rows) — redesenha KPIs + gráfico + sequências + tabelas
+                            + seção Distribuição de Odds (canvas tipsterDrillOdds, abaixo da
+                            Análise Mensal) via renderOddsDist(rows,'tipsterDrillOdds')
                           + _sliceDrillRows(), _updateDrillChips() — período do popup
                           + window.setDrillQuick(days), setDrillType(qt), setDrillAll() — chips período
                           + _tipMonthTbody(rows) — tbody HTML de análise mensal (reusado em popup)

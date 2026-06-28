@@ -1,6 +1,25 @@
 # STATUS — Betting Dashboard
 
-## Estado atual: fix do timeout do gatilho rebuildCache (getData via Sheets API) - COMPLETO (2026-06-26 sessao 46)
+## Estado atual: ajustes de UI na Visao Geral e drill-down de Tipsters - COMPLETO (2026-06-28 sessao 47)
+
+## Sessao 2026-06-28 (sessao 47) - Legenda do grafico, ordem dos cards, odds por tipster
+
+### O que foi feito
+1. Legenda do grafico Resultado Geral (Visao Geral) padronizada igual a de Tipsters. Antes usava a legenda nativa do Chart.js (quadrado azul para P/L acumulado, espacamento proprio). Agora usa legenda HTML acima do canvas: traco azul 20x2px para P/L acumulado + quadrados 12x12 para Dia positivo/negativo. renderBankroll passou a legend:{display:false}. Markup da legenda fica no mkCard em app.js.
+2. Eyebrow "P/L DIARIO . EVOLUCAO ACUMULADA" replicada nos graficos similares dos drill-downs (performance.js): secao Evolucao dos drills de Esportes e Bookies, e secao Resultado Geral do drill de Tipster. Titulo da secao virou flex com justify-content:space-between e a eyebrow alinhada a direita. Visao Geral e Resultados ja tinham.
+3. Card Calendario movido na Visao Geral para logo apos o Diagnostico de Risco. Nova ordem: Resultado Geral, Cenario Atual, Diagnostico de Risco, Calendario, ROI Mensal, Distribuicao de Odds, Custo de Contas.
+4. Distribuicao de Odds adicionada ao drill-down de cada tipster, abaixo da Analise Mensal. renderOddsDist agora aceita 2o parametro canvasId (default 'chartOddsDist', nada muda na Visao Geral). renderTipsterDrill ganhou secao "Distribuicao de Odds" com canvas tipsterDrillOdds e chama renderOddsDist(rows,'tipsterDrillOdds'). Acompanha o filtro de periodo/esporte/casa do popup e entra no copiar/salvar PNG.
+
+### Cache-busting
+- index.html: overview.js, app.js e performance.js bumpados de ?v=2 para ?v=3.
+
+### Validacao
+- Mudancas apenas de front (HTML/JS). Nao testado em navegador nesta sessao; revisar visualmente apos deploy.
+
+## Proximo passo
+- Confirmar visualmente as 4 mudancas no navegador (Ctrl+Shift+R). Seguir monitorando a taxa de erros do gatilho rebuildCache e corrigir a data 06-27 na planilha (pendencias das sessoes 45/46).
+
+## Estado anterior: fix do timeout do gatilho rebuildCache (getData via Sheets API) - COMPLETO (2026-06-26 sessao 46)
 
 ## Sessao 2026-06-26 (sessao 46) - Fix do timeout do gatilho rebuildCache
 

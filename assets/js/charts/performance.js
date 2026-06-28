@@ -417,7 +417,7 @@ function renderCasaDrill(rows){
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Evolução</div>`+
+      `<div class="analise-popup-section-title" style="display:flex;align-items:center;justify-content:space-between">Evolução<span style="font-family:JetBrains Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-soft);opacity:.7">P/L diário · evolução acumulada</span></div>`+
       `<div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:20px;height:2px;background:#2E8BFF;border-radius:1px;flex-shrink:0"></span>P/L acumulado</span>`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(43,192,126,.8);border-radius:2px;flex-shrink:0"></span>Dia positivo</span>`+
@@ -651,7 +651,7 @@ function renderSportDrill(rows){
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Evolução</div>`+
+      `<div class="analise-popup-section-title" style="display:flex;align-items:center;justify-content:space-between">Evolução<span style="font-family:JetBrains Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-soft);opacity:.7">P/L diário · evolução acumulada</span></div>`+
       `<div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:20px;height:2px;background:#2E8BFF;border-radius:1px;flex-shrink:0"></span>P/L acumulado</span>`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(43,192,126,.8);border-radius:2px;flex-shrink:0"></span>Dia positivo</span>`+
@@ -949,7 +949,7 @@ function renderTipsterDrill(rows){
       `</div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
-      `<div class="analise-popup-section-title">Resultado Geral</div>`+
+      `<div class="analise-popup-section-title" style="display:flex;align-items:center;justify-content:space-between">Resultado Geral<span style="font-family:JetBrains Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-soft);opacity:.7">P/L diário · evolução acumulada</span></div>`+
       `<div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:20px;height:2px;background:#2E8BFF;border-radius:1px;flex-shrink:0"></span>P/L acumulado</span>`+
         `<span style="display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--ink-mute)"><span style="display:inline-block;width:12px;height:12px;background:rgba(43,192,126,.8);border-radius:2px;flex-shrink:0"></span>Dia positivo</span>`+
@@ -1016,6 +1016,10 @@ function renderTipsterDrill(rows){
       `<div class="tbl-wrap drill-tbl"><table class="tbl" id="tipDrillTblMensal"><thead><tr>${mkTh('Mês','','l')+mkTh('Bets','','r')+mkTh('P/L','','r')+mkTh('Turnover','','r')+mkTh('ROI','','r')+mkTh('Win Rate','','r')+mkTh('Stake média','','r')+_mkOddMediaTh('r','88px')}</tr></thead><tbody>${_tipMonthTbody(rows)}</tbody></table></div>`+
     `</div>`+
     `<div class="analise-popup-section">`+
+      `<div class="analise-popup-section-title">Distribuição de Odds <span style="font-size:9px;color:var(--ink-mute);text-transform:none;letter-spacing:0">(apostas, win rate e ROI por faixa)</span></div>`+
+      `<div class="chart-wrap" style="height:240px;margin-top:.75rem"><canvas id="tipsterDrillOdds" role="img" aria-label="Distribuição de odds do tipster"></canvas></div>`+
+    `</div>`+
+    `<div class="analise-popup-section">`+
       `<div class="analise-popup-section-title">Por Casa</div>`+
       `<div class="tbl-wrap drill-tbl">${_tipBreakdownTbl(rows,'casa',casaCell,'tipDrillTblCasa')}</div>`+
     `</div>`+
@@ -1054,6 +1058,9 @@ function renderTipsterDrill(rows){
         y1:{ticks:{color:tc(),font:{size:10},callback:v=>fmtK(v)},grid:{display:false},border:{display:false},position:'right'}
       }}});
   }
+
+  // Distribuição de Odds — scoped ao tipster (mesmo gráfico da Visão Geral)
+  renderOddsDist(rows,'tipsterDrillOdds');
 
   setTimeout(()=>{
     makeSortable('tipDrillTblMensal',[1,2,3,4,5,6,7]);

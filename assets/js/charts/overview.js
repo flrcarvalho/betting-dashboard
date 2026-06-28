@@ -69,13 +69,7 @@ function renderBankroll(rows){
      borderRadius:1,yAxisID:'y',label:'P/L diário',barPercentage:0.9,categoryPercentage:1.0}
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{
-      legend:{display:true,position:'top',align:'start',
-        labels:{color:isDark()?'#AEB7C2':'#666E7A',font:{family:'JetBrains Mono, monospace',size:11},boxWidth:12,padding:16,
-          generateLabels:()=>{const lc=isDark()?'#AEB7C2':'#666E7A';return[
-            {text:'P/L acumulado',strokeStyle:'#2E8BFF',fillStyle:'#2E8BFF',lineWidth:2,pointStyle:'line',hidden:false,datasetIndex:0,fontColor:lc},
-            {text:'Dia positivo', strokeStyle:'rgba(43,192,126,.8)',fillStyle:'rgba(43,192,126,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1,fontColor:lc},
-            {text:'Dia negativo', strokeStyle:'rgba(229,82,75,.8)',fillStyle:'rgba(229,82,75,.8)',lineWidth:0,pointStyle:'rect',hidden:false,datasetIndex:1,fontColor:lc}
-          ];}}},
+      legend:{display:false},
       tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+fmtK(ctx.raw),title:ctx=>{const i=ctx[0].dataIndex;return days[i]?.split('-').reverse().join('/')||'';},}}},
     scales:{
       x:{display:false},
@@ -116,7 +110,7 @@ function renderROIMonthly(rows){
   mkChart('chartROI',{type:'bar',data:{labels:lbl,datasets:[{data:vals,backgroundColor:vals.map(roiColor),borderRadius:3,label:'ROI%'}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18,bottom:4}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtPct(ctx.raw,2)}}},scales:{x:{ticks:{color:tc(),font:{size:10},maxRotation:30},grid:{display:false},border:{display:false}},y:{ticks:{color:tc(),font:{size:10},callback:v=>fmtPct(v,1,v<0)},grid:{color:gc()},border:{display:false}}}},plugins:[roiLabelPlugin]});
 }
 
-function renderOddsDist(rows){
+function renderOddsDist(rows,canvasId='chartOddsDist'){
   const bins=[1,1.5,2.0,2.5,3.0,4.0,6.0,10.0,30.0,100.0,Infinity];
   const lbls=['1.0–1.5','1.5–2.0','2.0–2.5','2.5–3.0','3.0–4.0','4.0–6.0','6.0–10','10–30','30–100','100+'];
   const bdata=lbls.map(()=>({n:0,w:0,pl:0,s:0}));
@@ -128,7 +122,7 @@ function renderOddsDist(rows){
   const counts=bdata.map(b=>b.n);
   const wrs=bdata.map(b=>b.n>0?parseFloat((b.w/b.n*100).toFixed(1)):null);
   const rois=bdata.map(b=>b.s>0?parseFloat((b.pl/b.s*100).toFixed(2)):null);
-  mkChart('chartOddsDist',{type:'bar',data:{labels:lbls,datasets:[
+  mkChart(canvasId,{type:'bar',data:{labels:lbls,datasets:[
     {type:'bar',data:counts,backgroundColor:'rgba(46,139,255,.55)',borderRadius:3,label:'Apostas',yAxisID:'y'},
     {type:'line',data:wrs,borderColor:'#2BC07E',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#2BC07E',borderWidth:2,label:'Win Rate %',yAxisID:'y1',spanGaps:false},
     {type:'line',data:rois,borderColor:'#E0A21A',backgroundColor:'transparent',tension:.3,pointRadius:5,pointBackgroundColor:'#E0A21A',borderWidth:2,label:'ROI %',yAxisID:'y2',borderDash:[4,3],spanGaps:false}
