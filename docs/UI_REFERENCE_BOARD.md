@@ -141,7 +141,7 @@ Todas as imagens em: `docs/screenshots/`
 
 ### O que é consistente em TODAS as telas ✅
 - Sidebar: 220px, logo, nav-groups em mono uppercase, active com borda azul esquerda
-- Topbar: 68px, título gradient azul, sub-título mono uppercase, botão Aparência
+- Topbar: 44px, título gradient azul, sub-título mono uppercase, botão Aparência
 - Paleta: dark base `#0A0D12`, azul `#2E8BFF` como único acento, verde/vermelho só em resultado
 - Scrollbar fina com thumb steel
 - Grid de fundo 44px (sutil mas presente)
